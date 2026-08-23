@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AGOMONI 2026 Ticketing</title>
+    
+    <!-- Beautiful Bengali Web Fonts for Agomoni -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@700;800&family=Galada&family=Baloo+Da+2:wght@600;700&display=swap" rel="stylesheet">
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Firebase Cloud Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        /* =========================================
+           1. CORE VARIABLES & THEMES (GOLDEN RED TONES)
+           ========================================= */
+        :root {
+            --bg-color: #fffbf0; /* Warm golden white */
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #450a0a; /* Deep red-black */
+            --text-muted: #78350f;
+            --visitor-color: #dc2626; /* Festive Red */
+            --staff-color: #d97706;   /* Golden Amber */
+            --admin-color: #991b1b;   /* Deep Crimson */
+            --success: #16a34a;
+            --danger: #ef4444;
+            --border-color: #fcd34d;
+            --input-bg: #ffffff;
+            --input-border: #fde68a;
+        }
+
+        body.dark-mode {
+            --bg-color: #1a0505; /* Extremely dark red/black */
+            --card-bg: rgba(40, 10, 10, 0.85); /* Translucent dark crimson */
+            --text-main: #fef3c7;
+            --text-muted: #fcd34d;
+            --visitor-color: #ff0055; /* Neon Crimson */
+            --staff-color: #ffea00;   /* Neon Gold */
+            --admin-color: #ff6600;   /* Neon Orange */
+            --border-color: #7f1d1d;
+            --input-bg: #450a0a;
+            --input-border: #7f1d1d;
+        }
+
+        /* =========================================
+           2. GLOBAL STRUCTURE & MOBILE LAYOUT
+           ========================================= */
+        * { 
+            box-sizing: border-box; 
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        input {
+            -webkit-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg-color); margin: 0; padding: 15px; 
+            display: flex; flex-direction: column; align-items: center; padding-top: 12vh;
+            min-height: 100vh; color: var(--text-main); transition: background-color 0.4s, color 0.4s; 
+            position: relative; overflow-x: hidden;
+        }
+
+        .container { 
+            width: 100%; max-width: 500px; padding: 10px; position: relative; z-index: 1; flex-grow: 1;
+        }
+
+        .view-section { display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .view-section.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* =========================================
+           3. DYNAMIC BACKGROUND: DURGA ASHTRAS + CRACKERS + LIGHTS
+           ========================================= */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1;
+            /* Combined Light Mode SVG */
+            background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3C!-- FESTIVE LIGHTS & CRACKERS --%3E%3Cg fill='none' stroke-width='2' stroke-linecap='round' opacity='0.3'%3E%3Cpath d='M300 280 L300 240 M300 320 L300 360 M280 300 L240 300 M320 300 L360 300 M285 285 L260 260 M315 315 L340 340 M285 315 L260 340 M315 285 L340 260' stroke='%23ef4444'/%3E%3Cpath d='M80 180 L80 160 M80 200 L80 220 M70 190 L50 190 M90 190 L110 190 M73 183 L60 170 M87 197 L100 210 M73 197 L60 210 M87 183 L100 170' stroke='%23f59e0b'/%3E%3Cpath d='M0 30 Q 100 80 200 30 T 400 30' stroke='%23b45309' stroke-dasharray='5 5'/%3E%3Ccircle cx='50' cy='43' r='4' fill='%23ef4444' stroke='none'/%3E%3Ccircle cx='100' cy='55' r='4' fill='%23f59e0b' stroke='none'/%3E%3Ccircle cx='150' cy='43' r='4' fill='%23dc2626' stroke='none'/%3E%3Ccircle cx='250' cy='43' r='4' fill='%23f59e0b' stroke='none'/%3E%3Ccircle cx='300' cy='55' r='4' fill='%23ef4444' stroke='none'/%3E%3Ccircle cx='350' cy='43' r='4' fill='%23dc2626' stroke='none'/%3E%3C/g%3E%3C!-- DURGA ELEMENTS CENTERED --%3E%3Cg transform='translate(50, 50)' fill='none' stroke='%23d97706' stroke-width='2' stroke-opacity='0.4'%3E%3Ccircle cx='150' cy='150' r='100' stroke-dasharray='10 10' /%3E%3Ccircle cx='150' cy='150' r='110' stroke-dasharray='2 6' /%3E%3Cpath d='M150 200 Q180 240 150 280 Q120 240 150 200 Z' /%3E%3Cpath d='M150 220 Q190 230 200 260 Q170 260 150 280' /%3E%3Cpath d='M150 220 Q110 230 100 260 Q130 260 150 280' /%3E%3Cpath d='M150 100 L150 20 M120 90 Q120 40 90 30 M180 90 Q180 40 210 30' /%3E%3Cpath d='M140 30 L160 30 L150 10 Z' /%3E%3Cpath d='M40 150 Q70 120 60 180 Q30 190 40 150 Z' /%3E%3Cpath d='M45 155 Q55 145 55 170' /%3E%3Ccircle cx='260' cy='140' r='15' /%3E%3Cline x1='260' y1='155' x2='260' y2='210' /%3E%3Cline x1='245' y1='140' x2='275' y2='140' /%3E%3Cline x1='260' y1='125' x2='260' y2='155' /%3E%3Cpath d='M90 145 Q120 135 140 155 Q120 165 90 145 Z' /%3E%3Ccircle cx='115' cy='150' r='4' fill='%23d97706' /%3E%3Cpath d='M210 145 Q180 135 160 155 Q180 165 210 145 Z' /%3E%3Ccircle cx='185' cy='150' r='4' fill='%23d97706' /%3E%3Cpath d='M150 100 Q140 115 150 135 Q160 115 150 100 Z' stroke='%23ef4444'/%3E%3Ccircle cx='150' cy='122' r='6' fill='%23ef4444' stroke='none' fill-opacity='0.8' /%3E%3C/g%3E%3C/svg%3E");
+            background-size: 400px 400px; 
+            background-position: center center;
+            opacity: 0.6; 
+            animation: festivalSparkle 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes festivalSparkle {
+            0% { transform: scale(1) translateY(0); opacity: 0.4; }
+            50% { transform: scale(1.02) translateY(-5px); opacity: 0.6; }
+            100% { transform: scale(1) translateY(0); opacity: 0.4; }
+        }
+
+        body.dark-mode::before {
+            /* Combined Neon Dark Mode SVG */
+            background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='3' result='coloredBlur'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C!-- FESTIVE LIGHTS & CRACKERS --%3E%3Cg filter='url(%23glow)' fill='none' stroke-width='2.5' stroke-linecap='round' opacity='0.7'%3E%3Cpath d='M300 280 L300 240 M300 320 L300 360 M280 300 L240 300 M320 300 L360 300 M285 285 L260 260 M315 315 L340 340 M285 315 L260 340 M315 285 L340 260' stroke='%23ff0055'/%3E%3Cpath d='M80 180 L80 160 M80 200 L80 220 M70 190 L50 190 M90 190 L110 190 M73 183 L60 170 M87 197 L100 210 M73 197 L60 210 M87 183 L100 170' stroke='%23ffaa00'/%3E%3Cpath d='M0 30 Q 100 80 200 30 T 400 30' stroke='%237f1d1d' stroke-dasharray='4 8'/%3E%3Ccircle cx='50' cy='43' r='4' fill='%23ff0055' stroke='none'/%3E%3Ccircle cx='100' cy='55' r='4' fill='%23ffea00' stroke='none'/%3E%3Ccircle cx='150' cy='43' r='4' fill='%23ffaa00' stroke='none'/%3E%3Ccircle cx='250' cy='43' r='4' fill='%23ffea00' stroke='none'/%3E%3Ccircle cx='300' cy='55' r='4' fill='%23ff0055' stroke='none'/%3E%3Ccircle cx='350' cy='43' r='4' fill='%23ffaa00' stroke='none'/%3E%3C/g%3E%3C!-- DURGA ELEMENTS CENTERED --%3E%3Cg filter='url(%23glow)' transform='translate(50, 50)' fill='none' stroke='%23ffd700' stroke-width='2' stroke-opacity='0.8'%3E%3Ccircle cx='150' cy='150' r='100' stroke-dasharray='10 10' /%3E%3Ccircle cx='150' cy='150' r='110' stroke-dasharray='2 6' /%3E%3Cpath d='M150 200 Q180 240 150 280 Q120 240 150 200 Z' fill='%23ffd700' fill-opacity='0.05' /%3E%3Cpath d='M150 220 Q190 230 200 260 Q170 260 150 280' /%3E%3Cpath d='M150 220 Q110 230 100 260 Q130 260 150 280' /%3E%3Cpath d='M150 100 L150 20 M120 90 Q120 40 90 30 M180 90 Q180 40 210 30' /%3E%3Cpath d='M140 30 L160 30 L150 10 Z' /%3E%3Cpath d='M40 150 Q70 120 60 180 Q30 190 40 150 Z' /%3E%3Cpath d='M45 155 Q55 145 55 170' /%3E%3Ccircle cx='260' cy='140' r='15' /%3E%3Cline x1='260' y1='155' x2='260' y2='210' /%3E%3Cline x1='245' y1='140' x2='275' y2='140' /%3E%3Cline x1='260' y1='125' x2='260' y2='155' /%3E%3Cpath d='M90 145 Q120 135 140 155 Q120 165 90 145 Z' /%3E%3Ccircle cx='115' cy='150' r='4' fill='%23ffd700' /%3E%3Cpath d='M210 145 Q180 135 160 155 Q180 165 210 145 Z' /%3E%3Ccircle cx='185' cy='150' r='4' fill='%23ffd700' /%3E%3Cpath d='M150 100 Q140 115 150 135 Q160 115 150 100 Z' stroke='%23ff0055'/%3E%3Ccircle cx='150' cy='122' r='7' fill='%23ff0055' stroke='none' /%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.45;
+            animation: festivalSparkleDark 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes festivalSparkleDark {
+            0% { transform: scale(1) translateY(0); opacity: 0.35; filter: brightness(0.9) hue-rotate(0deg); }
+            100% { transform: scale(1.05) translateY(-10px); opacity: 0.65; filter: brightness(1.3) hue-rotate(15deg); }
+        }
+
+        /* =========================================
+           4. TOP NAVIGATION ICONS
+           ========================================= */
+        .icon-btn {
+            position: fixed; top: 15px; background: var(--card-bg); border: 1px solid var(--border-color);
+            color: var(--text-main); border-radius: 50%; width: 42px; height: 42px; font-size: 1.2rem; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center;
+            padding: 0; transition: all 0.3s ease; backdrop-filter: blur(8px); z-index: 100;
+        }
+        .icon-btn:active { transform: scale(0.9); }
+        .admin-toggle { left: 15px; }
+        .theme-toggle { right: 15px; }
+        
+        body.dark-mode .theme-toggle { border-color: var(--staff-color); box-shadow: 0 0 10px rgba(255, 234, 0, 0.4); }
+        body.dark-mode .admin-toggle { border-color: var(--visitor-color); box-shadow: 0 0 10px rgba(255, 0, 85, 0.4); }
+
+        /* =========================================
+           5. RESPONSIVE TYPOGRAPHY
+           ========================================= */
+        h1, h2, h3, h4 { margin-top: 0; color: var(--text-main); font-weight: 700; }
+        
+        .pre-title { 
+            text-align: center; color: var(--text-muted); font-size: 0.8rem; 
+            margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        /* FESTIVAL FONT STYLING FOR AGOMONI (100% VISIBLE FIX) */
+        .app-title { 
+            text-align: center; 
+            font-size: clamp(3.2rem, 12vw, 5.5rem); 
+            font-weight: normal; 
+            margin-bottom: 5px; 
+            line-height: 1.5; /* Crucial: Prevents top/bottom of letters from clipping */
+            letter-spacing: 2px;
+            font-family: 'Galada', cursive; /* Beautiful Cursive Bengali Font */
+            background: linear-gradient(135deg, #991b1b, #d97706); /* Deep Red to Golden */
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            transition: all 0.3s;
+            padding: 15px 0; /* Crucial: Gives gradient room to breathe without cutting text */
+            overflow: visible;
+        }
+        
+        .app-subtitle { 
+            text-align: center; color: var(--visitor-color); font-size: 1.1rem; 
+            margin-bottom: 35px; font-weight: 600; font-style: italic; transition: all 0.3s;
+            margin-top: -15px; /* Pulls it slightly closer to the title since padding was added */
+        }
+
+        body.dark-mode .pre-title { color: #fcd34d; text-shadow: 0 0 4px rgba(255,234,0,0.4); }
+        body.dark-mode .app-title { 
+            background: none; -webkit-text-fill-color: #ffffff; color: #ffffff; 
+            text-shadow: 0 0 5px var(--staff-color), 0 0 15px var(--visitor-color), 0 0 30px rgba(255, 0, 85, 0.6); 
+        }
+        body.dark-mode .app-subtitle { color: #fef3c7; text-shadow: 0 0 5px var(--staff-color), 0 0 10px rgba(255, 234, 0, 0.5); }
+
+        /* =========================================
+           6. UI CARDS & PANELS
+           ========================================= */
+        .home-grid { display: flex; flex-direction: column; gap: 16px; }
+        
+        .choice-card, .panel { 
+            background: var(--card-bg); border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); 
+            transition: all 0.3s ease; backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+        }
+        
+        .choice-card { padding: 30px 20px; text-align: center; cursor: pointer; }
+        .choice-card:active { transform: scale(0.97); }
+        .choice-card h2 { font-size: 1.5rem; margin-bottom: 6px; transition: all 0.3s; }
+        .choice-card p { margin: 0; color: var(--text-muted); font-size: 0.95rem; font-weight: 500;}
+
+        .panel { padding: 25px 20px; margin-bottom: 20px; }
+        .panel-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;
+        }
+        .panel-header h2 { font-size: 1.3rem; margin: 0; }
+        .section-box { background: var(--input-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 20px; }
+
+        body.dark-mode .choice-card, body.dark-mode .panel, body.dark-mode .section-box { 
+            background: var(--card-bg); border-color: rgba(255, 234, 0, 0.15);
+            box-shadow: inset 0 0 20px rgba(255, 0, 85, 0.05), 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+        
+        body.dark-mode .choice-card.visitor { border-bottom: 3px solid var(--visitor-color); }
+        body.dark-mode .choice-card.staff { border-bottom: 3px solid var(--staff-color); }
+        body.dark-mode .panel[style*="var(--admin-color)"] { border-bottom: 3px solid var(--admin-color); }
+
+        body.dark-mode .choice-card.visitor:hover h2, body.dark-mode h2.neon-visitor {
+            color: #ffffff !important; text-shadow: 0 0 8px var(--visitor-color), 0 0 20px var(--visitor-color) !important;
+        }
+        body.dark-mode .choice-card.staff:hover h2, body.dark-mode h2.neon-staff {
+            color: #ffffff !important; text-shadow: 0 0 8px var(--staff-color), 0 0 20px var(--staff-color) !important;
+        }
+        body.dark-mode h2.neon-admin {
+            color: #ffffff !important; text-shadow: 0 0 8px var(--admin-color), 0 0 20px var(--admin-color) !important;
+        }
+
+        /* =========================================
+           7. FORMS, INPUTS & BUTTONS
+           ========================================= */
+        input { 
+            width: 100%; padding: 14px; margin: 8px 0 16px 0; border: 1px solid var(--input-border); 
+            border-radius: 12px; box-sizing: border-box; font-size: 1rem; 
+            background-color: var(--input-bg); color: var(--text-main); transition: all 0.2s;
+        }
+        input:focus { outline: none; border-color: var(--visitor-color); box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15); }
+        
+        body.dark-mode input { border-color: #7f1d1d; color: white;}
+        body.dark-mode input:focus { border-color: var(--staff-color); box-shadow: 0 0 10px rgba(255, 234, 0, 0.2); }
+
+        .pin-input { text-align: center; font-size: 1.8rem; letter-spacing: 10px; font-weight: bold; }
+        .password-container { position: relative; width: 100%; }
+        .password-container input { padding-right: 50px; }
+        .eye-btn {
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; font-size: 1.2rem;
+            color: var(--text-muted); padding: 0; width: auto;
+        }
+
+        button { 
+            color: white; border: none; padding: 14px 20px; border-radius: 12px; 
+            cursor: pointer; font-weight: bold; width: 100%; font-size: 1rem; transition: all 0.2s;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        button:active { transform: scale(0.98); }
+        
+        .btn-visitor { background-color: var(--visitor-color); }
+        .btn-staff { background-color: var(--staff-color); }
+        .btn-admin { background-color: var(--admin-color); }
+        .scan-btn { background-color: #78350f; margin-top: 10px; }
+        .back-btn { background: var(--input-border); color: var(--text-main); width: auto; padding: 8px 14px; font-size: 0.85rem; border-radius: 8px; text-transform: none; }
+        .approve-btn { background: var(--success); width: auto; padding: 8px 14px; font-size: 0.85rem; text-transform: none; }
+        .remove-btn { background: var(--danger); width: auto; padding: 8px 14px; font-size: 0.85rem; text-transform: none; }
+        .logout-btn { background: var(--danger); width: auto; padding: 10px 15px; font-size: 0.9rem; margin-top: 15px;}
+
+        body.dark-mode .btn-visitor { background-color: #ff0055; box-shadow: 0 0 10px rgba(255, 0, 85, 0.3); border: 1px solid var(--visitor-color); color: white;}
+        body.dark-mode .btn-staff { background-color: #d97706; box-shadow: 0 0 10px rgba(255, 234, 0, 0.3); border: 1px solid var(--staff-color); color: white;}
+        body.dark-mode .btn-admin { background-color: #ff6600; box-shadow: 0 0 10px rgba(255, 102, 0, 0.3); border: 1px solid var(--admin-color); color: white;}
+        body.dark-mode .scan-btn { background-color: #450a0a; border: 1px solid #7f1d1d; }
+        body.dark-mode .back-btn { background: #450a0a; color: #fef3c7; border: 1px solid #7f1d1d; }
+        
+        /* Custom Download Button Styling */
+        .btn-download {
+            background-color: var(--visitor-color); margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .btn-download {
+            background-color: rgba(255, 0, 85, 0.15); color: #ff0055; 
+            border: 1px solid rgba(255, 0, 85, 0.4); box-shadow: 0 0 15px rgba(255, 0, 85, 0.15); 
+        }
+
+        .auth-toggle { text-align: center; margin-top: 20px; font-size: 0.95rem; color: var(--text-muted); }
+        .auth-toggle span { font-weight: bold; cursor: pointer; text-decoration: underline; padding: 5px; }
+        .toggle-visitor { color: var(--visitor-color); }
+        .toggle-staff { color: var(--staff-color); }
+        body.dark-mode .toggle-visitor { color: var(--visitor-color); text-shadow: 0 0 5px rgba(255,0,85,0.4); }
+        body.dark-mode .toggle-staff { color: var(--staff-color); text-shadow: 0 0 5px rgba(255,234,0,0.4); }
+
+        /* =========================================
+           8. BADGES, SCANNER & LISTS
+           ========================================= */
+        .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;}
+        .bg-pending { background: #fef3c7; color: #b45309; }
+        .bg-success { background: #d1fae5; color: #047857; }
+        .bg-danger { background: #fee2e2; color: #be123c; }
+        
+        body.dark-mode .bg-pending { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid #f59e0b; }
+        body.dark-mode .bg-success { background: rgba(22, 163, 74, 0.15); color: #4ade80; border: 1px solid #16a34a; }
+        body.dark-mode .bg-danger { background: rgba(225, 29, 72, 0.15); color: #fda4af; border: 1px solid #ef4444; }
+
+        .scanner-box { background: var(--text-main); color: var(--bg-color); padding: 20px; border-radius: 16px; margin-top: 20px; }
+        body.dark-mode .scanner-box { background: #1a0505; color: white; border: 1px solid #7f1d1d; }
+        .camera-view { background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 15px; border: 2px dashed #78350f; min-height: 220px;}
+        
+        .status-msg { margin-top: 15px; font-weight: bold; padding: 12px; border-radius: 10px; text-align: center; font-size: 0.95rem;}
+        .msg-success { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+        .msg-error { background: #fee2e2; color: #9f1239; border: 1px solid #fda4af; }
+        .hidden { display: none !important; }
+        
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px solid var(--border-color); }
+        .list-item:last-child { border-bottom: none; }
+        .scanned-by-text { color: var(--visitor-color); font-size: 0.8rem; margin-left: 8px; font-weight: bold; }
+        body.dark-mode .scanned-by-text { color: #ffea00; }
+
+        /* =========================================
+           9. FULL SCREEN WELCOME OVERLAY
+           ========================================= */
+        #welcomeOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color); z-index: 2000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        #welcomeOverlay.active { opacity: 1; pointer-events: auto; }
+        
+        .welcome-content { text-align: center; padding: 20px; animation: scaleUp 0.5s ease-out; }
+        @keyframes scaleUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .welcome-title {
+            font-size: clamp(1.8rem, 6vw, 2.5rem); font-weight: 900; margin-bottom: 10px;
+            color: #991b1b; font-family: 'Georgia', serif; letter-spacing: 1px;
+        }
+        /* Stylish Bengali Font for the Overlay (100% VISIBLE FIX) */
+        .welcome-title-bengali {
+            font-family: 'Galada', cursive;
+            font-size: clamp(2rem, 8vw, 3rem);
+            color: var(--visitor-color);
+            margin-bottom: 25px;
+            margin-top: 5px;
+            text-shadow: 0 0 10px rgba(220, 38, 38, 0.2);
+            line-height: 1.5; /* Prevents clipping */
+            padding: 10px 0; /* Prevents clipping */
+            overflow: visible;
+        }
+        .tap-continue { font-size: 0.9rem; color: var(--text-muted); opacity: 0.7; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+        body.dark-mode #welcomeOverlay { background: rgba(26, 5, 5, 0.95); backdrop-filter: blur(10px); }
+        body.dark-mode .welcome-title {
+            color: #ffffff; text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055, 0 0 40px #ffea00;
+        }
+        body.dark-mode .welcome-title-bengali {
+            color: #ffea00; text-shadow: 0 0 8px #ffea00, 0 0 20px #ff0055;
+        }
+
+        /* =========================================
+           10. FOOTER SECTION
+           ========================================= */
+        .app-footer {
+            width: 100%; max-width: 500px; margin-top: auto; padding: 30px 15px 15px;
+            text-align: center; color: var(--text-muted); border-top: 1px solid var(--border-color); z-index: 1;
+        }
+        body.dark-mode .app-footer { border-color: rgba(255, 234, 0, 0.15); }
+
+        .about-tab {
+            cursor: pointer; display: inline-block; font-weight: 700;
+            color: var(--visitor-color); margin-bottom: 15px; font-size: 1rem; transition: all 0.3s;
+        }
+        .about-tab:hover { text-decoration: underline; }
+        body.dark-mode .about-tab { color: #ffea00; text-shadow: 0 0 8px rgba(255, 234, 0, 0.5); }
+
+        .about-content {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            padding: 15px; border-radius: 12px; margin-bottom: 20px;
+            font-size: 0.95rem; color: var(--text-main); line-height: 1.5;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); animation: slideDown 0.3s ease-out forwards;
+        }
+        body.dark-mode .about-content { border-color: rgba(255, 234, 0, 0.2); box-shadow: 0 0 15px rgba(255, 0, 85, 0.1); }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .copyright { font-size: 0.85rem; font-weight: bold;}
+        
+        .visitor-counter-box {
+            margin-top: 15px; padding: 10px; border-radius: 8px; font-weight: bold;
+            background: rgba(255, 0, 85, 0.1); border: 1px solid var(--admin-color);
+            color: var(--admin-color); display: inline-block;
+        }
+        body.dark-mode .visitor-counter-box {
+            color: #ffea00; text-shadow: 0 0 5px rgba(255,234,0,0.5); box-shadow: 0 0 10px rgba(255,0,85,0.2);
+            border-color: #ff0055;
+        }
+    </style>
+</head>
+<body>
+
+<!-- === FULL SCREEN WELCOME OVERLAY === -->
+<div id="welcomeOverlay" class="hidden" onclick="hideWelcomeScreen()">
+    <div class="welcome-content">
+        <h1 class="welcome-title">Welcome to our best programme 'Agomoni'</h1>
+        <h2 class="welcome-title-bengali">আমাদের শ্রেষ্ঠ অনুষ্ঠান 'আগমনী'-তে স্বাগতম</h2>
+        <p class="tap-continue">(Tap anywhere to close)</p>
+    </div>
+</div>
+
+<!-- SECRET ADMIN ICON -->
+<button class="icon-btn admin-toggle" onclick="handleAdminIconClick()" title="Info">🛡️</button>
+<button id="themeToggle" class="icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle Day/Night Mode">🌙</button>
+
+<div class="container">
+
+    <!-- === HOME SCREEN === -->
+    <div id="view-home" class="view-section active">
+        <h4 class="pre-title">MMCC Computer Science Students Presents</h4>
+        <h1 class="app-title">আগমনী ২০২৬</h1>
+        <p class="app-subtitle">Welcome to our highly anticipated program</p>
+        
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 15px; font-size: 0.95rem;">Select your portal to continue</p>
+        
+        <div class="home-grid">
+            <div class="choice-card visitor" onclick="switchView('view-visitor')">
+                <h2 style="color: var(--visitor-color);">👤 Students</h2>
+                <p>Request and view entry pass</p>
+            </div>
+            <div class="choice-card staff" onclick="switchView('view-staff')">
+                <h2 style="color: var(--staff-color);">📋 Admins</h2>
+                <p>Approve and scan passes</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- === 1. STUDENTS PORTAL === -->
+    <div id="view-visitor" class="view-section">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="neon-visitor" style="color: var(--visitor-color);">Student Portal</h2>
+                <button class="back-btn" onclick="switchView('view-home')">Close ✕</button>
+            </div>
+            
+            <div id="visitorAuthSection">
+                <form id="formVisitorLogin">
+                    <h3>Student Login</h3>
+                    <input type="email" id="vLoginEmail" placeholder="Email Address" required>
+                    <div class="password-container">
+                        <input type="password" id="vLoginPass" placeholder="Password" required>
+                        <button type="button" class="eye-btn" onclick="togglePassword('vLoginPass', this)">👁️</button>
+                    </div>
+                    <button type="submit" class="btn-visitor">Log In</button>
+                    <div id="vLoginError" class="status-msg msg-error hidden">Invalid credentials.</div>
+                    <div class="auth-toggle">New student? <span class="toggle-visitor" onclick="toggleAuth('visitor', 'signup')">Sign Up</span></div>
+                </form>
+
+                <form id="formVisitorSignup" class="hidden">
+                    <h3>Student Signup</h3>
+                    <input type="text" id="vSignupName" placeholder="Full Name" required>
+                    <input type="email" id="vSignupEmail" placeholder="Email Address" required>
+                    <div class="password-container">
+                        <input type="password" id="vSignupPass" placeholder="Create Password" required>
+                        <button type="button" class="eye-btn" onclick="togglePassword('vSignupPass', this)">👁️</button>
+                    </div>
+                    <button type="submit" class="btn-visitor">Sign Up</button>
+                    <div id="vSignupError" class="status-msg msg-error hidden"></div>
+                    <div class="auth-toggle">Have an account? <span class="toggle-visitor" onclick="toggleAuth('visitor', 'login')">Log In</span></div>
+                </form>
+            </div>
+
+            <div id="visitorDashboard" class="hidden">
+                <h3 id="vWelcomeMsg" style="margin-bottom: 5px;"></h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0; margin-bottom: 20px;">Your event entry pass</p>
+                
+                <button id="btnRequestPass" class="btn-visitor" onclick="requestTicket()">Request Digital Pass</button>
+
+                <div id="userTicketDisplay" class="section-box hidden" style="text-align: center;">
+                    <h3 id="tktName" style="margin: 0 0 10px 0; font-size: 1.5rem;"></h3>
+                    <span id="tktStatus" class="status-badge bg-pending">Pending Approval</span><br>
+                    <div id="tktQrContainer" style="background: white; padding: 15px; border-radius: 12px; display: inline-block; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <canvas id="qrCanvas"></canvas>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout('visitor')">Log Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === 2. ADMINS PORTAL === -->
+    <div id="view-staff" class="view-section">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="neon-staff" style="color: var(--staff-color);">Admin Portal</h2>
+                <button class="back-btn" onclick="switchView('view-home')">Close ✕</button>
+            </div>
+            
+            <div id="staffAuthSection">
+                <form id="formStaffLogin">
+                    <h3>Admin Login</h3>
+                    <input type="email" id="sLoginEmail" placeholder="Admin Email" required>
+                    <div class="password-container">
+                        <input type="password" id="sLoginPass" placeholder="Password" required>
+                        <button type="button" class="eye-btn" onclick="togglePassword('sLoginPass', this)">👁️</button>
+                    </div>
+                    <button type="submit" class="btn-staff">Log In</button>
+                    <div id="sLoginError" class="status-msg msg-error hidden">Invalid credentials or awaiting Master Approval.</div>
+                    <div class="auth-toggle">New admin? <span class="toggle-staff" onclick="toggleAuth('staff', 'signup')">Register Here</span></div>
+                </form>
+
+                <form id="formStaffSignup" class="hidden">
+                    <h3>Admin Registration</h3>
+                    <input type="text" id="sSignupName" placeholder="Full Name" required>
+                    <input type="email" id="sSignupEmail" placeholder="Admin Email" required>
+                    <div class="password-container">
+                        <input type="password" id="sSignupPass" placeholder="Create Password" required>
+                        <button type="button" class="eye-btn" onclick="togglePassword('sSignupPass', this)">👁️</button>
+                    </div>
+                    <button type="submit" class="btn-staff">Register for Approval</button>
+                    <div id="sSignupError" class="status-msg msg-error hidden"></div>
+                    <div class="auth-toggle">Registered? <span class="toggle-staff" onclick="toggleAuth('staff', 'login')">Log In</span></div>
+                </form>
+            </div>
+
+            <div id="staffDashboard" class="hidden">
+                <h3 id="sWelcomeMsg" style="margin-top:0;"></h3>
+                
+                <div class="section-box">
+                    <h3 style="font-size: 1.1rem; margin: 0 0 10px 0;">Pending Student Approvals</h3>
+                    <div id="staffPendingList" style="font-size: 0.95rem;"></div>
+                </div>
+
+                <div class="section-box">
+                    <h3 style="font-size: 1.1rem; margin: 0 0 10px 0;">Active Student Passes</h3>
+                    <div id="staffApprovedList" style="font-size: 0.95rem;"></div>
+                </div>
+                
+                <div class="scanner-box">
+                    <h3 style="margin-top:0; font-size: 1.2rem;">📱 Live Door Scanner</h3>
+                    <div id="staff-reader" class="camera-view"></div>
+                    <button class="scan-btn" onclick="startCamera('staff-reader', 'staffScanResult')" style="background-color: var(--success); border: none; color: white;">Start Camera Scanner</button>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <input type="text" id="staffScannerInput" placeholder="Simulate (Enter ID)" style="background: white; color: black; border:none; margin: 0; flex: 2;">
+                        <button class="scan-btn" onclick="processScan(document.getElementById('staffScannerInput').value, 'staffScanResult')" style="margin: 0; flex: 1;">Enter</button>
+                    </div>
+                    <div id="staffScanResult" class="status-msg hidden"></div>
+                </div>
+                <button class="logout-btn" onclick="logout('staff')">Log Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === 3. MASTER CONTROL PORTAL === -->
+    <div id="view-admin" class="view-section">
+        <div class="panel" style="border: 2px solid var(--admin-color);">
+            <div class="panel-header">
+                <h2 class="neon-admin" style="color: var(--admin-color);">Master Control</h2>
+                <button class="back-btn" onclick="switchView('view-home')">Close ✕</button>
+            </div>
+            
+            <div id="adminAuthSection">
+                <h3>Master Secure Login</h3>
+                <input type="text" id="aLoginUser" placeholder="Master Username" autocomplete="off">
+                <div class="password-container">
+                    <input type="password" id="aLoginPass" placeholder="Master Password">
+                    <button type="button" class="eye-btn" onclick="togglePassword('aLoginPass', this)">👁️</button>
+                </div>
+                <button class="btn-admin" onclick="handleAdminLogin()">Next</button>
+                <div id="aLoginError" class="status-msg msg-error hidden">Access Denied</div>
+            </div>
+
+            <div id="admin2FASection" class="hidden">
+                <h3 style="text-align: center; color: var(--admin-color);">2-Step Verification</h3>
+                <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Enter the 6-digit Master Security PIN to continue.</p>
+                <input type="password" id="aLoginPin" class="pin-input" placeholder="••••••" maxlength="6" pattern="\d{6}" autocomplete="off">
+                <button class="btn-admin" onclick="verifyAdminPin()">Verify & Access</button>
+                <button class="back-btn" onclick="cancelAdminLogin()" style="margin-top: 15px; width: 100%; text-align: center;">Cancel Login</button>
+                <div id="aPinError" class="status-msg msg-error hidden">Invalid PIN Code</div>
+            </div>
+
+            <div id="adminDashboard" class="hidden">
+                <h3 style="margin-top:0;">Master Dashboard</h3>
+                
+                <button class="btn-download" onclick="downloadPDF()">
+                    📄 Download Event Report (PDF)
+                </button>
+                
+                <div class="section-box" style="border-left: 4px solid var(--admin-color);">
+                    <h3 style="font-size: 1.1rem; margin: 0 0 10px 0;">🛡️ Pending Admin Approvals</h3>
+                    <div id="adminStaffApprovalList" style="font-size: 0.95rem;"></div>
+                </div>
+
+                <div class="section-box">
+                    <h3 style="font-size: 1.1rem; margin: 0 0 10px 0;">👥 Approved Admins</h3>
+                    <div id="adminStaffList" style="font-size: 0.95rem;"></div>
+                </div>
+
+                <div class="section-box">
+                    <h3 style="font-size: 1.1rem; margin: 0 0 10px 0;">Pending Student Authorizations</h3>
+                    <div id="adminPendingList" style="font-size: 0.95rem;"></div>
+                </div>
+
+                <div class="section-box">
+                    <h3 style="font-size: 1.1rem; margin: 0 0 10px 0;">All Active Student Passes</h3>
+                    <div id="adminApprovedList" style="font-size: 0.95rem;"></div>
+                </div>
+
+                <div class="section-box" style="border-left: 4px solid var(--success);">
+                    <h3 style="font-size: 1.1rem; margin: 0 0 10px 0;">📍 Present in Venue (Scanned)</h3>
+                    <div id="adminPresentList" style="font-size: 0.95rem;"></div>
+                </div>
+                
+                <div class="scanner-box">
+                    <h3 style="margin-top:0; font-size: 1.2rem;">📱 Master Override Scanner</h3>
+                    <div id="master-reader" class="camera-view"></div>
+                    <button class="scan-btn" onclick="startCamera('master-reader', 'adminScanResult')" style="background-color: var(--success); border: none; color: white;">Start Camera Scanner</button>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <input type="text" id="adminScannerInput" placeholder="Simulate (Enter ID)" style="background: white; color: black; border:none; margin: 0; flex: 2;">
+                        <button class="scan-btn" onclick="processScan(document.getElementById('adminScannerInput').value, 'adminScanResult')" style="margin: 0; flex: 1;">Enter</button>
+                    </div>
+                    <div id="adminScanResult" class="status-msg hidden"></div>
+                </div>
+                <button class="logout-btn" onclick="logout('admin')">Lock Dashboard</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- === FOOTER SECTION === -->
+<footer class="app-footer">
+    <div class="about-tab" onclick="toggleAbout()">About 🔽</div>
+    <div id="aboutContent" class="about-content hidden">
+        <strong>Maharaja Manindra Chandra College</strong><br>
+        Computer Science Department
+    </div>
+    
+    <div id="footerVisitorCount" class="hidden">
+        <div class="visitor-counter-box">
+            📈 Registered Students: <span id="totalVisitorCount">0</span>
+        </div>
+    </div>
+    
+    <div class="copyright" style="margin-top: 15px;">© Copyright By MMCC CS Dept , 2026</div>
+</footer>
+
+<!-- === MAIN APPLICATION SCRIPT === -->
+<script>
+    // ==========================================
+    // 1. FIREBASE CLOUD DATABASE CONFIGURATION
+    // ==========================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyAvtM_LmkN4oXLQ7_wojG8CunUuw6lbt7Y",
+        authDomain: "iia-fest.firebaseapp.com",
+        databaseURL: "https://iia-fest-default-rtdb.firebaseio.com",
+        projectId: "iia-fest",
+        storageBucket: "iia-fest.firebasestorage.app",
+        messagingSenderId: "111712260847",
+        appId: "1:111712260847:web:667572c9309a011b02811a",
+        measurementId: "G-M1SHTJ5LF1"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ==========================================
+    // 2. GLOBAL STATE (Synced with Cloud)
+    // ==========================================
+    let visitors = []; 
+    let staffMembers = []; 
+    let tickets = [];  
+    
+    let currentVisitor = null; 
+    let currentStaff = null;
+    let isAdminLoggedIn = false;
+
+    // UI Debounce System to Prevent Freezing during multiple scans
+    let refreshTimer = null;
+    function debouncedRefreshDashboards() {
+        if(refreshTimer) clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(() => {
+            refreshDashboards();
+        }, 300);
+    }
+
+    // REAL-TIME CLOUD LISTENER
+    db.ref('iia_fest_data').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+            visitors = data.visitors || [];
+            staffMembers = data.staffMembers || [];
+            tickets = data.tickets || [];
+            
+            if(html5QrCode && html5QrCode.isScanning) {
+                updateFooterCounter(); 
+            } else {
+                debouncedRefreshDashboards(); 
+            }
+        }
+    });
+
+    // MASTER SAVE FUNCTION
+    function syncToCloud() {
+        db.ref('iia_fest_data').set({
+            visitors: visitors,
+            staffMembers: staffMembers,
+            tickets: tickets
+        });
+    }
+
+    // ==========================================
+    // 3. UI & AUTHENTICATION LOGIC
+    // ==========================================
+    let adminIconTimer = null;
+    function handleAdminIconClick() {
+        if (adminIconTimer === null) {
+            adminIconTimer = setTimeout(() => {
+                adminIconTimer = null;
+                document.getElementById('welcomeOverlay').classList.remove('hidden');
+                setTimeout(() => { document.getElementById('welcomeOverlay').classList.add('active'); }, 10);
+            }, 300);
+        } else {
+            clearTimeout(adminIconTimer);
+            adminIconTimer = null;
+            switchView('view-admin');
+        }
+    }
+
+    function hideWelcomeScreen() {
+        document.getElementById('welcomeOverlay').classList.remove('active');
+        setTimeout(() => { document.getElementById('welcomeOverlay').classList.add('hidden'); }, 400); 
+    }
+
+    function updateFooterCounter() {
+        const counterDiv = document.getElementById('footerVisitorCount');
+        const countSpan = document.getElementById('totalVisitorCount');
+        if (isAdminLoggedIn || (currentStaff && currentStaff.status === 'Approved')) {
+            countSpan.innerText = visitors.length;
+            counterDiv.classList.remove('hidden');
+        } else {
+            counterDiv.classList.add('hidden');
+        }
+    }
+
+    function isValidEmailDomain(email) {
+        const allowedDomains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com', 'icloud.com', 'aol.com'];
+        const domain = email.split('@')[1];
+        return allowedDomains.includes(domain);
+    }
+
+    function toggleAbout() {
+        const content = document.getElementById('aboutContent');
+        const tab = document.querySelector('.about-tab');
+        if(content.classList.contains('hidden')) {
+            content.classList.remove('hidden'); tab.innerText = "About 🔼";
+        } else {
+            content.classList.add('hidden'); tab.innerText = "About 🔽";
+        }
+    }
+
+    function togglePassword(fieldId, btn) {
+        const input = document.getElementById(fieldId);
+        if (input.type === "password") { input.type = "text"; btn.innerText = "🙈"; } 
+        else { input.type = "password"; btn.innerText = "👁️"; }
+    }
+
+    function toggleTheme() {
+        const body = document.body;
+        const btn = document.getElementById('themeToggle');
+        body.classList.toggle('dark-mode');
+        btn.innerText = body.classList.contains('dark-mode') ? '☀️' : '🌙';
+    }
+
+    function switchView(viewId) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        if(html5QrCode && html5QrCode.isScanning) { html5QrCode.stop().then(() => { html5QrCode.clear(); }).catch(e => {}); }
+        refreshDashboards();
+    }
+
+    function refreshDashboards() {
+        if(currentVisitor) updateVisitorUI();
+        if(currentStaff) updateStaffUI();
+        if(isAdminLoggedIn) updateAdminUI();
+        updateFooterCounter();
+    }
+
+    function toggleAuth(role, type) {
+        document.getElementById(`vLoginError`).classList.add('hidden');
+        document.getElementById(`vSignupError`).classList.add('hidden');
+        document.getElementById(`sLoginError`).classList.add('hidden');
+        document.getElementById(`sSignupError`).classList.add('hidden');
+        if (type === 'signup') {
+            document.getElementById(`form${role.charAt(0).toUpperCase() + role.slice(1)}Login`).classList.add('hidden');
+            document.getElementById(`form${role.charAt(0).toUpperCase() + role.slice(1)}Signup`).classList.remove('hidden');
+        } else {
+            document.getElementById(`form${role.charAt(0).toUpperCase() + role.slice(1)}Signup`).classList.add('hidden');
+            document.getElementById(`form${role.charAt(0).toUpperCase() + role.slice(1)}Login`).classList.remove('hidden');
+        }
+    }
+
+    function logout(role) {
+        if(html5QrCode && html5QrCode.isScanning) html5QrCode.stop().catch(e => {});
+        if(role === 'visitor') {
+            currentVisitor = null;
+            document.getElementById('visitorDashboard').classList.add('hidden');
+            document.getElementById('visitorAuthSection').classList.remove('hidden');
+            toggleAuth('visitor', 'login');
+        } else if (role === 'staff') {
+            currentStaff = null;
+            document.getElementById('staffDashboard').classList.add('hidden');
+            document.getElementById('staffAuthSection').classList.remove('hidden');
+            toggleAuth('staff', 'login');
+        } else if (role === 'admin') {
+            isAdminLoggedIn = false;
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('admin2FASection').classList.add('hidden');
+            document.getElementById('aLoginUser').value = '';
+            document.getElementById('aLoginPass').value = '';
+            document.getElementById('aLoginPin').value = '';
+            document.getElementById('adminAuthSection').classList.remove('hidden');
+        }
+        updateFooterCounter();
+    }
+
+    // --- STUDENT REGISTRATION ---
+    document.getElementById('formVisitorSignup').addEventListener('submit', e => {
+        e.preventDefault();
+        const n = document.getElementById('vSignupName').value;
+        const eMail = document.getElementById('vSignupEmail').value;
+        const p = document.getElementById('vSignupPass').value;
+        
+        if (!isValidEmailDomain(eMail)) {
+            const err = document.getElementById('vSignupError');
+            err.innerText = "Please use a real email provider (e.g., @gmail.com, @yahoo.com)";
+            err.classList.remove('hidden'); return;
+        }
+        if (visitors.find(v => v.email === eMail)) {
+            const err = document.getElementById('vSignupError');
+            err.innerText = "Email already exists.";
+            err.classList.remove('hidden'); return;
+        }
+
+        currentVisitor = { name: n, email: eMail, pass: p };
+        visitors.push(currentVisitor);
+        syncToCloud(); 
+        e.target.reset();
+        showVisitorDashboard();
+    });
+
+    document.getElementById('formVisitorLogin').addEventListener('submit', e => {
+        e.preventDefault();
+        const eMail = document.getElementById('vLoginEmail').value;
+        const p = document.getElementById('vLoginPass').value;
+        const u = visitors.find(v => v.email === eMail && v.pass === p);
+        if (u) { currentVisitor = u; e.target.reset(); showVisitorDashboard(); } 
+        else { document.getElementById('vLoginError').classList.remove('hidden'); }
+    });
+
+    function showVisitorDashboard() {
+        document.getElementById('visitorAuthSection').classList.add('hidden');
+        document.getElementById('visitorDashboard').classList.remove('hidden');
+        document.getElementById('vWelcomeMsg').innerText = `Welcome, ${currentVisitor.name}!`;
+        updateVisitorUI();
+    }
+
+    function updateVisitorUI() {
+        const tkt = tickets.find(t => t.email === currentVisitor.email);
+        const btn = document.getElementById('btnRequestPass');
+        const disp = document.getElementById('userTicketDisplay');
+        const badge = document.getElementById('tktStatus');
+        const qrBox = document.getElementById('tktQrContainer');
+
+        if (!tkt) {
+            btn.classList.remove('hidden'); disp.classList.add('hidden');
+        } else {
+            btn.classList.add('hidden'); disp.classList.remove('hidden');
+            document.getElementById('tktName').innerText = tkt.name;
+
+            if (tkt.status === 'Pending') {
+                badge.innerText = 'Pending Approval'; badge.className = 'status-badge bg-pending'; qrBox.classList.add('hidden');
+            } else if (tkt.status === 'Approved') {
+                badge.innerText = 'Pass Authorized'; badge.className = 'status-badge bg-success'; qrBox.classList.remove('hidden');
+                new QRious({ element: document.getElementById('qrCanvas'), value: tkt.id, size: 200, level: 'H' });
+            } else if (tkt.status === 'Used') {
+                badge.innerText = 'Pass Used (Entry Verified)'; badge.className = 'status-badge'; badge.style.background = 'var(--border-color)'; badge.style.color = 'var(--text-main)'; qrBox.classList.remove('hidden'); 
+            } else if (tkt.status === 'Revoked') {
+                badge.innerText = 'Pass Revoked'; badge.className = 'status-badge bg-danger'; qrBox.classList.add('hidden');
+            }
+        }
+    }
+
+    function requestTicket() {
+        tickets.push({ id: 'AGOMONI-' + Math.floor(Math.random() * 90000 + 10000), email: currentVisitor.email, name: currentVisitor.name, status: 'Pending' });
+        syncToCloud(); 
+    }
+
+    // --- ADMIN AUTHENTICATION ---
+    document.getElementById('formStaffSignup').addEventListener('submit', e => {
+        e.preventDefault();
+        const n = document.getElementById('sSignupName').value;
+        const eMail = document.getElementById('sSignupEmail').value;
+        const p = document.getElementById('sSignupPass').value;
+        
+        if (!isValidEmailDomain(eMail)) {
+            const err = document.getElementById('sSignupError');
+            err.innerText = "Please use a real email provider (e.g., @gmail.com, @yahoo.com)";
+            err.classList.remove('hidden'); return;
+        }
+        if (staffMembers.find(s => s.email === eMail)) {
+            const err = document.getElementById('sSignupError');
+            err.innerText = "Email already registered.";
+            err.classList.remove('hidden'); return;
+        }
+        
+        const newAdmin = { name: n, email: eMail, pass: p, status: 'Pending' };
+        staffMembers.push(newAdmin);
+        syncToCloud(); 
+        
+        e.target.reset();
+        alert('Registration submitted! Please wait for Master Admin approval to log in.');
+        toggleAuth('staff', 'login');
+    });
+
+    document.getElementById('formStaffLogin').addEventListener('submit', e => {
+        e.preventDefault();
+        const eMail = document.getElementById('sLoginEmail').value;
+        const p = document.getElementById('sLoginPass').value;
+        const u = staffMembers.find(s => s.email === eMail && s.pass === p);
+        
+        if (u && u.status === 'Approved') { 
+            currentStaff = u; e.target.reset(); 
+            showStaffDashboard(); 
+            updateFooterCounter(); 
+        } else { 
+            document.getElementById('sLoginError').classList.remove('hidden'); 
+        }
+    });
+
+    function showStaffDashboard() {
+        document.getElementById('staffAuthSection').classList.add('hidden');
+        document.getElementById('staffDashboard').classList.remove('hidden');
+        document.getElementById('sWelcomeMsg').innerText = `Admin: ${currentStaff.name}`;
+        updateStaffUI();
+    }
+
+    function updateStaffUI() {
+        if(!currentStaff) return;
+        renderTicketLists('staffPendingList', 'staffApprovedList');
+    }
+
+    // --- MASTER ADMIN LOGIC ---
+    function handleAdminLogin() {
+        const u = document.getElementById('aLoginUser').value;
+        const p = document.getElementById('aLoginPass').value;
+        if(u === 'SsUuDdAaRrSsAaNn' && p === 'QWERTy@2026') {
+            document.getElementById('adminAuthSection').classList.add('hidden');
+            document.getElementById('aLoginError').classList.add('hidden');
+            document.getElementById('admin2FASection').classList.remove('hidden');
+        } else {
+            document.getElementById('aLoginError').classList.remove('hidden');
+        }
+    }
+
+    function verifyAdminPin() {
+        const pin = document.getElementById('aLoginPin').value;
+        if(pin === '202005') {
+            isAdminLoggedIn = true;
+            document.getElementById('admin2FASection').classList.add('hidden');
+            document.getElementById('aLoginPin').value = '';
+            document.getElementById('aPinError').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            updateAdminUI();
+            updateFooterCounter();
+        } else {
+            document.getElementById('aPinError').classList.remove('hidden');
+        }
+    }
+
+    function cancelAdminLogin() {
+        document.getElementById('admin2FASection').classList.add('hidden');
+        document.getElementById('aLoginPin').value = '';
+        document.getElementById('aPinError').classList.add('hidden');
+        document.getElementById('adminAuthSection').classList.remove('hidden');
+    }
+
+    function updateAdminUI() {
+        if(!isAdminLoggedIn) return;
+        
+        const pendingAdminsDiv = document.getElementById('adminStaffApprovalList');
+        const pendAdmins = staffMembers.filter(s => s.status === 'Pending');
+        if(pendAdmins.length > 0) {
+            pendingAdminsDiv.innerHTML = pendAdmins.map(s => `
+                <div class="list-item">
+                    <div><strong>${s.name}</strong><br><small style="color:var(--text-muted)">${s.email}</small></div>
+                    <button class="approve-btn" onclick="approveAdmin('${s.email}')">Approve Admin</button>
+                </div>`).join('');
+        } else {
+            pendingAdminsDiv.innerHTML = '<span style="color: var(--text-muted);">No pending admin registrations.</span>';
+        }
+
+        const staffListDiv = document.getElementById('adminStaffList');
+        const appAdmins = staffMembers.filter(s => s.status === 'Approved');
+        if(appAdmins.length > 0) {
+            staffListDiv.innerHTML = appAdmins.map(s => `<div class="list-item"><div><strong>${s.name}</strong><br><small style="color:var(--text-muted)">${s.email}</small></div><span class="status-badge bg-success" style="font-size:0.7rem">Active</span></div>`).join('');
+        } else {
+            staffListDiv.innerHTML = '<span style="color: var(--text-muted);">No approved admins yet.</span>';
+        }
+
+        const presentListDiv = document.getElementById('adminPresentList');
+        const presentTickets = tickets.filter(t => t.status === 'Used');
+        if(presentTickets.length > 0) {
+            presentListDiv.innerHTML = presentTickets.map(t => `
+                <div class="list-item">
+                    <div>
+                        <strong>${t.name}</strong> 
+                        <span class="scanned-by-text">(Scanned by: ${t.scannedBy})</span><br>
+                        <small style="color:var(--text-muted)">${t.email}</small>
+                    </div>
+                    <span class="status-badge" style="background:var(--border-color); color:var(--text-main); font-size:0.7rem">In Venue</span>
+                </div>`).join('');
+        } else {
+            presentListDiv.innerHTML = '<span style="color: var(--text-muted);">No students have entered yet.</span>';
+        }
+
+        renderTicketLists('adminPendingList', 'adminApprovedList');
+    }
+
+    function approveAdmin(email) {
+        const admin = staffMembers.find(s => s.email === email);
+        if(admin) {
+            admin.status = 'Approved';
+            syncToCloud(); 
+        }
+    }
+
+    function renderTicketLists(pendingContainerId, approvedContainerId) {
+        const pList = document.getElementById(pendingContainerId);
+        const pendT = tickets.filter(t => t.status === 'Pending');
+        if(pendT.length > 0) {
+            pList.innerHTML = pendT.map(t => `<div class="list-item"><div><strong>${t.name}</strong><br><small style="color:var(--text-muted)">${t.email}</small></div><button class="approve-btn" onclick="ticketAction('${t.id}', 'Approved')">Approve</button></div>`).join('');
+        } else {
+            pList.innerHTML = '<span style="color: var(--text-muted);">Queue is empty.</span>';
+        }
+
+        const aList = document.getElementById(approvedContainerId);
+        const appT = tickets.filter(t => t.status === 'Approved');
+        if(appT.length > 0) {
+            aList.innerHTML = appT.map(t => `<div class="list-item"><div><strong>${t.name}</strong><br><small style="color:var(--text-muted)">ID: ${t.id}</small></div><button class="remove-btn" onclick="ticketAction('${t.id}', 'Revoked')">Remove</button></div>`).join('');
+        } else {
+            aList.innerHTML = '<span style="color: var(--text-muted);">No active passes.</span>';
+        }
+    }
+
+    function ticketAction(id, action) {
+        const t = tickets.find(t => t.id === id);
+        if(t) { 
+            t.status = action; 
+            syncToCloud(); 
+        }
+    }
+
+    // --- PDF EXPORT FEATURE ---
+    function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFontSize(18);
+        doc.text("AGOMONI 2026 - Master Event Report", 14, 20);
+        doc.setFontSize(12);
+        
+        doc.text("1. Present in Venue (Scanned & Verified)", 14, 30);
+        const presentData = tickets.filter(t => t.status === 'Used').map(t => [t.name, t.email, t.id, t.scannedBy || 'Master']);
+        doc.autoTable({ startY: 35, head: [['Student Name', 'Email', 'Pass ID', 'Verified By']], body: presentData });
+        
+        let finalY = doc.lastAutoTable.finalY || 35;
+        
+        doc.text("2. Active / Approved Passes (Not Scanned Yet)", 14, finalY + 15);
+        const activeData = tickets.filter(t => t.status === 'Approved').map(t => [t.name, t.email, t.id]);
+        doc.autoTable({ startY: finalY + 20, head: [['Student Name', 'Email', 'Pass ID']], body: activeData });
+        
+        finalY = doc.lastAutoTable.finalY || finalY + 20;
+
+        doc.text("3. Authorized Admins", 14, finalY + 15);
+        const adminData = staffMembers.filter(s => s.status === 'Approved').map(s => [s.name, s.email]);
+        doc.autoTable({ startY: finalY + 20, head: [['Admin Name', 'Email']], body: adminData });
+        
+        doc.save("AGOMONI_2026_Event_Report.pdf");
+    }
+
+    // --- LIVE CAMERA SCANNER LOGIC ---
+    let html5QrCode;
+    function startCamera(readerElementId, resultElementId) {
+        if(html5QrCode) {
+            html5QrCode.stop().then(() => { html5QrCode.clear(); }).catch(err => console.log(err));
+        }
+        document.getElementById(resultElementId).classList.add('hidden');
+        html5QrCode = new Html5Qrcode(readerElementId);
+        
+        html5QrCode.start({ facingMode: "environment" }, { fps: 5, qrbox: { width: 250, height: 250 } }, 
+        (decodedText) => {
+            html5QrCode.stop();
+            document.getElementById(readerElementId).innerHTML = '<div style="color:#10b981; padding:40px 0; font-size:1.5rem; font-weight:bold; text-align:center;">✅ QR Detected! Processing...</div>';
+            processScan(decodedText, resultElementId);
+        }, 
+        (errorMessage) => {}).catch(err => {
+            document.getElementById(resultElementId).innerText = "Camera access denied. Ensure you are on a secure (HTTPS) connection or use manual entry.";
+            document.getElementById(resultElementId).classList.remove('hidden');
+            document.getElementById(resultElementId).classList.add('msg-error');
+        });
+    }
+
+    function processScan(decodedText, resultId) {
+        const id = decodedText.trim();
+        const res = document.getElementById(resultId);
+        res.classList.remove('hidden', 'msg-success', 'msg-error');
+        
+        if(!id) { res.innerText = "❌ Please enter a valid Pass ID"; res.classList.add('msg-error'); return; }
+
+        let t = tickets.find(t => t.id === id);
+
+        if(!t || t.status === 'Pending' || t.status === 'Revoked') {
+            res.innerText = "❌ Pass Not Found or Unauthorized"; res.classList.add('msg-error');
+        } else if (t.status === 'Used') {
+            res.innerText = `⚠️ Alert: Pass Already Used! (${t.name})`; res.classList.add('msg-error');
+        } else if (t.status === 'Approved') {
+            t.status = 'Used'; 
+            
+            if (isAdminLoggedIn) { t.scannedBy = 'Master Admin'; } 
+            else if (currentStaff) { t.scannedBy = currentStaff.name; } 
+            else { t.scannedBy = 'System'; }
+
+            res.innerHTML = `✅ VERIFIED<br><small>Entry granted for: ${t.name}</small>`; res.classList.add('msg-success');
+            syncToCloud(); 
+        }
+    }
+</script>
+
+<!-- === ANTI-INSPECT SECURITY SCRIPT === -->
+<script>
+    // 1. Disable Right-Click Context Menu
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    // 2. Disable Keyboard Shortcuts for Inspect, Source, and Console
+    document.addEventListener('keydown', function(e) {
+        // Block F12
+        if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault();
+            return false;
+        }
+        // Block Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (Windows/Linux)
+        if (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) {
+            e.preventDefault();
+            return false;
+        }
+        // Block Cmd+Option+I, Cmd+Option+J, Cmd+Option+C (Mac)
+        if (e.metaKey && e.altKey && ['I','i','J','j','C','c'].includes(e.key)) {
+            e.preventDefault();
+            return false;
+        }
+        // Block Ctrl+U / Cmd+U (View Source)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) {
+            e.preventDefault();
+            return false;
+        }
+        // Block Ctrl+S / Cmd+S (Save Page)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+</script>
+</body>
+</html>
