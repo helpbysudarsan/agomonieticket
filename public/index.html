@@ -668,7 +668,7 @@
     }
 
     // REAL-TIME CLOUD LISTENER
-    db.ref('iia_fest_data').on('value', (snapshot) => {
+    db.ref('agomoni_eticket_data').on('value', (snapshot) => {
         const data = snapshot.val();
         if(data) {
             visitors = data.visitors || [];
@@ -685,7 +685,7 @@
 
     // MASTER SAVE FUNCTION
     function syncToCloud() {
-        db.ref('iia_fest_data').set({
+        db.ref('agomoni_eticket_data').set({
             visitors: visitors,
             staffMembers: staffMembers,
             tickets: tickets
@@ -943,7 +943,7 @@
         if(pendAdmins.length > 0) {
             pendingAdminsDiv.innerHTML = pendAdmins.map(s => `
                 <div class="list-item">
-                    <div><strong>${s.name}</strong><br><small style="color:var(--text-muted)">${s.email}</small></div>
+                    <div><strong>s.name</strong><br><smallstyle="color:var(--text-muted)">{s.email}</small></div>
                     <button class="approve-btn" onclick="approveAdmin('${s.email}')">Approve Admin</button>
                 </div>`).join('');
         } else {
@@ -953,7 +953,7 @@
         const staffListDiv = document.getElementById('adminStaffList');
         const appAdmins = staffMembers.filter(s => s.status === 'Approved');
         if(appAdmins.length > 0) {
-            staffListDiv.innerHTML = appAdmins.map(s => `<div class="list-item"><div><strong>${s.name}</strong><br><small style="color:var(--text-muted)">${s.email}</small></div><span class="status-badge bg-success" style="font-size:0.7rem">Active</span></div>`).join('');
+            staffListDiv.innerHTML = appAdmins.map(s => `<div class="list-item"><div><strong>s.name</strong><br><smallstyle="color:var(--text-muted)">{s.email}</small></div><span class="status-badge bg-success" style="font-size:0.7rem">Active</span></div>`).join('');
         } else {
             staffListDiv.innerHTML = '<span style="color: var(--text-muted);">No approved admins yet.</span>';
         }
@@ -989,7 +989,7 @@
         const pList = document.getElementById(pendingContainerId);
         const pendT = tickets.filter(t => t.status === 'Pending');
         if(pendT.length > 0) {
-            pList.innerHTML = pendT.map(t => `<div class="list-item"><div><strong>${t.name}</strong><br><small style="color:var(--text-muted)">${t.email}</small></div><button class="approve-btn" onclick="ticketAction('${t.id}', 'Approved')">Approve</button></div>`).join('');
+            pList.innerHTML = pendT.map(t => `<div class="list-item"><div><strong>t.name</strong><br><smallstyle="color:var(--text-muted)">{t.email}</small></div><button class="approve-btn" onclick="ticketAction('${t.id}', 'Approved')">Approve</button></div>`).join('');
         } else {
             pList.innerHTML = '<span style="color: var(--text-muted);">Queue is empty.</span>';
         }
@@ -997,7 +997,7 @@
         const aList = document.getElementById(approvedContainerId);
         const appT = tickets.filter(t => t.status === 'Approved');
         if(appT.length > 0) {
-            aList.innerHTML = appT.map(t => `<div class="list-item"><div><strong>${t.name}</strong><br><small style="color:var(--text-muted)">ID: ${t.id}</small></div><button class="remove-btn" onclick="ticketAction('${t.id}', 'Revoked')">Remove</button></div>`).join('');
+            aList.innerHTML = appT.map(t => `<div class="list-item"><div><strong>${t.name}</strong><br><small style="color:var(--text-muted)">ID: t.id</small></div><buttonclass="remove-btn"onclick="ticketAction('{t.id}', 'Revoked')">Remove</button></div>`).join('');
         } else {
             aList.innerHTML = '<span style="color: var(--text-muted);">No active passes.</span>';
         }
@@ -1093,3 +1093,4 @@
 </script>
 </body>
 </html>
+
