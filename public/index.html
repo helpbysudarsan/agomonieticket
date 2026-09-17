@@ -32,6 +32,14 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
+    <!-- EmailJS Library with Updated Public Key -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            emailjs.init("m0pNr6EJmfX5YexAN"); // Note: Added quotes around the key
+        })();
+    </script>
+
     <style>
         /* =========================================
            1. CORE VARIABLES & THEMES (GOLDEN RED TONES)
@@ -306,13 +314,16 @@
         /* VIP Pass Design */
         .vip-pass { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); text-align: left; border: 2px solid #fde68a; margin-bottom: 20px; transition: all 0.5s ease; }
         .pass-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px dashed #fcd34d; padding-bottom: 15px; }
+        
+        /* AVATAR: Custom Center & Zoom Applied Here */
         .avatar { 
             width: 55px; height: 55px; border-radius: 50%; background-color: var(--visitor-color); 
             display: flex; align-items: center; justify-content: center; font-size: 1.5rem; 
             font-weight: bold; color: transparent; border: 2px solid #ffd700; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            background-size: 145%;
-            background-position: 50% 25%;
+            background-size: 145%; 
+            background-position: 50% 25%; 
         }
+        
         .pass-details { margin-bottom: 20px; font-size: 0.9rem; line-height: 1.6; }
         .qr-box { background: white; padding: 15px; border-radius: 12px; display: inline-block; width: 100%; text-align: center; border: 1px solid #fef3c7;}
         .vip-pass-text { color: var(--text-main) !important; }
@@ -347,7 +358,7 @@
         body.dark-mode .vip-pass-subtext { color: #fcd34d !important; }
 
         /* =========================================
-           7. FORMS, INPUTS & BUTTONS
+           7. FORMS, INPUTS & BUTTONS & BRUTE-FORCE LOCK INFO
            ========================================= */
         input:not([type="checkbox"]), select { width: 100%; padding: 14px; margin: 8px 0 16px 0; border: 1px solid var(--input-border); border-radius: 8px; box-sizing: border-box; font-size: 1rem; background-color: var(--input-bg); color: var(--text-main); transition: all 0.2s; }
         input:focus, select:focus { outline: none; border-color: var(--visitor-color); box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15); }
@@ -356,12 +367,26 @@
         
         .pin-input { text-align: center; font-size: 1.8rem; letter-spacing: 10px; font-weight: bold; }
         .password-container { position: relative; width: 100%; }
-        .password-container input { padding-right: 50px; }
+        .password-container input { padding-right: 50px; margin-bottom: 5px; }
         .eye-btn {
-            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            position: absolute; right: 15px; top: 40%; transform: translateY(-50%);
             background: none; border: none; cursor: pointer; font-size: 1.2rem;
             color: var(--text-muted); padding: 0; width: auto;
         }
+
+        /* Brute-force Attempts text styling */
+        .attempts-text {
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            margin-top: -2px;
+            height: 15px;
+        }
+        .attempts-danger { color: var(--danger) !important; animation: pulse-red-text 1s infinite alternate; }
+        @keyframes pulse-red-text { from { opacity: 1; } to { opacity: 0.6; } }
 
         button { 
             color: white; border: none; padding: 14px 20px; border-radius: 12px; 
@@ -369,6 +394,7 @@
             text-transform: uppercase; letter-spacing: 0.5px;
         }
         button:active { transform: scale(0.98); }
+        button:disabled { opacity: 0.5 !important; cursor: not-allowed !important; transform: none !important;}
         
         .btn-visitor { background-color: var(--visitor-color); }
         .btn-staff { background-color: var(--staff-color); }
@@ -431,8 +457,8 @@
            9. COMPACT SWEETALERT2 POPUP DESIGN (RESIZED PRO)
            ========================================= */
         .swal2-popup {
-            width: clamp(220px, 65vw, 280px) !important; /* 10% smaller */
-            padding: 0.8em 0.5em 0.5em !important; /* Reduced padding */
+            width: clamp(220px, 65vw, 280px) !important; 
+            padding: 0.8em 0.5em 0.5em !important; 
             border-radius: 12px !important;
         }
         .swal2-title {
@@ -442,12 +468,12 @@
         }
         .swal2-html-container {
             font-size: 0.8rem !important;
-            margin: 0.5em 0 0.8em !important; /* Tighter margins */
+            margin: 0.5em 0 0.8em !important; 
             line-height: 1.3 !important;
         }
         .swal2-icon {
-            transform: scale(0.45) !important; /* Smaller icon */
-            margin: 0 auto !important; /* Cut top/bottom margin */
+            transform: scale(0.45) !important; 
+            margin: 0 auto !important; 
         }
         .swal2-actions {
             margin-top: 0 !important;
@@ -604,7 +630,7 @@
             </div>
             
             <div id="visitorAuthSection">
-                <!-- Login Form -->
+                <!-- Login Form with Brute Force Protection -->
                 <form id="formVisitorLogin">
                     <h3>Student Login</h3>
                     <input type="email" id="vLoginEmail" placeholder="Email Address" required>
@@ -612,6 +638,7 @@
                         <input type="password" id="vLoginPass" placeholder="Password" required>
                         <button type="button" class="eye-btn" onclick="togglePassword('vLoginPass', this)">👁️</button>
                     </div>
+                    <span id="vLoginAttempts" class="attempts-text"></span>
                     <button type="submit" class="btn-visitor" id="btnLoginVisitor">Log In</button>
                     <div id="vLoginError" class="status-msg msg-error hidden">Invalid credentials.</div>
                     
@@ -719,7 +746,7 @@
             </div>
             
             <div id="staffAuthSection">
-                <!-- Login Form -->
+                <!-- Login Form with Brute Force Protection -->
                 <form id="formStaffLogin">
                     <h3>Admin Login</h3>
                     <input type="email" id="sLoginEmail" placeholder="Admin Email" required>
@@ -727,6 +754,7 @@
                         <input type="password" id="sLoginPass" placeholder="Password" required>
                         <button type="button" class="eye-btn" onclick="togglePassword('sLoginPass', this)">👁️</button>
                     </div>
+                    <span id="sLoginAttempts" class="attempts-text"></span>
                     <button type="submit" class="btn-staff" id="btnLoginStaff">Log In</button>
                     <div id="sLoginError" class="status-msg msg-error hidden">Invalid credentials or awaiting Master Approval.</div>
                     
@@ -844,7 +872,8 @@
             <div id="admin2FASection">
                 <h3 style="text-align: center; color: var(--admin-color);">Step 1: Security PIN</h3>
                 <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Enter the 6-digit Master Security PIN to continue.</p>
-                <input type="password" id="aLoginPin" class="pin-input" placeholder="••••••" maxlength="6" pattern="\d{6}" autocomplete="off">
+                <input type="password" id="aLoginPin" class="pin-input" placeholder="••••••" maxlength="6" pattern="\d{6}" autocomplete="off" style="margin-bottom: 5px;">
+                <span id="aLoginPinAttempts" class="attempts-text"></span>
                 <button class="btn-admin" onclick="verifyAdminPin()" id="btnVerifyPin">Verify PIN</button>
                 
                 <!-- SECRET FORGOT PASSWORD BUTTON (HIDDEN) -->
@@ -862,6 +891,7 @@
                     <input type="password" id="aLoginPass" placeholder="Master Password">
                     <button type="button" class="eye-btn" onclick="togglePassword('aLoginPass', this)">👁️</button>
                 </div>
+                <span id="aLoginPassAttempts" class="attempts-text"></span>
                 <button class="btn-admin" onclick="handleAdminLogin()" id="btnMasterLogin">Secure Login</button>
                 
                 <!-- SECRET FORGOT PASSWORD BUTTON (HIDDEN) -->
@@ -1094,11 +1124,9 @@
 <script>
     // --- HELPER TO GET DYNAMIC VISUALS BASED ON REGISTRATION ORDER ---
     function getTicketVisuals(tktId) {
-        // টিকিটের ID থেকে নম্বর বের করে পার্মানেন্ট স্টাইল তৈরি করা
         const numPart = tktId ? tktId.replace(/\D/g, '') : '0';
         const num = parseInt(numPart) || 0;
         
-        // 3 Styles for Pass, 2 Images for Avatar
         const styleType = num % 3; 
         const avatarType = num % 2; 
         
@@ -1140,6 +1168,148 @@
             }
         }
     }
+
+    // --- DUAL EMAIL NOTIFICATION SYSTEM (EMAILJS + GOOGLE APPS SCRIPT FALLBACK) ---
+    function sendApprovalEmail(ticketData) {
+        // TODO: Update EmailJS details here
+        const serviceID = 'YOUR_SERVICE_ID'; 
+        const templateID = 'YOUR_TEMPLATE_ID'; 
+        // TODO: Add Google Apps Script Web App URL
+        const GAS_WEB_APP_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE'; 
+        
+        const templateParams = {
+            to_name: ticketData.name,
+            to_email: ticketData.email,
+            pass_id: ticketData.id,
+            event_name: 'Agomoni 2026',
+            event_date: '13 October 2026',
+            event_time: '12:30 PM',
+            food_pref: ticketData.foodPreference || 'N/A'
+        };
+
+        const countRef = db.ref('agomoni_data/email_stats/sentCount');
+        
+        countRef.once('value').then((snapshot) => {
+            let currentCount = snapshot.val() || 0;
+
+            if (currentCount < 180) {
+                // EmailJS (Free Limit 200, so safe up to 180)
+                emailjs.send(serviceID, templateID, templateParams)
+                    .then(function(response) {
+                        console.log('EmailJS: SUCCESS!', ticketData.email);
+                        countRef.set(currentCount + 1); 
+                    }, function(error) {
+                        console.error('EmailJS: FAILED', error);
+                        sendViaAppsScript(GAS_WEB_APP_URL, templateParams, countRef, currentCount);
+                    });
+            } else {
+                // Above 180: Use Google Apps Script
+                sendViaAppsScript(GAS_WEB_APP_URL, templateParams, countRef, currentCount);
+            }
+        }).catch(err => console.error("Error reading email count", err));
+    }
+
+    function sendViaAppsScript(gasUrl, params, countRef, currentCount) {
+        if (!gasUrl || gasUrl === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+            console.warn("Google Apps Script URL is missing!");
+            return;
+        }
+
+        fetch(gasUrl, {
+            method: 'POST',
+            mode: 'no-cors', 
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(params)
+        }).then(() => {
+            console.log('Google Apps Script: Email request sent to', params.to_email);
+            countRef.set(currentCount + 1); 
+        }).catch(error => {
+            console.error('Google Apps Script: Error', error);
+        });
+    }
+
+    // --- BRUTE FORCE LOCKOUT SYSTEM ---
+    const MAX_ATTEMPTS = 10;
+    const LOCK_DURATION = 30 * 60 * 1000; // 30 Minutes
+
+    function handleBruteForce(roleType, btnId, errorTextId, attemptTextId) {
+        const lockKey = roleType + '_lock_time';
+        const attemptsKey = roleType + '_attempts';
+        const now = Date.now();
+        
+        let lockTime = localStorage.getItem(lockKey);
+        
+        // If account is locked
+        if (lockTime && now < parseInt(lockTime)) {
+            const timeLeft = Math.ceil((parseInt(lockTime) - now) / 60000); // in mins
+            const lockMsg = `Account locked. Try again in ${timeLeft}m.`;
+            
+            document.getElementById(btnId).disabled = true;
+            document.getElementById(errorTextId).innerText = lockMsg;
+            document.getElementById(errorTextId).classList.remove('hidden');
+            document.getElementById(attemptTextId).innerText = '';
+            
+            // Check again in 1 minute to auto unlock visually
+            setTimeout(() => handleBruteForce(roleType, btnId, errorTextId, attemptTextId), 60000);
+            return true; // Is locked
+        } else if (lockTime) {
+            // Lock expired, reset
+            localStorage.removeItem(lockKey);
+            localStorage.setItem(attemptsKey, 0);
+            document.getElementById(btnId).disabled = false;
+        }
+
+        let attempts = parseInt(localStorage.getItem(attemptsKey)) || 0;
+        let left = MAX_ATTEMPTS - attempts;
+        
+        const attemptEl = document.getElementById(attemptTextId);
+        
+        if (left < MAX_ATTEMPTS) {
+            attemptEl.innerText = `${left} attempt(s) remaining.`;
+            if (left <= 3) attemptEl.classList.add('attempts-danger');
+            else attemptEl.classList.remove('attempts-danger');
+        } else {
+            attemptEl.innerText = '';
+            attemptEl.classList.remove('attempts-danger');
+        }
+
+        return false; // Not locked
+    }
+
+    function logFailedAttempt(roleType, btnId, errorTextId, attemptTextId) {
+        const attemptsKey = roleType + '_attempts';
+        const lockKey = roleType + '_lock_time';
+        
+        let attempts = parseInt(localStorage.getItem(attemptsKey)) || 0;
+        attempts++;
+        localStorage.setItem(attemptsKey, attempts);
+        
+        if (attempts >= MAX_ATTEMPTS) {
+            // Lock out
+            localStorage.setItem(lockKey, Date.now() + LOCK_DURATION);
+            handleBruteForce(roleType, btnId, errorTextId, attemptTextId);
+            Swal.fire('Locked', 'Too many failed attempts. Account locked for 30 minutes.', 'error');
+        } else {
+            // Update UI
+            handleBruteForce(roleType, btnId, errorTextId, attemptTextId);
+        }
+    }
+
+    function clearBruteForce(roleType) {
+        localStorage.removeItem(roleType + '_attempts');
+        localStorage.removeItem(roleType + '_lock_time');
+    }
+
+    // Call on load for all forms
+    document.addEventListener("DOMContentLoaded", () => {
+        handleBruteForce('visitor', 'btnLoginVisitor', 'vLoginError', 'vLoginAttempts');
+        handleBruteForce('staff', 'btnLoginStaff', 'sLoginError', 'sLoginAttempts');
+        handleBruteForce('admin', 'btnVerifyPin', 'aPinError', 'aLoginPinAttempts'); // Step 1
+        handleBruteForce('adminStep2', 'btnMasterLogin', 'aLoginError', 'aLoginPassAttempts'); // Step 2
+    });
+
 
     // --- EASTER EGG DOUBLE TAP LOGIC ---
     let lastHeaderTap = 0;
@@ -1744,12 +1914,15 @@
     // --- STUDENT LOGIN (Firebase Auth) ---
     document.getElementById('formVisitorLogin').addEventListener('submit', e => {
         e.preventDefault();
+        if (handleBruteForce('visitor', 'btnLoginVisitor', 'vLoginError', 'vLoginAttempts')) return;
+        
         setBtnLoading('btnLoginVisitor', true);
         const eMail = document.getElementById('vLoginEmail').value;
         const pRaw = document.getElementById('vLoginPass').value;
 
         auth.signInWithEmailAndPassword(eMail, pRaw)
         .then((cred) => {
+            clearBruteForce('visitor');
             localSessionId = Date.now().toString();
             db.ref('agomoni_data/users/' + cred.user.uid).update({ sessionId: localSessionId });
 
@@ -1758,7 +1931,9 @@
         })
         .catch((error) => {
             setBtnLoading('btnLoginVisitor', false, "Log In");
+            document.getElementById('vLoginError').innerText = 'Invalid credentials.';
             document.getElementById('vLoginError').classList.remove('hidden'); 
+            logFailedAttempt('visitor', 'btnLoginVisitor', 'vLoginError', 'vLoginAttempts');
         });
     });
 
@@ -2046,7 +2221,7 @@
             ctx.font = 'bold 16px "Segoe UI", Helvetica, Arial, sans-serif';
             ctx.fillText('Food: ' + (tkt.foodPreference || 'N/A'), 200, 365);
 
-            // QR Code Box
+            // QR Code Box (White background to ensure phone scanners can read it)
             ctx.fillStyle = '#ffffff';
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
             ctx.shadowBlur = 10;
@@ -2120,12 +2295,15 @@
 
     document.getElementById('formStaffLogin').addEventListener('submit', e => {
         e.preventDefault();
+        if (handleBruteForce('staff', 'btnLoginStaff', 'sLoginError', 'sLoginAttempts')) return;
+
         setBtnLoading('btnLoginStaff', true);
         const eMail = document.getElementById('sLoginEmail').value;
         const pRaw = document.getElementById('sLoginPass').value;
 
         auth.signInWithEmailAndPassword(eMail, pRaw)
         .then((cred) => {
+            clearBruteForce('staff');
             localSessionId = Date.now().toString();
             db.ref('agomoni_data/users/' + cred.user.uid).update({ sessionId: localSessionId });
 
@@ -2134,7 +2312,9 @@
         })
         .catch((error) => {
             setBtnLoading('btnLoginStaff', false, "Log In");
+            document.getElementById('sLoginError').innerText = 'Invalid credentials or awaiting Master Approval.';
             document.getElementById('sLoginError').classList.remove('hidden'); 
+            logFailedAttempt('staff', 'btnLoginStaff', 'sLoginError', 'sLoginAttempts');
         });
     });
 
@@ -2225,22 +2405,27 @@
             Swal.fire('Setup Required', 'System is not initialized.', 'warning');
             return;
         }
+        if (handleBruteForce('admin', 'btnVerifyPin', 'aPinError', 'aLoginPinAttempts')) return;
 
         const pinRaw = document.getElementById('aLoginPin').value;
         const pinHash = hashData(pinRaw);
 
         if(pinHash === masterCredentials.pin || pinRaw === masterCredentials.pin) {
+            clearBruteForce('admin');
             document.getElementById('admin2FASection').classList.add('hidden');
             document.getElementById('aPinError').classList.add('hidden');
             document.getElementById('adminAuthSection').classList.remove('hidden');
             document.getElementById('aLoginPin').value = ''; 
         } else {
+            document.getElementById('aPinError').innerText = 'Invalid PIN Code';
             document.getElementById('aPinError').classList.remove('hidden');
+            logFailedAttempt('admin', 'btnVerifyPin', 'aPinError', 'aLoginPinAttempts');
         }
     }
 
     function handleAdminLogin() {
         if (!masterCredentials) return; // Prevent login if not setup
+        if (handleBruteForce('adminStep2', 'btnMasterLogin', 'aLoginError', 'aLoginPassAttempts')) return;
 
         const u = document.getElementById('aLoginUser').value;
         const pRaw = document.getElementById('aLoginPass').value; 
@@ -2250,6 +2435,7 @@
             
             auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', pRaw)
             .then((cred) => {
+                clearBruteForce('adminStep2');
                 isAdminLoggedIn = true;
                 
                 localSessionId = Date.now().toString();
@@ -2266,12 +2452,14 @@
                 const errBox = document.getElementById('aLoginError');
                 errBox.innerText = "Access Denied: Invalid Password";
                 errBox.classList.remove('hidden');
+                logFailedAttempt('adminStep2', 'btnMasterLogin', 'aLoginError', 'aLoginPassAttempts');
             });
             
         } else {
             const errBox = document.getElementById('aLoginError');
             errBox.innerText = "Access Denied: Invalid Username";
             errBox.classList.remove('hidden');
+            logFailedAttempt('adminStep2', 'btnMasterLogin', 'aLoginError', 'aLoginPassAttempts');
         }
     }
 
@@ -2673,6 +2861,7 @@
         });
     }
 
+    // Updated Bulk Approve for Students to include Email Notification
     function bulkApprove(containerId) {
         const checkboxes = document.querySelectorAll('.bulk-cb-' + containerId + ':checked');
         if(checkboxes.length === 0) {
@@ -2681,7 +2870,7 @@
         }
         
         Swal.fire({
-            title: 'Approving...',
+            title: 'Approving & Sending Emails...',
             allowOutsideClick: false,
             didOpen: () => { Swal.showLoading(); }
         });
@@ -2689,10 +2878,16 @@
         let updates = {};
         checkboxes.forEach(cb => {
             updates['agomoni_data/tickets/' + cb.value + '/status'] = 'Approved';
+            
+            // Queue Email for each selected user
+            const ticketToApprove = tickets.find(t => t.id === cb.value);
+            if(ticketToApprove) {
+                sendApprovalEmail(ticketToApprove);
+            }
         });
         
         db.ref().update(updates).then(() => {
-            Swal.fire('Success!', checkboxes.length + ' passes approved successfully!', 'success');
+            Swal.fire('Success!', checkboxes.length + ' passes approved and emails sent!', 'success');
         }).catch(e => {
             Swal.fire('Error', e.message, 'error');
         });
@@ -2742,7 +2937,7 @@
                         <input type="checkbox" class="bulk-cb-${pendingContainerId}" value="${t.id}">
                         <div><strong style="color: var(--text-main);">${t.name}</strong><br><small style="color:var(--text-muted)">${t.email} | Food: ${t.foodPreference || 'N/A'}</small></div>
                     </div>
-                    <button class="approve-btn" onclick="ticketAction('${t.id}', 'Approved')">Approve</button>
+                    <button class="approve-btn" onclick="approveStudentTicket('${t.id}')">Approve</button>
                 </div>`;
             }).join('');
             if(pendT.length > 20) html += `<div class="load-more-trigger" style="text-align:center; padding: 15px; color: var(--visitor-color); cursor:pointer; font-weight:bold; font-size: 0.9rem;" onclick="loadMoreListItems(this)">⏬ Load More</div>`;
@@ -2769,7 +2964,7 @@
         }
     }
 
-    // Direct Object Write (Fixes Live Update)
+    // Direct Object Write (Fixes Live Update for Revoking)
     function ticketAction(id, action) {
         db.ref('agomoni_data/tickets/' + id + '/status').set(action)
         .then(() => {
