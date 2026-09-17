@@ -8,7 +8,8 @@
     <!-- PWA Setup: Inline Manifest & Theme Color -->
     <meta name="theme-color" content="#fffbf0">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/10435/10435193.png">
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiSUlBIFRlYWNoZXJzIERheSAySzI2Iiwic2hvcnRfbmFtZSI6IklJQSBGZXN0Iiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmOGZhZmMiLCJ0aGVtZV9jb2xvciI6IiMwZjE3MmEiLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMTA0MzUvMTA0MzUxOTMucG5nIiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsic3JjIjoiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMTA0MzUvMTA0MzUxOTMucG5nIiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3BuZyJ9XX0=">
+    <!-- Updated Manifest: Now explicitly names the App "MMCC Agomoni 2026" instead of IIA -->
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiTU1DQyBBZ29tb25pIDIwMjYiLCJzaG9ydF9uYW1lIjoiQWdvbW9uaSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjZmZmYmYwIiwidGhlbWVfY29sb3ciOiIjOTkxYjFiIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzEwNDM1LzEwNDM1MTkzLnBuZyIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9wbmcifSx7InNyYyI6Imh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzEwNDM1LzEwNDM1MTkzLnBuZyIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9wbmcifV19">
 
     <!-- Beautiful Bengali Web Fonts for Agomoni -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1037,9 +1038,9 @@
             
             let updates = {};
             offlineScans.forEach(scan => {
-                updates['iia_fest_data/tickets/' + scan.id + '/status'] = 'Used';
-                updates['iia_fest_data/tickets/' + scan.id + '/scannedBy'] = scan.scannedBy;
-                updates['iia_fest_data/tickets/' + scan.id + '/scanTime'] = scan.scanTime;
+                updates['agomoni_data/tickets/' + scan.id + '/status'] = 'Used';
+                updates['agomoni_data/tickets/' + scan.id + '/scannedBy'] = scan.scannedBy;
+                updates['agomoni_data/tickets/' + scan.id + '/scanTime'] = scan.scanTime;
             });
             
             db.ref().update(updates).then(() => {
@@ -1128,7 +1129,7 @@
     }
 
     // ==========================================
-    // 1. FIREBASE CLOUD DATABASE CONFIGURATION (UPDATED)
+    // 1. FIREBASE CLOUD DATABASE CONFIGURATION
     // ==========================================
     const firebaseConfig = {
       apiKey: "AIzaSyAW1BpFZ8WusY2bq96we9fR-dgvtDLhvkY",
@@ -1165,7 +1166,7 @@
     let isAdminLoggedIn = false;
 
     // Fetch Master Credentials safely without hardcoding
-    db.ref('iia_fest_data/masterCredentials').on('value', (snapshot) => {
+    db.ref('agomoni_data/masterCredentials').on('value', (snapshot) => {
         if(snapshot.val()) {
             const data = snapshot.val();
             if(isAdminLoggedIn && data.sessionId && data.sessionId !== localSessionId) {
@@ -1187,7 +1188,7 @@
     // Firebase Auth State Observer
     auth.onAuthStateChanged((user) => {
         if (user) {
-            db.ref('iia_fest_data/users/' + user.uid).on('value', (snapshot) => {
+            db.ref('agomoni_data/users/' + user.uid).on('value', (snapshot) => {
                 const userData = snapshot.val();
                 if(userData) {
                     if (userData.sessionId && localSessionId && userData.sessionId !== localSessionId) {
@@ -1268,7 +1269,7 @@
     });
 
     function loadTickets() {
-        db.ref('iia_fest_data/tickets').on('value', (snapshot) => {
+        db.ref('agomoni_data/tickets').on('value', (snapshot) => {
             const data = snapshot.val();
             tickets = data ? Object.values(data) : [];
             if(currentVisitor) updateVisitorUI();
@@ -1276,13 +1277,13 @@
     }
 
     function loadAllTicketsAndUsers() {
-        db.ref('iia_fest_data/tickets').on('value', (snapshot) => {
+        db.ref('agomoni_data/tickets').on('value', (snapshot) => {
             const data = snapshot.val();
             tickets = data ? Object.values(data) : [];
             if(currentStaff) updateStaffUI();
             if(isAdminLoggedIn) updateAdminUI();
         });
-        db.ref('iia_fest_data/users').on('value', (snapshot) => {
+        db.ref('agomoni_data/users').on('value', (snapshot) => {
             const allUsers = snapshot.val() || {};
             visitors = []; staffMembers = [];
             for (let uid in allUsers) {
@@ -1564,7 +1565,7 @@
         auth.createUserWithEmailAndPassword(eMail, pRaw)
         .then((userCredential) => {
             const uid = userCredential.user.uid;
-            db.ref('iia_fest_data/users/' + uid).set({ name: n, email: eMail, role: 'visitor' });
+            db.ref('agomoni_data/users/' + uid).set({ name: n, email: eMail, role: 'visitor' });
             e.target.reset();
             setBtnLoading('btnSignupVisitor', false, "Sign Up");
         })
@@ -1585,7 +1586,7 @@
         auth.signInWithEmailAndPassword(eMail, pRaw)
         .then((cred) => {
             localSessionId = Date.now().toString();
-            db.ref('iia_fest_data/users/' + cred.user.uid).update({ sessionId: localSessionId });
+            db.ref('agomoni_data/users/' + cred.user.uid).update({ sessionId: localSessionId });
 
             e.target.reset(); 
             setBtnLoading('btnLoginVisitor', false, "Log In");
@@ -1692,7 +1693,7 @@
         err.classList.add('hidden');
 
         const newId = 'MMCC26-' + Math.floor(Math.random() * 90000 + 10000);
-        db.ref('iia_fest_data/tickets/' + newId).set({
+        db.ref('agomoni_data/tickets/' + newId).set({
             id: newId, 
             email: currentVisitor.email, 
             name: currentVisitor.name, 
@@ -1797,7 +1798,7 @@
         auth.createUserWithEmailAndPassword(eMail, pRaw)
         .then((userCredential) => {
             const uid = userCredential.user.uid;
-            db.ref('iia_fest_data/users/' + uid).set({
+            db.ref('agomoni_data/users/' + uid).set({
                 name: n,
                 email: eMail,
                 role: 'staff',
@@ -1826,7 +1827,7 @@
         auth.signInWithEmailAndPassword(eMail, pRaw)
         .then((cred) => {
             localSessionId = Date.now().toString();
-            db.ref('iia_fest_data/users/' + cred.user.uid).update({ sessionId: localSessionId });
+            db.ref('agomoni_data/users/' + cred.user.uid).update({ sessionId: localSessionId });
 
             e.target.reset();
             setBtnLoading('btnLoginStaff', false, "Log In");
@@ -1954,7 +1955,7 @@
                 isAdminLoggedIn = true;
                 
                 localSessionId = Date.now().toString();
-                db.ref('iia_fest_data/masterCredentials/sessionId').set(localSessionId);
+                db.ref('agomoni_data/masterCredentials/sessionId').set(localSessionId);
 
                 loadAllTicketsAndUsers(); 
                 document.getElementById('adminAuthSection').classList.add('hidden');
@@ -2063,7 +2064,7 @@
         const user = auth.currentUser;
         if (user) {
             user.updatePassword(newPassRaw).then(() => {
-                db.ref('iia_fest_data/masterCredentials').set(newCreds)
+                db.ref('agomoni_data/masterCredentials').set(newCreds)
                 .then(() => {
                     setBtnLoading('btnSaveMasterCreds', false, "Save Credentials");
                     Swal.fire('Saved!', 'Master Admin credentials configured and securely encrypted successfully!', 'success');
@@ -2136,7 +2137,7 @@
 
     function saveCredsToDB(successMsg, btnId, defaultText) {
         document.getElementById('cCredsError').classList.add('hidden');
-        db.ref('iia_fest_data/masterCredentials').set(masterCredentials)
+        db.ref('agomoni_data/masterCredentials').set(masterCredentials)
         .then(() => {
             if(btnId) setBtnLoading(btnId, false, defaultText);
             const suc = document.getElementById('cCredsSuccess');
@@ -2322,7 +2323,7 @@
     }
 
     function approveAdmin(uid) {
-        db.ref('iia_fest_data/users/' + uid + '/status').set('Approved')
+        db.ref('agomoni_data/users/' + uid + '/status').set('Approved')
         .then(() => {
             Swal.fire({
                 title: 'Admin Approved!',
@@ -2345,7 +2346,7 @@
             confirmButtonColor: '#ef4444',
         }).then((result) => {
             if (result.value === "yes") {
-                db.ref('iia_fest_data/users/' + uid).remove().then(() => Swal.fire('Deleted!', 'Admin deleted successfully.', 'success'));
+                db.ref('agomoni_data/users/' + uid).remove().then(() => Swal.fire('Deleted!', 'Admin deleted successfully.', 'success'));
             }
         });
     }
@@ -2359,7 +2360,7 @@
             confirmButtonColor: '#ef4444',
         }).then((result) => {
             if (result.value === "yes") {
-                db.ref('iia_fest_data/tickets/' + id).remove().then(() => Swal.fire('Deleted!', 'Record deleted successfully.', 'success'));
+                db.ref('agomoni_data/tickets/' + id).remove().then(() => Swal.fire('Deleted!', 'Record deleted successfully.', 'success'));
             }
         });
     }
@@ -2389,7 +2390,7 @@
         
         let updates = {};
         checkboxes.forEach(cb => {
-            updates['iia_fest_data/tickets/' + cb.value + '/status'] = 'Approved';
+            updates['agomoni_data/tickets/' + cb.value + '/status'] = 'Approved';
         });
         
         db.ref().update(updates).then(() => {
@@ -2414,7 +2415,7 @@
         
         let updates = {};
         checkboxes.forEach(cb => {
-            updates['iia_fest_data/users/' + cb.value + '/status'] = 'Approved';
+            updates['agomoni_data/users/' + cb.value + '/status'] = 'Approved';
         });
         
         db.ref().update(updates).then(() => {
@@ -2472,7 +2473,7 @@
 
     // Direct Object Write (Fixes Live Update)
     function ticketAction(id, action) {
-        db.ref('iia_fest_data/tickets/' + id + '/status').set(action)
+        db.ref('agomoni_data/tickets/' + id + '/status').set(action)
         .then(() => {
             Swal.fire({
                 title: 'Success!',
@@ -2576,7 +2577,7 @@
             const timestamp = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
             
             if (navigator.onLine) {
-                db.ref('iia_fest_data/tickets/' + t.id).update({ status: 'Used', scannedBy: scannedBy, scanTime: timestamp })
+                db.ref('agomoni_data/tickets/' + t.id).update({ status: 'Used', scannedBy: scannedBy, scanTime: timestamp })
                 .then(() => {
                     res.innerHTML = `✅ VERIFIED<br><small>Entry granted for: ${t.name}</small>`; 
                     res.classList.add('msg-success');
