@@ -8,7 +8,6 @@
     <!-- PWA Setup: Inline Manifest & Theme Color -->
     <meta name="theme-color" content="#fffbf0">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/10435/10435193.png">
-    <!-- Updated Manifest: Now explicitly names the App "MMCC Agomoni 2026" instead of IIA -->
     <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiTU1DQyBBZ29tb25pIDIwMjYiLCJzaG9ydF9uYW1lIjoiQWdvbW9uaSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3ciOiIjZmZmYmYwIiwidGhlbWVfY29sb3ciOiIjOTkxYjFiIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzEwNDM1LzEwNDM1MTkzLnBuZyIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9wbmcifSx7InNyYyI6Imh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzEwNDM1LzEwNDM1MTkzLnBuZyIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9wbmcifV19">
 
     <!-- Beautiful Bengali Web Fonts for Agomoni -->
@@ -38,13 +37,13 @@
            1. CORE VARIABLES & THEMES (GOLDEN RED TONES)
            ========================================= */
         :root {
-            --bg-color: #fffbf0; /* Warm golden white */
+            --bg-color: #fffbf0; 
             --card-bg: rgba(255, 255, 255, 0.95);
-            --text-main: #450a0a; /* Deep red-black */
+            --text-main: #450a0a; 
             --text-muted: #78350f;
-            --visitor-color: #dc2626; /* Festive Red */
-            --staff-color: #d97706;   /* Golden Amber */
-            --admin-color: #991b1b;   /* Deep Crimson */
+            --visitor-color: #dc2626; 
+            --staff-color: #d97706;   
+            --admin-color: #991b1b;   
             --success: #16a34a;
             --danger: #ef4444;
             --border-color: #fcd34d;
@@ -53,13 +52,13 @@
         }
 
         body.dark-mode {
-            --bg-color: #1a0505; /* Extremely dark red/black */
-            --card-bg: rgba(40, 10, 10, 0.85); /* Translucent dark crimson */
+            --bg-color: #1a0505; 
+            --card-bg: rgba(40, 10, 10, 0.85); 
             --text-main: #fef3c7;
             --text-muted: #fcd34d;
-            --visitor-color: #ff0055; /* Neon Crimson */
-            --staff-color: #ffea00;   /* Neon Gold */
-            --admin-color: #ff6600;   /* Neon Orange */
+            --visitor-color: #ff0055; 
+            --staff-color: #ffea00;   
+            --admin-color: #ff6600;   
             --border-color: #7f1d1d;
             --input-bg: #450a0a;
             --input-border: #7f1d1d;
@@ -102,16 +101,23 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         /* =========================================
-           3. DYNAMIC BACKGROUND: DURGA ASHTRAS + CRACKERS + LIGHTS
+           3. DYNAMIC BACKGROUND & CHAKRA (RANGOLI/MANDALA)
            ========================================= */
+        
+        /* Sparkles Base */
         body::before {
-            content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1;
-            /* Combined Light Mode SVG */
-            background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3C!-- FESTIVE LIGHTS & CRACKERS --%3E%3Cg fill='none' stroke-width='2' stroke-linecap='round' opacity='0.3'%3E%3Cpath d='M300 280 L300 240 M300 320 L300 360 M280 300 L240 300 M320 300 L360 300 M285 285 L260 260 M315 315 L340 340 M285 315 L260 340 M315 285 L340 260' stroke='%23ef4444'/%3E%3Cpath d='M80 180 L80 160 M80 200 L80 220 M70 190 L50 190 M90 190 L110 190 M73 183 L60 170 M87 197 L100 210 M73 197 L60 210 M87 183 L100 170' stroke='%23f59e0b'/%3E%3Cpath d='M0 30 Q 100 80 200 30 T 400 30' stroke='%23b45309' stroke-dasharray='5 5'/%3E%3Ccircle cx='50' cy='43' r='4' fill='%23ef4444' stroke='none'/%3E%3Ccircle cx='100' cy='55' r='4' fill='%23f59e0b' stroke='none'/%3E%3Ccircle cx='150' cy='43' r='4' fill='%23dc2626' stroke='none'/%3E%3Ccircle cx='250' cy='43' r='4' fill='%23f59e0b' stroke='none'/%3E%3Ccircle cx='300' cy='55' r='4' fill='%23ef4444' stroke='none'/%3E%3Ccircle cx='350' cy='43' r='4' fill='%23dc2626' stroke='none'/%3E%3C/g%3E%3C!-- DURGA ELEMENTS CENTERED --%3E%3Cg transform='translate(50, 50)' fill='none' stroke='%23d97706' stroke-width='2' stroke-opacity='0.4'%3E%3Ccircle cx='150' cy='150' r='100' stroke-dasharray='10 10' /%3E%3Ccircle cx='150' cy='150' r='110' stroke-dasharray='2 6' /%3E%3Cpath d='M150 200 Q180 240 150 280 Q120 240 150 200 Z' /%3E%3Cpath d='M150 220 Q190 230 200 260 Q170 260 150 280' /%3E%3Cpath d='M150 220 Q110 230 100 260 Q130 260 150 280' /%3E%3Cpath d='M150 100 L150 20 M120 90 Q120 40 90 30 M180 90 Q180 40 210 30' /%3E%3Cpath d='M140 30 L160 30 L150 10 Z' /%3E%3Cpath d='M40 150 Q70 120 60 180 Q30 190 40 150 Z' /%3E%3Cpath d='M45 155 Q55 145 55 170' /%3E%3Ccircle cx='260' cy='140' r='15' /%3E%3Cline x1='260' y1='155' x2='260' y2='210' /%3E%3Cline x1='245' y1='140' x2='275' y2='140' /%3E%3Cline x1='260' y1='125' x2='260' y2='155' /%3E%3Cpath d='M90 145 Q120 135 140 155 Q120 165 90 145 Z' /%3E%3Ccircle cx='115' cy='150' r='4' fill='%23d97706' /%3E%3Cpath d='M210 145 Q180 135 160 155 Q180 165 210 145 Z' /%3E%3Ccircle cx='185' cy='150' r='4' fill='%23d97706' /%3E%3Cpath d='M150 100 Q140 115 150 135 Q160 115 150 100 Z' stroke='%23ef4444'/%3E%3Ccircle cx='150' cy='122' r='6' fill='%23ef4444' stroke='none' fill-opacity='0.8' /%3E%3C/g%3E%3C/svg%3E");
+            content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -3;
+            background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3C!-- FESTIVE LIGHTS & CRACKERS --%3E%3Cg fill='none' stroke-width='2' stroke-linecap='round' opacity='0.3'%3E%3Cpath d='M300 280 L300 240 M300 320 L300 360 M280 300 L240 300 M320 300 L360 300 M285 285 L260 260 M315 315 L340 340 M285 315 L260 340 M315 285 L340 260' stroke='%23ef4444'/%3E%3Cpath d='M80 180 L80 160 M80 200 L80 220 M70 190 L50 190 M90 190 L110 190 M73 183 L60 170 M87 197 L100 210 M73 197 L60 210 M87 183 L100 170' stroke='%23f59e0b'/%3E%3Cpath d='M0 30 Q 100 80 200 30 T 400 30' stroke='%23b45309' stroke-dasharray='5 5'/%3E%3Ccircle cx='50' cy='43' r='4' fill='%23ef4444' stroke='none'/%3E%3Ccircle cx='100' cy='55' r='4' fill='%23f59e0b' stroke='none'/%3E%3Ccircle cx='150' cy='43' r='4' fill='%23dc2626' stroke='none'/%3E%3Ccircle cx='250' cy='43' r='4' fill='%23f59e0b' stroke='none'/%3E%3Ccircle cx='300' cy='55' r='4' fill='%23ef4444' stroke='none'/%3E%3Ccircle cx='350' cy='43' r='4' fill='%23dc2626' stroke='none'/%3E%3C/g%3E%3C/svg%3E");
             background-size: 400px 400px; 
             background-position: center center;
             opacity: 0.6; 
             animation: festivalSparkle 12s ease-in-out infinite alternate;
+        }
+
+        body.dark-mode::before {
+            background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='3' result='coloredBlur'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C!-- FESTIVE LIGHTS & CRACKERS --%3E%3Cg filter='url(%23glow)' fill='none' stroke-width='2.5' stroke-linecap='round' opacity='0.7'%3E%3Cpath d='M300 280 L300 240 M300 320 L300 360 M280 300 L240 300 M320 300 L360 300 M285 285 L260 260 M315 315 L340 340 M285 315 L260 340 M315 285 L340 260' stroke='%23ff0055'/%3E%3Cpath d='M80 180 L80 160 M80 200 L80 220 M70 190 L50 190 M90 190 L110 190 M73 183 L60 170 M87 197 L100 210 M73 197 L60 210 M87 183 L100 170' stroke='%23ffaa00'/%3E%3Cpath d='M0 30 Q 100 80 200 30 T 400 30' stroke='%237f1d1d' stroke-dasharray='4 8'/%3E%3Ccircle cx='50' cy='43' r='4' fill='%23ff0055' stroke='none'/%3E%3Ccircle cx='100' cy='55' r='4' fill='%23ffea00' stroke='none'/%3E%3Ccircle cx='150' cy='43' r='4' fill='%23ffaa00' stroke='none'/%3E%3Ccircle cx='250' cy='43' r='4' fill='%23ffea00' stroke='none'/%3E%3Ccircle cx='300' cy='55' r='4' fill='%23ff0055' stroke='none'/%3E%3Ccircle cx='350' cy='43' r='4' fill='%23ffaa00' stroke='none'/%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.45;
+            animation: festivalSparkleDark 10s ease-in-out infinite alternate;
         }
 
         @keyframes festivalSparkle {
@@ -120,16 +126,81 @@
             100% { transform: scale(1) translateY(0); opacity: 0.4; }
         }
 
-        body.dark-mode::before {
-            /* Combined Neon Dark Mode SVG */
-            background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='3' result='coloredBlur'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C!-- FESTIVE LIGHTS & CRACKERS --%3E%3Cg filter='url(%23glow)' fill='none' stroke-width='2.5' stroke-linecap='round' opacity='0.7'%3E%3Cpath d='M300 280 L300 240 M300 320 L300 360 M280 300 L240 300 M320 300 L360 300 M285 285 L260 260 M315 315 L340 340 M285 315 L260 340 M315 285 L340 260' stroke='%23ff0055'/%3E%3Cpath d='M80 180 L80 160 M80 200 L80 220 M70 190 L50 190 M90 190 L110 190 M73 183 L60 170 M87 197 L100 210 M73 197 L60 210 M87 183 L100 170' stroke='%23ffaa00'/%3E%3Cpath d='M0 30 Q 100 80 200 30 T 400 30' stroke='%237f1d1d' stroke-dasharray='4 8'/%3E%3Ccircle cx='50' cy='43' r='4' fill='%23ff0055' stroke='none'/%3E%3Ccircle cx='100' cy='55' r='4' fill='%23ffea00' stroke='none'/%3E%3Ccircle cx='150' cy='43' r='4' fill='%23ffaa00' stroke='none'/%3E%3Ccircle cx='250' cy='43' r='4' fill='%23ffea00' stroke='none'/%3E%3Ccircle cx='300' cy='55' r='4' fill='%23ff0055' stroke='none'/%3E%3Ccircle cx='350' cy='43' r='4' fill='%23ffaa00' stroke='none'/%3E%3C/g%3E%3C!-- DURGA ELEMENTS CENTERED --%3E%3Cg filter='url(%23glow)' transform='translate(50, 50)' fill='none' stroke='%23ffd700' stroke-width='2' stroke-opacity='0.8'%3E%3Ccircle cx='150' cy='150' r='100' stroke-dasharray='10 10' /%3E%3Ccircle cx='150' cy='150' r='110' stroke-dasharray='2 6' /%3E%3Cpath d='M150 200 Q180 240 150 280 Q120 240 150 200 Z' fill='%23ffd700' fill-opacity='0.05' /%3E%3Cpath d='M150 220 Q190 230 200 260 Q170 260 150 280' /%3E%3Cpath d='M150 220 Q110 230 100 260 Q130 260 150 280' /%3E%3Cpath d='M150 100 L150 20 M120 90 Q120 40 90 30 M180 90 Q180 40 210 30' /%3E%3Cpath d='M140 30 L160 30 L150 10 Z' /%3E%3Cpath d='M40 150 Q70 120 60 180 Q30 190 40 150 Z' /%3E%3Cpath d='M45 155 Q55 145 55 170' /%3E%3Ccircle cx='260' cy='140' r='15' /%3E%3Cline x1='260' y1='155' x2='260' y2='210' /%3E%3Cline x1='245' y1='140' x2='275' y2='140' /%3E%3Cline x1='260' y1='125' x2='260' y2='155' /%3E%3Cpath d='M90 145 Q120 135 140 155 Q120 165 90 145 Z' /%3E%3Ccircle cx='115' cy='150' r='4' fill='%23ffd700' /%3E%3Cpath d='M210 145 Q180 135 160 155 Q180 165 210 145 Z' /%3E%3Ccircle cx='185' cy='150' r='4' fill='%23ffd700' /%3E%3Cpath d='M150 100 Q140 115 150 135 Q160 115 150 100 Z' stroke='%23ff0055'/%3E%3Ccircle cx='150' cy='122' r='7' fill='%23ff0055' stroke='none' /%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.45;
-            animation: festivalSparkleDark 10s ease-in-out infinite alternate;
-        }
-
         @keyframes festivalSparkleDark {
             0% { transform: scale(1) translateY(0); opacity: 0.35; filter: brightness(0.9) hue-rotate(0deg); }
             100% { transform: scale(1.05) translateY(-10px); opacity: 0.65; filter: brightness(1.3) hue-rotate(15deg); }
+        }
+
+        /* 3.1 CHAKRA (RANGOLI / MANDALA) ROTATION */
+        .chakra-container {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -2; 
+            width: 90vw; height: 90vw;
+            max-width: 500px; max-height: 500px; 
+            display: flex; justify-content: center; align-items: center;
+            pointer-events: none; 
+        }
+        
+        .chakra-inner {
+            width: 100%; height: 100%;
+            background-image: url('https://www.kindpng.com/picc/m/107-1074922_rangoli-png-transparent-png.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            clip-path: circle(49%); 
+            opacity: 0.15; 
+            mix-blend-mode: multiply; 
+            animation: rotateChakra 20s linear infinite; 
+        }
+        
+        body.dark-mode .chakra-inner {
+            background-image: url('https://static.vecteezy.com/system/resources/previews/055/783/911/non_2x/traditional-indian-mandala-pattern-free-vector.jpg');
+            opacity: 1; 
+            mix-blend-mode: normal; 
+        }
+
+        @keyframes rotateChakra {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 3.2 TUNI LIGHTS (FALLING & BLINKING) */
+        .tuni-lights {
+            display: none; 
+        }
+        
+        body.dark-mode .tuni-lights {
+            display: block; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0; 
+            overflow: hidden;
+        }
+
+        .tuni {
+            position: absolute; top: -10%;
+            width: 6px; height: 16px; border-radius: 50%;
+            animation: fallTuni linear infinite, blinkTuni alternate infinite;
+        }
+
+        .t1 { left: 10%; background: #ff0055; box-shadow: 0 0 12px #ff0055; animation-duration: 7s, 0.5s; animation-delay: 0s, 0s; }
+        .t2 { left: 25%; background: #00f0ff; box-shadow: 0 0 12px #00f0ff; animation-duration: 9s, 0.6s; animation-delay: 2s, 0.1s; }
+        .t3 { left: 40%; background: #ffea00; box-shadow: 0 0 12px #ffea00; animation-duration: 6s, 0.4s; animation-delay: 4s, 0.2s; }
+        .t4 { left: 55%; background: #4ade80; box-shadow: 0 0 12px #4ade80; animation-duration: 8s, 0.7s; animation-delay: 1s, 0.3s; }
+        .t5 { left: 70%; background: #ff0055; box-shadow: 0 0 12px #ff0055; animation-duration: 10s, 0.5s; animation-delay: 5s, 0.4s; }
+        .t6 { left: 85%; background: #00f0ff; box-shadow: 0 0 12px #00f0ff; animation-duration: 7s, 0.6s; animation-delay: 3s, 0.5s; }
+        .t7 { left: 15%; background: #ffea00; box-shadow: 0 0 12px #ffea00; animation-duration: 8.5s, 0.4s; animation-delay: 6s, 0.1s; }
+        .t8 { left: 80%; background: #4ade80; box-shadow: 0 0 12px #4ade80; animation-duration: 6.5s, 0.7s; animation-delay: 7s, 0.3s; }
+
+        @keyframes fallTuni {
+            0% { top: -10%; opacity: 1; }
+            80% { opacity: 1; }
+            100% { top: 110%; opacity: 0; }
+        }
+        @keyframes blinkTuni {
+            0% { opacity: 0.1; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); }
         }
 
         /* =========================================
@@ -158,28 +229,28 @@
             font-weight: bold;
         }
         
-        /* FESTIVAL FONT STYLING FOR AGOMONI (100% VISIBLE FIX) */
         .app-title { 
             text-align: center; 
-            font-size: clamp(3.2rem, 12vw, 5.5rem); 
+            white-space: nowrap; 
+            font-size: clamp(2rem, 9vw, 5rem); 
             font-weight: normal; 
             margin-bottom: 5px; 
-            line-height: 1.5; /* Crucial: Prevents top/bottom of letters from clipping */
+            line-height: 1.5; 
             letter-spacing: 2px;
-            font-family: 'Galada', cursive; /* Beautiful Cursive Bengali Font */
-            background: linear-gradient(135deg, #991b1b, #d97706); /* Deep Red to Golden */
+            font-family: 'Galada', cursive; 
+            background: linear-gradient(135deg, #991b1b, #d97706); 
             -webkit-background-clip: text; 
             -webkit-text-fill-color: transparent; 
             transition: all 0.3s;
-            padding: 15px 0; /* Crucial: Gives gradient room to breathe without cutting text */
+            padding: 10px 0; 
             overflow: visible;
         }
         
         .app-subtitle { 
             text-align: center; color: var(--visitor-color); font-size: 1.05rem; 
             margin-bottom: 35px; font-weight: 600; transition: all 0.3s;
-            margin-top: -15px; /* Pulls it slightly closer to the title since padding was added */
-            font-family: 'Baloo Da 2', sans-serif; /* Beautiful and clean Bengali Font */
+            margin-top: -10px; 
+            font-family: 'Baloo Da 2', sans-serif; 
             letter-spacing: 0.5px;
         }
 
@@ -188,7 +259,6 @@
             background: none; -webkit-text-fill-color: #ffffff; color: #ffffff; 
             text-shadow: 0 0 5px var(--staff-color), 0 0 15px var(--visitor-color), 0 0 30px rgba(255, 0, 85, 0.6); 
         }
-        /* Beautiful Glowing Dark Mode Subtitle */
         body.dark-mode .app-subtitle { 
             color: #fef3c7; 
             text-shadow: 0 0 5px var(--staff-color), 0 0 15px rgba(255, 234, 0, 0.6);
@@ -234,9 +304,15 @@
         .search-bar { width: 100%; padding: 10px 14px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--input-border); background: #fffcf8; color: var(--text-main); font-size: 0.9rem; }
         
         /* VIP Pass Design */
-        .vip-pass { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); text-align: left; border: 1px solid #fde68a; margin-bottom: 20px; }
+        .vip-pass { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); text-align: left; border: 2px solid #fde68a; margin-bottom: 20px; transition: all 0.5s ease; }
         .pass-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px dashed #fcd34d; padding-bottom: 15px; }
-        .avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--visitor-color); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; color: white; }
+        .avatar { 
+            width: 55px; height: 55px; border-radius: 50%; background-color: var(--visitor-color); 
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem; 
+            font-weight: bold; color: transparent; border: 2px solid #ffd700; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background-size: 145%;
+            background-position: 50% 25%;
+        }
         .pass-details { margin-bottom: 20px; font-size: 0.9rem; line-height: 1.6; }
         .qr-box { background: white; padding: 15px; border-radius: 12px; display: inline-block; width: 100%; text-align: center; border: 1px solid #fef3c7;}
         .vip-pass-text { color: var(--text-main) !important; }
@@ -266,14 +342,9 @@
         
         body.dark-mode .menu-badge { background-color: #450a0a; color: #fef3c7; border-color: #7f1d1d;}
         body.dark-mode .search-bar { background: #1a0505; border-color: #7f1d1d; color: #fef3c7; }
-        body.dark-mode .vip-pass { background: #1a0505; border-color: var(--visitor-color); }
+        body.dark-mode .vip-pass { background: #1a0505; border-width: 2px;}
         body.dark-mode .vip-pass-text { color: #ffffff !important; }
         body.dark-mode .vip-pass-subtext { color: #fcd34d !important; }
-
-        /* SweetAlert Customization */
-        body.dark-mode .swal2-popup { background: #1a0505 !important; color: #fef3c7 !important; border: 1px solid #7f1d1d; }
-        body.dark-mode .swal2-title, body.dark-mode .swal2-html-container { color: #fef3c7 !important; }
-        body.dark-mode .swal2-input { background: #450a0a !important; color: white !important; border: 1px solid #7f1d1d !important; }
 
         /* =========================================
            7. FORMS, INPUTS & BUTTONS
@@ -357,7 +428,43 @@
         body.dark-mode .scanned-by-text { color: #ffea00; }
 
         /* =========================================
-           9. FULL SCREEN WELCOME OVERLAY
+           9. COMPACT SWEETALERT2 POPUP DESIGN (RESIZED PRO)
+           ========================================= */
+        .swal2-popup {
+            width: clamp(220px, 65vw, 280px) !important; /* 10% smaller */
+            padding: 0.8em 0.5em 0.5em !important; /* Reduced padding */
+            border-radius: 12px !important;
+        }
+        .swal2-title {
+            font-size: 1.05rem !important;
+            margin-bottom: 0 !important;
+            padding: 0 !important;
+        }
+        .swal2-html-container {
+            font-size: 0.8rem !important;
+            margin: 0.5em 0 0.8em !important; /* Tighter margins */
+            line-height: 1.3 !important;
+        }
+        .swal2-icon {
+            transform: scale(0.45) !important; /* Smaller icon */
+            margin: 0 auto !important; /* Cut top/bottom margin */
+        }
+        .swal2-actions {
+            margin-top: 0 !important;
+        }
+        .swal2-confirm, .swal2-cancel {
+            font-size: 0.8rem !important;
+            padding: 6px 16px !important;
+            border-radius: 6px !important;
+            min-height: 30px !important;
+        }
+
+        body.dark-mode .swal2-popup { background: #1a0505 !important; color: #fef3c7 !important; border: 1px solid #7f1d1d; }
+        body.dark-mode .swal2-title, body.dark-mode .swal2-html-container { color: #fef3c7 !important; }
+        body.dark-mode .swal2-input { background: #450a0a !important; color: white !important; border: 1px solid #7f1d1d !important; }
+
+        /* =========================================
+           10. FULL SCREEN WELCOME OVERLAY
            ========================================= */
         #welcomeOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -374,7 +481,6 @@
             font-size: clamp(1.8rem, 6vw, 2.5rem); font-weight: 900; margin-bottom: 10px;
             color: #991b1b; font-family: 'Georgia', serif; letter-spacing: 1px;
         }
-        /* Stylish Bengali Font for the Overlay (100% VISIBLE FIX) */
         .welcome-title-bengali {
             font-family: 'Galada', cursive;
             font-size: clamp(2rem, 8vw, 3rem);
@@ -382,8 +488,8 @@
             margin-bottom: 25px;
             margin-top: 5px;
             text-shadow: 0 0 10px rgba(220, 38, 38, 0.2);
-            line-height: 1.5; /* Prevents clipping */
-            padding: 10px 0; /* Prevents clipping */
+            line-height: 1.5; 
+            padding: 10px 0; 
             overflow: visible;
         }
         .tap-continue { font-size: 0.9rem; color: var(--text-muted); opacity: 0.7; animation: pulse 2s infinite; }
@@ -398,7 +504,7 @@
         }
 
         /* =========================================
-           10. FOOTER SECTION
+           11. FOOTER SECTION
            ========================================= */
         .app-footer {
             width: 100%; max-width: 500px; margin-top: auto; padding: 30px 15px 15px;
@@ -437,6 +543,23 @@
 </head>
 <body>
 
+<!-- CHAKRA BACKGROUND -->
+<div class="chakra-container">
+    <div class="chakra-inner"></div>
+</div>
+
+<!-- TUNI LIGHTS (Visible only in Dark Mode) -->
+<div class="tuni-lights">
+    <div class="tuni t1"></div>
+    <div class="tuni t2"></div>
+    <div class="tuni t3"></div>
+    <div class="tuni t4"></div>
+    <div class="tuni t5"></div>
+    <div class="tuni t6"></div>
+    <div class="tuni t7"></div>
+    <div class="tuni t8"></div>
+</div>
+
 <!-- === FULL SCREEN WELCOME OVERLAY === -->
 <div id="welcomeOverlay" class="hidden" onclick="hideWelcomeScreen()">
     <div class="welcome-content">
@@ -456,7 +579,6 @@
     <div id="view-home" class="view-section active">
         <h4 class="pre-title">MMCC Computer Science Students Presents</h4>
         <h1 class="app-title">আগমনী ২০২৬</h1>
-        <!-- Updated Subtitle applied here -->
         <p class="app-subtitle">আমাদের বহুপ্রতীক্ষিত এই বিশেষ আয়োজনে আপনাদের স্বাগতম</p>
         
         <p style="text-align: center; color: var(--text-muted); margin-bottom: 15px; font-size: 0.95rem;">Select your portal to continue</p>
@@ -560,17 +682,17 @@
                 <div id="userTicketDisplay" class="hidden">
                     <div class="vip-pass">
                         <div class="pass-header">
-                            <div id="passAvatar" class="avatar">V</div>
+                            <div id="passAvatar" class="avatar"></div>
                             <div>
                                 <h3 id="tktName" class="vip-pass-text" style="margin: 0; font-size: 1.3rem;">Student Name</h3>
-                                <p class="vip-pass-subtext" style="margin: 0; font-size: 0.8rem; letter-spacing: 1px;">MMCC STUDENT PASS</p>
+                                <p class="vip-pass-subtext" style="margin: 0; font-size: 0.8rem; letter-spacing: 1px;">MMCC CS E-Pass</p>
                             </div>
                         </div>
                         <div class="pass-details">
                             <p class="vip-pass-text" style="margin: 5px 0;"><strong>Event:</strong> Agomoni 2026</p>
-                            <p class="vip-pass-text" style="margin: 5px 0;"><strong>Venue:</strong> MMCC Auditorium</p>
-                            <p class="vip-pass-text" style="margin: 5px 0;"><strong>Date:</strong> 10 October 2026, (Mahalaya)</p>
-                            <p class="vip-pass-text" style="margin: 5px 0 15px 0;"><strong>Time:</strong> 11:30 AM</p>
+                            <p class="vip-pass-text" style="margin: 5px 0;"><strong>Venue:</strong> MMCC Room no 8</p>
+                            <p class="vip-pass-text" style="margin: 5px 0;"><strong>Date:</strong> 13 October 2026</p>
+                            <p class="vip-pass-text" style="margin: 5px 0 15px 0;"><strong>Time:</strong> 12:30 PM</p>
                             <span id="tktStatus" class="status-badge bg-pending">Pending Approval</span>
                         </div>
                         <div id="tktQrContainer" class="qr-box hidden">
@@ -970,15 +1092,63 @@
 
 <!-- === MAIN APPLICATION SCRIPT === -->
 <script>
+    // --- HELPER TO GET DYNAMIC VISUALS BASED ON REGISTRATION ORDER ---
+    function getTicketVisuals(tktId) {
+        // টিকিটের ID থেকে নম্বর বের করে পার্মানেন্ট স্টাইল তৈরি করা
+        const numPart = tktId ? tktId.replace(/\D/g, '') : '0';
+        const num = parseInt(numPart) || 0;
+        
+        // 3 Styles for Pass, 2 Images for Avatar
+        const styleType = num % 3; 
+        const avatarType = num % 2; 
+        
+        const img1 = "https://i.pinimg.com/236x/58/6f/51/586f514d8222cb2aec6463e92697a972.jpg";
+        const img2 = "https://img.magnific.com/premium-vector/hindu-goddess-durga-face-illustration-with-traditional-golden-ornaments_649214-2356.jpg?semt=ais_hybrid&w=740&q=80";
+        
+        return {
+            styleType: styleType,
+            avatar: avatarType === 0 ? img1 : img2
+        };
+    }
+    
+    // --- ADVANCED BASE64 IMAGE FETCHER (BYPASSES CANVAS CORS) ---
+    async function getBase64Image(url) {
+        const proxyUrl1 = "https://wsrv.nl/?url=" + encodeURIComponent(url) + "&output=png";
+        const proxyUrl2 = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
+        
+        try {
+            let response = await fetch(proxyUrl1);
+            if (!response.ok) throw new Error("Proxy 1 failed");
+            let blob = await response.blob();
+            return await new Promise((resolve) => {
+                let reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            });
+        } catch (e1) {
+            try {
+                let response = await fetch(proxyUrl2);
+                if (!response.ok) throw new Error("Proxy 2 failed");
+                let blob = await response.blob();
+                return await new Promise((resolve) => {
+                    let reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+            } catch (e2) {
+                return null;
+            }
+        }
+    }
+
     // --- EASTER EGG DOUBLE TAP LOGIC ---
     let lastHeaderTap = 0;
     function handleMasterHeaderTap(e) {
-        if (isAdminLoggedIn) return; // Do nothing if already inside the dashboard
+        if (isAdminLoggedIn) return; 
         
         let currentTime = new Date().getTime();
         let tapLength = currentTime - lastHeaderTap;
         if (tapLength < 400 && tapLength > 0) {
-            // Secret Unlocked: Toggle visibility of the Recovery Buttons
             const btn1 = document.getElementById('masterRecoveryBtn1');
             const btn2 = document.getElementById('masterRecoveryBtn2');
             if(btn1) btn1.classList.toggle('hidden');
@@ -1008,7 +1178,7 @@
         }
         function resetTimer() {
             clearTimeout(time);
-            time = setTimeout(logoutUser, 900000); // 900000 ms = 15 minutes
+            time = setTimeout(logoutUser, 900000); 
         }
     };
     inactivityTime();
@@ -1075,7 +1245,7 @@
         }
         
         if(hiddenItems.length <= 20) {
-            triggerBtn.style.display = 'none'; // Hide trigger if no more items
+            triggerBtn.style.display = 'none'; 
         }
     }
 
@@ -1158,14 +1328,11 @@
     let prevStaffPendingCount = 0;
     let localSessionId = null; 
 
-    // ✅ NO HARDCODED PASSWORDS - FULLY HACKER PROOF!
     let masterCredentials = null;
-    
     let currentVisitor = null; 
     let currentStaff = null;
     let isAdminLoggedIn = false;
 
-    // Fetch Master Credentials safely without hardcoding
     db.ref('agomoni_data/masterCredentials').on('value', (snapshot) => {
         if(snapshot.val()) {
             const data = snapshot.val();
@@ -1185,7 +1352,6 @@
         }
     });
 
-    // Firebase Auth State Observer
     auth.onAuthStateChanged((user) => {
         if (user) {
             db.ref('agomoni_data/users/' + user.uid).on('value', (snapshot) => {
@@ -1229,7 +1395,6 @@
         }
     });
     
-    // Check for Master Email Verification Link
     document.addEventListener("DOMContentLoaded", () => {
         if (auth.isSignInWithEmailLink(window.location.href)) {
             let email = window.localStorage.getItem('emailForSignIn');
@@ -1663,7 +1828,22 @@
             disp.classList.remove('hidden');
             
             document.getElementById('tktName').innerText = tkt.name;
-            document.getElementById('passAvatar').innerText = tkt.name.charAt(0).toUpperCase();
+            
+            // Apply Dynamic Avatar and Colors to Web UI
+            const visuals = getTicketVisuals(tkt.id);
+            document.getElementById('passAvatar').style.backgroundImage = `url('${visuals.avatar}')`;
+            
+            const vipPassEl = document.querySelector('.vip-pass');
+            if(visuals.styleType === 0) {
+                vipPassEl.style.borderColor = '#ffd700'; // Gold
+                vipPassEl.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.2)';
+            } else if (visuals.styleType === 1) {
+                vipPassEl.style.borderColor = '#00f0ff'; // Neon Blue
+                vipPassEl.style.boxShadow = '0 0 15px rgba(0, 240, 255, 0.2)';
+            } else {
+                vipPassEl.style.borderColor = '#facc15'; // Emerald Gold
+                vipPassEl.style.boxShadow = '0 0 15px rgba(250, 204, 21, 0.2)';
+            }
 
             if (tkt.status === 'Pending') {
                 badge.innerText = 'Pending Approval'; badge.className = 'status-badge bg-pending'; qrBox.classList.add('hidden');
@@ -1710,81 +1890,201 @@
         }).catch((e) => Swal.fire('Error', e.message, 'error'));
     }
 
-    // --- DOWNLOAD PASS PNG (DYNAMIC ID CARD) ---
-    function downloadPassAsPNG() {
+    // --- DOWNLOAD PASS PNG (3 DYNAMIC PREMIUM THEMES WITH PROXY FALLBACK) ---
+    async function downloadPassAsPNG() {
         const tkt = tickets.find(t => t.email === currentVisitor.email);
         if(!tkt || tkt.status !== 'Approved') return;
 
         const qrCanvas = document.getElementById('qrCanvas');
         if(!qrCanvas) return;
 
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 400;
-        canvas.height = 650;
+        const dlBtn = document.getElementById('btnDownloadPassPNG');
+        const origText = dlBtn.innerHTML;
+        dlBtn.innerHTML = 'Generating... ⌛';
+        dlBtn.style.pointerEvents = 'none';
 
-        let gradient = ctx.createLinearGradient(0, 0, 400, 650);
-        gradient.addColorStop(0, '#ffffff');
-        gradient.addColorStop(1, '#fef9c3');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 400;
+            canvas.height = 700;
+            
+            const visuals = getTicketVisuals(tkt.id);
+            const styleType = visuals.styleType;
+            
+            let gradStart, gradEnd, borderColor, borderInner, titleColor, subTitleColor, detailColor, foodColor;
+            
+            if (styleType === 0) {
+                // Style 1: Crimson Gold
+                gradStart = '#1a0505'; gradEnd = '#000000';
+                borderColor = '#ffd700'; borderInner = 'rgba(255, 0, 85, 0.4)';
+                titleColor = '#ffd700'; subTitleColor = '#fcd34d';
+                detailColor = '#fef3c7'; foodColor = '#ff0055';
+            } else if (styleType === 1) {
+                // Style 2: Deep Blue Neon
+                gradStart = '#081229'; gradEnd = '#000000';
+                borderColor = '#00f0ff'; borderInner = 'rgba(0, 240, 255, 0.4)';
+                titleColor = '#00f0ff'; subTitleColor = '#7dd3fc';
+                detailColor = '#f0f9ff'; foodColor = '#38bdf8';
+            } else {
+                // Style 3: Emerald Gold
+                gradStart = '#022c22'; gradEnd = '#000000';
+                borderColor = '#facc15'; borderInner = 'rgba(74, 222, 128, 0.4)';
+                titleColor = '#facc15'; subTitleColor = '#bbf7d0';
+                detailColor = '#f0fdf4'; foodColor = '#4ade80';
+            }
 
-        ctx.strokeStyle = '#fcd34d';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(10, 10, 380, 630);
+            // Premium Gradient Background
+            let gradient = ctx.createLinearGradient(0, 0, 400, 700);
+            gradient.addColorStop(0, gradStart); 
+            gradient.addColorStop(1, gradEnd); 
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.fillStyle = '#b91c1c';
-        ctx.font = '900 26px "Segoe UI", Helvetica, Arial, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('MMCC AGOMONI 2026', 200, 50);
-        
-        ctx.fillStyle = '#78350f'; 
-        ctx.font = '700 16px "Segoe UI", Helvetica, Arial, sans-serif';
-        ctx.fillText('MMCC STUDENT PASS', 200, 75);
+            // Outer Border
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(15, 15, 370, 670);
+            
+            // Inner Subtle Border
+            ctx.strokeStyle = borderInner;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(20, 20, 360, 660);
 
-        ctx.beginPath();
-        ctx.arc(200, 145, 45, 0, Math.PI * 2);
-        ctx.fillStyle = '#dc2626';
-        ctx.fill();
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 40px "Segoe UI", Helvetica, Arial, sans-serif';
-        ctx.fillText(tkt.name.charAt(0).toUpperCase(), 200, 160);
+            // Main Title (Agomoni in stylish Bengali)
+            ctx.fillStyle = titleColor; 
+            ctx.font = 'bold 28px "Georgia", serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('আগমনী ২০২৬', 200, 65);
+            
+            // Subtitle
+            ctx.fillStyle = subTitleColor; 
+            ctx.font = '700 14px "Segoe UI", Helvetica, Arial, sans-serif';
+            ctx.letterSpacing = "2px"; 
+            ctx.fillText('MMCC CS E-Pass', 200, 90);
 
-        ctx.fillStyle = '#431407';
-        ctx.font = 'bold 24px "Segoe UI", Helvetica, Arial, sans-serif';
-        ctx.fillText(tkt.name, 200, 225);
+            // Fetch Base64 Image to Bypass CORS entirely
+            const base64Data = await getBase64Image(visuals.avatar);
 
-        ctx.fillStyle = '#78350f';
-        ctx.font = '500 16px "Segoe UI", Helvetica, Arial, sans-serif';
-        ctx.fillText('Venue: MMCC Auditorium', 200, 255);
-        ctx.fillText('Date: 10 October 2026, (Mahalaya)', 200, 275);
-        ctx.fillText('Time: 11:30 AM', 200, 295);
-        
-        ctx.fillStyle = '#b45309'; 
-        ctx.font = 'bold 16px "Segoe UI", Helvetica, Arial, sans-serif';
-        ctx.fillText('Food: ' + (tkt.foodPreference || 'N/A'), 200, 320);
+            // Draw Avatar Background Circle
+            ctx.beginPath();
+            ctx.arc(200, 160, 45, 0, Math.PI * 2);
+            ctx.fillStyle = gradStart;
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = borderColor;
+            ctx.stroke();
 
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        if(ctx.roundRect) {
-            ctx.roundRect(100, 345, 200, 200, 16);
-        } else {
-            ctx.rect(100, 345, 200, 200); 
+            // Draw Maa Durga Image Custom Positioned
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(200, 160, 45, 0, Math.PI * 2);
+            ctx.clip();
+            
+            if(base64Data) {
+                const maaImage = new Image();
+                await new Promise((resolve) => {
+                    maaImage.onload = () => {
+                        const aspect = maaImage.width / maaImage.height;
+                        const zoomScale = 1.45; // 45% Zoom
+                        const baseSize = 90;
+                        const targetSize = baseSize * zoomScale; 
+                        
+                        let dWidth = targetSize, dHeight = targetSize;
+                        if (aspect > 1) { 
+                            dWidth = targetSize * aspect; 
+                        } else { 
+                            dHeight = targetSize / aspect; 
+                        }
+                        
+                        // Shift X left (-6px) & Shift Y down (+8px) to frame face center
+                        const offsetX = -6; 
+                        const offsetY = 8;  
+                        
+                        const dx = 200 - (dWidth / 2) + offsetX;
+                        const dy = 160 - (dHeight / 2) + offsetY;
+                        
+                        ctx.drawImage(maaImage, dx, dy, dWidth, dHeight);
+                        resolve();
+                    };
+                    maaImage.onerror = () => {
+                        ctx.fillStyle = foodColor;
+                        ctx.font = 'bold 40px "Segoe UI"';
+                        ctx.fillText(tkt.name.charAt(0).toUpperCase(), 200, 175);
+                        resolve();
+                    };
+                    maaImage.src = base64Data;
+                });
+            } else {
+                ctx.fillStyle = foodColor;
+                ctx.font = 'bold 40px "Segoe UI"';
+                ctx.fillText(tkt.name.charAt(0).toUpperCase(), 200, 175);
+            }
+            ctx.restore();
+
+            // Student Name
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px "Segoe UI", Helvetica, Arial, sans-serif';
+            ctx.fillText(tkt.name, 200, 240);
+
+            // Decorative Line
+            ctx.beginPath();
+            ctx.moveTo(80, 255);
+            ctx.lineTo(320, 255);
+            ctx.strokeStyle = borderInner;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Details Section
+            ctx.fillStyle = detailColor;
+            ctx.font = '500 16px "Segoe UI", Helvetica, Arial, sans-serif';
+            ctx.fillText('Venue: MMCC Room no 8', 200, 285);
+            ctx.fillText('Date: 13 October 2026', 200, 310);
+            ctx.fillText('Time: 12:30 PM', 200, 335);
+            
+            ctx.fillStyle = foodColor; 
+            ctx.font = 'bold 16px "Segoe UI", Helvetica, Arial, sans-serif';
+            ctx.fillText('Food: ' + (tkt.foodPreference || 'N/A'), 200, 365);
+
+            // QR Code Box
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.shadowBlur = 10;
+            if(ctx.roundRect) {
+                ctx.roundRect(100, 395, 200, 200, 16);
+            } else {
+                ctx.rect(100, 395, 200, 200); 
+            }
+            ctx.fill();
+            ctx.shadowBlur = 0; // Reset shadow
+
+            // Draw actual QR
+            ctx.drawImage(qrCanvas, 110, 405, 180, 180);
+
+            // Footer Text
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = 'italic 12px "Segoe UI", Helvetica, Arial, sans-serif';
+            const now = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+            ctx.fillText('Downloaded on: ' + now, 200, 635);
+            
+            ctx.fillStyle = borderColor;
+            ctx.font = 'bold 13px "Segoe UI", Helvetica, Arial, sans-serif';
+            ctx.fillText('MMCC Computer Science Dept', 200, 655);
+
+            // Trigger Download
+            const link = document.createElement('a');
+            link.download = tkt.name.replace(/\s+/g, '_') + '_Agomoni_Pass.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+        } catch(error) {
+            console.error("Download Error:", error);
+            Swal.fire("Error", "Could not generate pass. Please try again.", "error");
+        } finally {
+            // Restore button state
+            dlBtn.innerHTML = origText;
+            dlBtn.style.pointerEvents = 'auto';
         }
-        ctx.fill();
-
-        ctx.drawImage(qrCanvas, 110, 355, 180, 180);
-
-        ctx.fillStyle = '#a8a29e';
-        ctx.font = 'italic 12px "Segoe UI", Helvetica, Arial, sans-serif';
-        const now = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
-        ctx.fillText('Downloaded on: ' + now, 200, 580);
-        ctx.fillText('MMCC Computer Science Dept', 200, 600);
-
-        const link = document.createElement('a');
-        link.download = tkt.name.replace(/\s+/g, '_') + '_MMCC_Pass.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
     }
 
     // --- ADMIN AUTHENTICATION (Firebase Auth) ---
@@ -1943,13 +2243,11 @@
         if (!masterCredentials) return; // Prevent login if not setup
 
         const u = document.getElementById('aLoginUser').value;
-        const pRaw = document.getElementById('aLoginPass').value; // Master admin types password here
+        const pRaw = document.getElementById('aLoginPass').value; 
         
         // 1. Check Custom Username ONLY
         if(u === masterCredentials.user) {
             
-            // 🔒 ULTIMATE HIDDEN SECURITY LAYER: Validating raw password directly via Firebase Auth
-            // ZERO passwords or hashes are hardcoded in the script.
             auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', pRaw)
             .then((cred) => {
                 isAdminLoggedIn = true;
@@ -2180,7 +2478,7 @@
         // Re-authenticate to prove old password is correct
         auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', oldPass).then((cred) => {
             cred.user.updatePassword(newPass).then(() => {
-                if(btnId) setBtnLoading('btnUpdatePass', false, 'Update Password');
+                setBtnLoading('btnUpdatePass', false, 'Update Password');
                 const suc = document.getElementById('cCredsSuccess');
                 suc.innerText = "✅ Password updated securely in Firebase Auth."; 
                 suc.classList.remove('hidden');
