@@ -36,7 +36,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            emailjs.init("m0pNr6EJmfX5YexAN"); // Note: Added quotes around the key
+            emailjs.init("m0pNr6EJmfX5YexAN");
         })();
     </script>
 
@@ -1171,11 +1171,9 @@
 
     // --- DUAL EMAIL NOTIFICATION SYSTEM (EMAILJS + GOOGLE APPS SCRIPT FALLBACK) ---
     function sendApprovalEmail(ticketData) {
-        // TODO: Update EmailJS details here
-        const serviceID = 'YOUR_SERVICE_ID'; 
-        const templateID = 'YOUR_TEMPLATE_ID'; 
-        // TODO: Add Google Apps Script Web App URL
-        const GAS_WEB_APP_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE'; 
+        const serviceID = 'service_i88qlsl'; 
+        const templateID = 'template_uuqg0oz'; 
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzdzC-Aj083r05y2e87uHP3hxXvRYh-l_qCdPh_skdmlwu7IhCpkH6q59V73qn8mkGH/exec'; 
         
         const templateParams = {
             to_name: ticketData.name,
@@ -1931,9 +1929,26 @@
         })
         .catch((error) => {
             setBtnLoading('btnLoginVisitor', false, "Log In");
-            document.getElementById('vLoginError').innerText = 'Invalid credentials.';
-            document.getElementById('vLoginError').classList.remove('hidden'); 
-            logFailedAttempt('visitor', 'btnLoginVisitor', 'vLoginError', 'vLoginAttempts');
+            
+            // --- Custom User Not Found Popup Logic ---
+            if (error.code === 'auth/user-not-found') {
+                Swal.fire({
+                    title: 'Account Not Found!',
+                    text: 'This email is not registered in our database.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sign Up Now',
+                    cancelButtonText: 'Try Again'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        toggleAuth('visitor', 'signup');
+                    }
+                });
+            } else {
+                document.getElementById('vLoginError').innerText = 'Invalid credentials.';
+                document.getElementById('vLoginError').classList.remove('hidden'); 
+                logFailedAttempt('visitor', 'btnLoginVisitor', 'vLoginError', 'vLoginAttempts');
+            }
         });
     });
 
@@ -2293,6 +2308,7 @@
         });
     });
 
+    // --- ADMIN LOGIN WITH "NOT FOUND" POPUP ---
     document.getElementById('formStaffLogin').addEventListener('submit', e => {
         e.preventDefault();
         if (handleBruteForce('staff', 'btnLoginStaff', 'sLoginError', 'sLoginAttempts')) return;
@@ -2312,9 +2328,26 @@
         })
         .catch((error) => {
             setBtnLoading('btnLoginStaff', false, "Log In");
-            document.getElementById('sLoginError').innerText = 'Invalid credentials or awaiting Master Approval.';
-            document.getElementById('sLoginError').classList.remove('hidden'); 
-            logFailedAttempt('staff', 'btnLoginStaff', 'sLoginError', 'sLoginAttempts');
+            
+            // --- Custom User Not Found Popup Logic ---
+            if (error.code === 'auth/user-not-found') {
+                Swal.fire({
+                    title: 'Admin Not Found!',
+                    text: 'This email is not registered as an Admin.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Register Here',
+                    cancelButtonText: 'Try Again'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        toggleAuth('staff', 'signup');
+                    }
+                });
+            } else {
+                document.getElementById('sLoginError').innerText = 'Invalid credentials or awaiting Master Approval.';
+                document.getElementById('sLoginError').classList.remove('hidden'); 
+                logFailedAttempt('staff', 'btnLoginStaff', 'sLoginError', 'sLoginAttempts');
+            }
         });
     });
 
@@ -2806,6 +2839,32 @@
         renderTicketLists('adminPendingList', 'adminApprovedList');
         reFilterAll();
         applyInfiniteScroll();
+    }
+
+    // --- APPROVAL LOGIC WITH EMAIL NOTIFICATION ---
+    // Updated single approve to use EmailJS/GAS system
+    function approveStudentTicket(id) {
+        const ticketToApprove = tickets.find(t => t.id === id);
+        if(!ticketToApprove) return;
+
+        db.ref('agomoni_data/tickets/' + id + '/status').set('Approved')
+        .then(() => {
+            // Trigger Email Notification upon successful approval
+            sendApprovalEmail(ticketToApprove);
+
+            Swal.fire({
+                title: 'Success!',
+                text: 'Pass Approved & Notification Sent!',
+                icon: 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        })
+        .catch((e) => {
+            Swal.fire('Action Blocked', 'Database Error: ' + e.message, 'error');
+        });
     }
 
     function approveAdmin(uid) {
