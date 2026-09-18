@@ -1585,7 +1585,7 @@
                 auth.signInWithEmailLink(em, window.location.href)
                 .then((result) => {
                     window.localStorage.removeItem('emailForSignIn');
-                    if (em === "sudarsanmandal908@gmail.com") {
+                    if (em === "iamdarsan.ai@gmail.com") {
                         Swal.fire('Verified!', 'Master Email Verified! You can now securely set or reset the Master Credentials.', 'success');
                         switchView('view-admin');
                         document.getElementById('admin2FASection').classList.add('hidden');
@@ -2432,7 +2432,7 @@
         // 1. Check Custom Username ONLY
         if(u === masterCredentials.user) {
             
-            auth.signInWithEmailAndPassword('sudarsanmandal908@gmail.com', pRaw)
+            auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', pRaw)
             .then((cred) => {
                 clearBruteForce('adminStep2');
                 isAdminLoggedIn = true;
@@ -2499,7 +2499,7 @@
 
     function sendMasterRecoveryEmail() {
         setBtnLoading('btnSendRecLink', true);
-        const masterEmail = "sudarsanmandal908@gmail.com";
+        const masterEmail = "iamdarsan.ai@gmail.com";
         const actionCodeSettings = {
             url: window.location.href, // Redirect back to this page
             handleCodeInApp: true
@@ -2646,7 +2646,7 @@
         if(!newUser) { showCredError("❌ Please enter a new username.", 'btnUpdateUser', 'Update Username'); return; }
         
         // Re-authenticate to prove password is correct
-        auth.signInWithEmailAndPassword('sudarsanmandal908@gmail.com', pass).then(() => {
+        auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', pass).then(() => {
             masterCredentials.user = newUser;
             saveCredsToDB("Username updated securely.", 'btnUpdateUser', 'Update Username');
         }).catch(() => {
@@ -2663,7 +2663,7 @@
         if(!newPass || newPass !== confirmPass) { showCredError("❌ New passwords do not match or are empty.", 'btnUpdatePass', 'Update Password'); return; }
         
         // Re-authenticate to prove old password is correct
-        auth.signInWithEmailAndPassword('sudarsanmandal908@gmail.com', oldPass).then((cred) => {
+        auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', oldPass).then((cred) => {
             cred.user.updatePassword(newPass).then(() => {
                 setBtnLoading('btnUpdatePass', false, 'Update Password');
                 const suc = document.getElementById('cCredsSuccess');
@@ -2687,7 +2687,7 @@
         }
         if(!newPin || newPin.length !== 6 || isNaN(newPin)) { showCredError("❌ New PIN must be exactly 6 digits.", 'btnUpdatePin', 'Update 2-Step PIN'); return; }
         
-        auth.signInWithEmailAndPassword('sudarsanmandal908@gmail.com', pass).then(() => {
+        auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', pass).then(() => {
             masterCredentials.pin = hashData(newPin);
             saveCredsToDB("2-Step PIN updated securely.", 'btnUpdatePin', 'Update 2-Step PIN');
         }).catch(() => {
