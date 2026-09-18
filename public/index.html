@@ -1472,14 +1472,13 @@
     // 1. FIREBASE CLOUD DATABASE CONFIGURATION
     // ==========================================
     const firebaseConfig = {
-      apiKey: "AIzaSyAW1BpFZ8WusY2bq96we9fR-dgvtDLhvkY",
-      authDomain: "agomoni-eticket.firebaseapp.com",
-      databaseURL: "https://agomoni-eticket-default-rtdb.firebaseio.com",
-      projectId: "agomoni-eticket",
-      storageBucket: "agomoni-eticket.firebasestorage.app",
-      messagingSenderId: "75853196980",
-      appId: "1:75853196980:web:1246595758e14d5c84f1e1",
-      measurementId: "G-16XVTCZJ2V"
+        apiKey: "AIzaSyDf1DUQPdyRQBEijx0TuaX37CHFF7j4a6Q",
+        authDomain: "agomoni-2k26.firebaseapp.com",
+        projectId: "agomoni-2k26",
+        storageBucket: "agomoni-2k26.firebasestorage.app",
+        messagingSenderId: "48078781911",
+        appId: "1:48078781911:web:327163594643e857665f92",
+        measurementId: "G-6H7887NP72"
     };
     
     if (!firebase.apps.length) {
@@ -1586,7 +1585,7 @@
                 auth.signInWithEmailLink(em, window.location.href)
                 .then((result) => {
                     window.localStorage.removeItem('emailForSignIn');
-                    if (em === "iamdarsan.ai@gmail.com") {
+                    if (em === "sudarsanmandal908@gmail.com") {
                         Swal.fire('Verified!', 'Master Email Verified! You can now securely set or reset the Master Credentials.', 'success');
                         switchView('view-admin');
                         document.getElementById('admin2FASection').classList.add('hidden');
@@ -2433,7 +2432,7 @@
         // 1. Check Custom Username ONLY
         if(u === masterCredentials.user) {
             
-            auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', pRaw)
+            auth.signInWithEmailAndPassword('sudarsanmandal908@gmail.com', pRaw)
             .then((cred) => {
                 clearBruteForce('adminStep2');
                 isAdminLoggedIn = true;
@@ -2500,7 +2499,7 @@
 
     function sendMasterRecoveryEmail() {
         setBtnLoading('btnSendRecLink', true);
-        const masterEmail = "iamdarsan.ai@gmail.com";
+        const masterEmail = "sudarsanmandal908@gmail.com";
         const actionCodeSettings = {
             url: window.location.href, // Redirect back to this page
             handleCodeInApp: true
@@ -2647,7 +2646,7 @@
         if(!newUser) { showCredError("❌ Please enter a new username.", 'btnUpdateUser', 'Update Username'); return; }
         
         // Re-authenticate to prove password is correct
-        auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', pass).then(() => {
+        auth.signInWithEmailAndPassword('sudarsanmandal908@gmail.com', pass).then(() => {
             masterCredentials.user = newUser;
             saveCredsToDB("Username updated securely.", 'btnUpdateUser', 'Update Username');
         }).catch(() => {
@@ -2664,7 +2663,7 @@
         if(!newPass || newPass !== confirmPass) { showCredError("❌ New passwords do not match or are empty.", 'btnUpdatePass', 'Update Password'); return; }
         
         // Re-authenticate to prove old password is correct
-        auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', oldPass).then((cred) => {
+        auth.signInWithEmailAndPassword('sudarsanmandal908@gmail.com', oldPass).then((cred) => {
             cred.user.updatePassword(newPass).then(() => {
                 setBtnLoading('btnUpdatePass', false, 'Update Password');
                 const suc = document.getElementById('cCredsSuccess');
@@ -2688,7 +2687,7 @@
         }
         if(!newPin || newPin.length !== 6 || isNaN(newPin)) { showCredError("❌ New PIN must be exactly 6 digits.", 'btnUpdatePin', 'Update 2-Step PIN'); return; }
         
-        auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', pass).then(() => {
+        auth.signInWithEmailAndPassword('sudarsanmandal908@gmail.com', pass).then(() => {
             masterCredentials.pin = hashData(newPin);
             saveCredsToDB("2-Step PIN updated securely.", 'btnUpdatePin', 'Update 2-Step PIN');
         }).catch(() => {
