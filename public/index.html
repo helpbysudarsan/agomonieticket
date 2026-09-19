@@ -1172,8 +1172,8 @@
 
     // --- DUAL EMAIL NOTIFICATION SYSTEM (EMAILJS + GOOGLE APPS SCRIPT FALLBACK) ---
     function sendApprovalEmail(ticketData) {
-        // const serviceID = 'service_i88qlsl'; 
-        // const templateID = 'template_uuqg0oz'; 
+        const serviceID = 'service_i88qlsl'; 
+        const templateID = 'template_uuqg0oz'; 
         const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzdzC-Aj083r05y2e87uHP3hxXvRYh-l_qCdPh_skdmlwu7IhCpkH6q59V73qn8mkGH/exec'; 
         
         const templateParams = {
@@ -1191,7 +1191,7 @@
         docRef.get().then((doc) => {
             let currentCount = doc.exists ? (doc.data().sentCount || 0) : 0;
 
-            if (currentCount < 180) {
+            if (currentCount < 2) {
                 // EmailJS (Free Limit 200, so safe up to 180)
                 emailjs.send(serviceID, templateID, templateParams)
                     .then(function(response) {
@@ -2287,17 +2287,23 @@
         auth.createUserWithEmailAndPassword(eMail, pRaw)
         .then((userCredential) => {
             const uid = userCredential.user.uid;
+            
+            // ডাটাবেসে সেভ হওয়ার পর signOut হবে, আগে নয়
             db.collection('users').doc(uid).set({
                 name: n,
                 email: eMail,
                 role: 'staff',
                 status: 'Pending'
+            }).then(() => {
+                e.target.reset();
+                setBtnLoading('btnSignupStaff', false, "Register for Approval");
+                Swal.fire('Submitted!', 'Registration submitted! Please wait for Master Admin approval before logging back in.', 'success');
+                auth.signOut(); 
+                toggleAuth('staff', 'login');
+            }).catch((err) => {
+                setBtnLoading('btnSignupStaff', false, "Register for Approval");
+                Swal.fire('Error', err.message, 'error');
             });
-            e.target.reset();
-            setBtnLoading('btnSignupStaff', false, "Register for Approval");
-            Swal.fire('Submitted!', 'Registration submitted! Please wait for Master Admin approval before logging back in.', 'success');
-            auth.signOut();
-            toggleAuth('staff', 'login');
         })
         .catch((error) => {
             setBtnLoading('btnSignupStaff', false, "Register for Approval");
@@ -2840,11 +2846,18 @@
         applyInfiniteScroll();
     }
 
-    function approveAdmin(uid) {
-        db.collection('users').doc(uid).update({ status: 'Approved' })
+    function approveStudentTicket(id) {
+        const ticketToApprove = tickets.find(t => t.id === id);
+        if(!ticketToApprove) return;
+
+        db.collection('tickets').doc(id).update({ status: 'Approved' })
         .then(() => {
+            // Trigger Email Notification upon successful approval
+            sendApprovalEmail(ticketToApprove);
+
             Swal.fire({
-                title: 'Admin Approved!',
+                title: 'Success!',
+                text: 'Pass Approved & Notification Sent!',
                 icon: 'success',
                 toast: true,
                 position: 'top-end',
@@ -2852,7 +2865,9 @@
                 timer: 3000
             });
         })
-        .catch(e => Swal.fire('Error', 'Action Blocked: ' + e.message, 'error'));
+        .catch((e) => {
+            Swal.fire('Action Blocked', 'Database Error: ' + e.message, 'error');
+        });
     }
     
     function deleteApprovedAdmin(uid) {
