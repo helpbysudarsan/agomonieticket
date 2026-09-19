@@ -27,12 +27,12 @@
     <!-- CryptoJS Library for Secure Password Hashing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
-    <!-- Firebase Cloud Libraries -->
+    <!-- Firebase Cloud Libraries (UPDATED FOR FIRESTORE) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-    <!-- EmailJS Library with Updated Public Key -->
+    <!-- EmailJS Library -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
@@ -1185,29 +1185,29 @@
             food_pref: ticketData.foodPreference || 'N/A'
         };
 
-        const countRef = db.ref('agomoni_data/email_stats/sentCount');
+        const docRef = db.collection('system').doc('emailStats');
         
-        countRef.once('value').then((snapshot) => {
-            let currentCount = snapshot.val() || 0;
+        docRef.get().then((doc) => {
+            let currentCount = doc.exists ? (doc.data().sentCount || 0) : 0;
 
             if (currentCount < 180) {
                 // EmailJS (Free Limit 200, so safe up to 180)
                 emailjs.send(serviceID, templateID, templateParams)
                     .then(function(response) {
                         console.log('EmailJS: SUCCESS!', ticketData.email);
-                        countRef.set(currentCount + 1); 
+                        docRef.set({sentCount: currentCount + 1}, {merge: true}); 
                     }, function(error) {
                         console.error('EmailJS: FAILED', error);
-                        sendViaAppsScript(GAS_WEB_APP_URL, templateParams, countRef, currentCount);
+                        sendViaAppsScript(GAS_WEB_APP_URL, templateParams, docRef, currentCount);
                     });
             } else {
                 // Above 180: Use Google Apps Script
-                sendViaAppsScript(GAS_WEB_APP_URL, templateParams, countRef, currentCount);
+                sendViaAppsScript(GAS_WEB_APP_URL, templateParams, docRef, currentCount);
             }
         }).catch(err => console.error("Error reading email count", err));
     }
 
-    function sendViaAppsScript(gasUrl, params, countRef, currentCount) {
+    function sendViaAppsScript(gasUrl, params, docRef, currentCount) {
         if (!gasUrl || gasUrl === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
             console.warn("Google Apps Script URL is missing!");
             return;
@@ -1222,7 +1222,7 @@
             body: JSON.stringify(params)
         }).then(() => {
             console.log('Google Apps Script: Email request sent to', params.to_email);
-            countRef.set(currentCount + 1); 
+            docRef.set({sentCount: currentCount + 1}, {merge: true}); 
         }).catch(error => {
             console.error('Google Apps Script: Error', error);
         });
@@ -1374,14 +1374,13 @@
                 toast: true, position: 'top-end', showConfirmButton: false, timer: 2000
             });
             
-            let updates = {};
+            let batch = db.batch();
             offlineScans.forEach(scan => {
-                updates['agomoni_data/tickets/' + scan.id + '/status'] = 'Used';
-                updates['agomoni_data/tickets/' + scan.id + '/scannedBy'] = scan.scannedBy;
-                updates['agomoni_data/tickets/' + scan.id + '/scanTime'] = scan.scanTime;
+                let tRef = db.collection('tickets').doc(scan.id);
+                batch.update(tRef, { status: 'Used', scannedBy: scan.scannedBy, scanTime: scan.scanTime });
             });
             
-            db.ref().update(updates).then(() => {
+            batch.commit().then(() => {
                 offlineScans = [];
                 localStorage.removeItem('offlineScans');
                 Swal.fire({
@@ -1467,12 +1466,11 @@
     }
 
     // ==========================================
-    // 1. FIREBASE CLOUD DATABASE CONFIGURATION
+    // 1. FIREBASE CLOUD DATABASE CONFIGURATION (FIRESTORE)
     // ==========================================
     const firebaseConfig = {
       apiKey: "AIzaSyAW1BpFZ8WusY2bq96we9fR-dgvtDLhvkY",
       authDomain: "agomoni-eticket.firebaseapp.com",
-      databaseURL: "https://agomoni-eticket-default-rtdb.firebaseio.com",
       projectId: "agomoni-eticket",
       storageBucket: "agomoni-eticket.firebasestorage.app",
       messagingSenderId: "75853196980",
@@ -1483,7 +1481,7 @@
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
-    const db = firebase.database();
+    const db = firebase.firestore();
     const auth = firebase.auth();
 
     // ==========================================
@@ -1501,9 +1499,9 @@
     let currentStaff = null;
     let isAdminLoggedIn = false;
 
-    db.ref('agomoni_data/masterCredentials').on('value', (snapshot) => {
-        if(snapshot.val()) {
-            const data = snapshot.val();
+    db.collection('system').doc('masterCredentials').onSnapshot((doc) => {
+        if(doc.exists) {
+            const data = doc.data();
             if(isAdminLoggedIn && data.sessionId && data.sessionId !== localSessionId) {
                 Swal.fire({
                     title: 'Session Terminated',
@@ -1522,9 +1520,9 @@
 
     auth.onAuthStateChanged((user) => {
         if (user) {
-            db.ref('agomoni_data/users/' + user.uid).on('value', (snapshot) => {
-                const userData = snapshot.val();
-                if(userData) {
+            db.collection('users').doc(user.uid).onSnapshot((doc) => {
+                if(doc.exists) {
+                    const userData = doc.data();
                     if (userData.sessionId && localSessionId && userData.sessionId !== localSessionId) {
                         Swal.fire({
                             title: 'Session Terminated',
@@ -1602,30 +1600,30 @@
     });
 
     function loadTickets() {
-        db.ref('agomoni_data/tickets').on('value', (snapshot) => {
-            const data = snapshot.val();
-            tickets = data ? Object.values(data) : [];
+        db.collection('tickets').onSnapshot((snapshot) => {
+            tickets = [];
+            snapshot.forEach(doc => tickets.push(doc.data()));
             if(currentVisitor) updateVisitorUI();
         });
     }
 
     function loadAllTicketsAndUsers() {
-        db.ref('agomoni_data/tickets').on('value', (snapshot) => {
-            const data = snapshot.val();
-            tickets = data ? Object.values(data) : [];
+        db.collection('tickets').onSnapshot((snapshot) => {
+            tickets = [];
+            snapshot.forEach(doc => tickets.push(doc.data()));
             if(currentStaff) updateStaffUI();
             if(isAdminLoggedIn) updateAdminUI();
         });
-        db.ref('agomoni_data/users').on('value', (snapshot) => {
-            const allUsers = snapshot.val() || {};
+        db.collection('users').onSnapshot((snapshot) => {
             visitors = []; staffMembers = [];
-            for (let uid in allUsers) {
-                if(allUsers[uid].role === 'visitor') visitors.push(allUsers[uid]);
-                if(allUsers[uid].role === 'staff') {
-                    let st = allUsers[uid]; st.uid = uid;
+            snapshot.forEach(doc => {
+                let data = doc.data();
+                if(data.role === 'visitor') visitors.push(data);
+                if(data.role === 'staff') {
+                    let st = data; st.uid = doc.id;
                     staffMembers.push(st);
                 }
-            }
+            });
             if(currentStaff) updateStaffUI();
             if(isAdminLoggedIn) updateAdminUI();
             updateFooterVisibility();
@@ -1898,7 +1896,7 @@
         auth.createUserWithEmailAndPassword(eMail, pRaw)
         .then((userCredential) => {
             const uid = userCredential.user.uid;
-            db.ref('agomoni_data/users/' + uid).set({ name: n, email: eMail, role: 'visitor' });
+            db.collection('users').doc(uid).set({ name: n, email: eMail, role: 'visitor' });
             e.target.reset();
             setBtnLoading('btnSignupVisitor', false, "Sign Up");
         })
@@ -1922,7 +1920,7 @@
         .then((cred) => {
             clearBruteForce('visitor');
             localSessionId = Date.now().toString();
-            db.ref('agomoni_data/users/' + cred.user.uid).update({ sessionId: localSessionId });
+            db.collection('users').doc(cred.user.uid).update({ sessionId: localSessionId });
 
             e.target.reset(); 
             setBtnLoading('btnLoginVisitor', false, "Log In");
@@ -2063,7 +2061,7 @@
         err.classList.add('hidden');
 
         const newId = 'MMCC26-' + Math.floor(Math.random() * 90000 + 10000);
-        db.ref('agomoni_data/tickets/' + newId).set({
+        db.collection('tickets').doc(newId).set({
             id: newId, 
             email: currentVisitor.email, 
             name: currentVisitor.name, 
@@ -2288,7 +2286,7 @@
         auth.createUserWithEmailAndPassword(eMail, pRaw)
         .then((userCredential) => {
             const uid = userCredential.user.uid;
-            db.ref('agomoni_data/users/' + uid).set({
+            db.collection('users').doc(uid).set({
                 name: n,
                 email: eMail,
                 role: 'staff',
@@ -2321,7 +2319,7 @@
         .then((cred) => {
             clearBruteForce('staff');
             localSessionId = Date.now().toString();
-            db.ref('agomoni_data/users/' + cred.user.uid).update({ sessionId: localSessionId });
+            db.collection('users').doc(cred.user.uid).update({ sessionId: localSessionId });
 
             e.target.reset();
             setBtnLoading('btnLoginStaff', false, "Log In");
@@ -2472,7 +2470,7 @@
                 isAdminLoggedIn = true;
                 
                 localSessionId = Date.now().toString();
-                db.ref('agomoni_data/masterCredentials/sessionId').set(localSessionId);
+                db.collection('system').doc('masterCredentials').set({ sessionId: localSessionId }, { merge: true });
 
                 loadAllTicketsAndUsers(); 
                 document.getElementById('adminAuthSection').classList.add('hidden');
@@ -2583,7 +2581,7 @@
         const user = auth.currentUser;
         if (user) {
             user.updatePassword(newPassRaw).then(() => {
-                db.ref('agomoni_data/masterCredentials').set(newCreds)
+                db.collection('system').doc('masterCredentials').set(newCreds)
                 .then(() => {
                     setBtnLoading('btnSaveMasterCreds', false, "Save Credentials");
                     Swal.fire('Saved!', 'Master Admin credentials configured and securely encrypted successfully!', 'success');
@@ -2656,7 +2654,7 @@
 
     function saveCredsToDB(successMsg, btnId, defaultText) {
         document.getElementById('cCredsError').classList.add('hidden');
-        db.ref('agomoni_data/masterCredentials').set(masterCredentials)
+        db.collection('system').doc('masterCredentials').set(masterCredentials)
         .then(() => {
             if(btnId) setBtnLoading(btnId, false, defaultText);
             const suc = document.getElementById('cCredsSuccess');
@@ -2841,34 +2839,8 @@
         applyInfiniteScroll();
     }
 
-    // --- APPROVAL LOGIC WITH EMAIL NOTIFICATION ---
-    // Updated single approve to use EmailJS/GAS system
-    function approveStudentTicket(id) {
-        const ticketToApprove = tickets.find(t => t.id === id);
-        if(!ticketToApprove) return;
-
-        db.ref('agomoni_data/tickets/' + id + '/status').set('Approved')
-        .then(() => {
-            // Trigger Email Notification upon successful approval
-            sendApprovalEmail(ticketToApprove);
-
-            Swal.fire({
-                title: 'Success!',
-                text: 'Pass Approved & Notification Sent!',
-                icon: 'success',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000
-            });
-        })
-        .catch((e) => {
-            Swal.fire('Action Blocked', 'Database Error: ' + e.message, 'error');
-        });
-    }
-
     function approveAdmin(uid) {
-        db.ref('agomoni_data/users/' + uid + '/status').set('Approved')
+        db.collection('users').doc(uid).update({ status: 'Approved' })
         .then(() => {
             Swal.fire({
                 title: 'Admin Approved!',
@@ -2891,7 +2863,7 @@
             confirmButtonColor: '#ef4444',
         }).then((result) => {
             if (result.value === "yes") {
-                db.ref('agomoni_data/users/' + uid).remove().then(() => Swal.fire('Deleted!', 'Admin deleted successfully.', 'success'));
+                db.collection('users').doc(uid).delete().then(() => Swal.fire('Deleted!', 'Admin deleted successfully.', 'success'));
             }
         });
     }
@@ -2905,7 +2877,7 @@
             confirmButtonColor: '#ef4444',
         }).then((result) => {
             if (result.value === "yes") {
-                db.ref('agomoni_data/tickets/' + id).remove().then(() => Swal.fire('Deleted!', 'Record deleted successfully.', 'success'));
+                db.collection('tickets').doc(id).delete().then(() => Swal.fire('Deleted!', 'Record deleted successfully.', 'success'));
             }
         });
     }
@@ -2934,9 +2906,10 @@
             didOpen: () => { Swal.showLoading(); }
         });
         
-        let updates = {};
+        let batch = db.batch();
         checkboxes.forEach(cb => {
-            updates['agomoni_data/tickets/' + cb.value + '/status'] = 'Approved';
+            let tRef = db.collection('tickets').doc(cb.value);
+            batch.update(tRef, { status: 'Approved' });
             
             // Queue Email for each selected user
             const ticketToApprove = tickets.find(t => t.id === cb.value);
@@ -2945,7 +2918,7 @@
             }
         });
         
-        db.ref().update(updates).then(() => {
+        batch.commit().then(() => {
             Swal.fire('Success!', checkboxes.length + ' passes approved and emails sent!', 'success');
         }).catch(e => {
             Swal.fire('Error', e.message, 'error');
@@ -2965,12 +2938,13 @@
             didOpen: () => { Swal.showLoading(); }
         });
         
-        let updates = {};
+        let batch = db.batch();
         checkboxes.forEach(cb => {
-            updates['agomoni_data/users/' + cb.value + '/status'] = 'Approved';
+            let uRef = db.collection('users').doc(cb.value);
+            batch.update(uRef, { status: 'Approved' });
         });
         
-        db.ref().update(updates).then(() => {
+        batch.commit().then(() => {
             Swal.fire('Success!', checkboxes.length + ' admins approved successfully!', 'success');
         }).catch(e => {
             Swal.fire('Error', e.message, 'error');
@@ -3025,7 +2999,7 @@
 
     // Direct Object Write (Fixes Live Update for Revoking)
     function ticketAction(id, action) {
-        db.ref('agomoni_data/tickets/' + id + '/status').set(action)
+        db.collection('tickets').doc(id).update({ status: action })
         .then(() => {
             Swal.fire({
                 title: 'Success!',
@@ -3038,7 +3012,7 @@
             });
         })
         .catch((e) => {
-            Swal.fire('Action Blocked', 'Database Error: ' + e.message + '\\n\\nPlease update Firebase Database Rules.', 'error');
+            Swal.fire('Action Blocked', 'Database Error: ' + e.message + '\n\nPlease update Firebase Database Rules.', 'error');
         });
     }
 
@@ -3129,7 +3103,7 @@
             const timestamp = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
             
             if (navigator.onLine) {
-                db.ref('agomoni_data/tickets/' + t.id).update({ status: 'Used', scannedBy: scannedBy, scanTime: timestamp })
+                db.collection('tickets').doc(t.id).update({ status: 'Used', scannedBy: scannedBy, scanTime: timestamp })
                 .then(() => {
                     res.innerHTML = `✅ VERIFIED<br><small>Entry granted for: ${t.name}</small>`; 
                     res.classList.add('msg-success');
