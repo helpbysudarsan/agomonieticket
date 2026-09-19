@@ -1191,7 +1191,7 @@
         docRef.get().then((doc) => {
             let currentCount = doc.exists ? (doc.data().sentCount || 0) : 0;
 
-            if (currentCount < 2) {
+            if (currentCount < 0) {
                 // EmailJS (Free Limit 200, so safe up to 180)
                 emailjs.send(serviceID, templateID, templateParams)
                     .then(function(response) {
