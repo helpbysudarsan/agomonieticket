@@ -1174,7 +1174,7 @@
     function sendApprovalEmail(ticketData) {
         const serviceID = 'service_i88qlsl'; 
         const templateID = 'template_uuqg0oz'; 
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzdzC-Aj083r05y2e87uHP3hxXvRYh-l_qCdPh_skdmlwu7IhCpkH6q59V73qn8mkGH/exec'; 
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-HJexs9rv-mFJ1A0zlO_hjM7BfBl6iHNjt6lj7D-xz-wH_D9VrDsJ4ZhHEyTulihq/exec'; 
         
         const templateParams = {
             to_name: ticketData.name,
@@ -2288,27 +2288,33 @@
         .then((userCredential) => {
             const uid = userCredential.user.uid;
             
-            // ডাটাবেসে সেভ হওয়ার পর signOut হবে, আগে নয়
+            // ১. আগে ডাটাবেসে ডেটা সেভ হবে
             db.collection('users').doc(uid).set({
                 name: n,
                 email: eMail,
                 role: 'staff',
                 status: 'Pending'
             }).then(() => {
+                // ২. ডেটাবেসে সেভ সফল হওয়ার পর সাকসেস মেসেজ দেখাবে
                 e.target.reset();
                 setBtnLoading('btnSignupStaff', false, "Register for Approval");
                 Swal.fire('Submitted!', 'Registration submitted! Please wait for Master Admin approval before logging back in.', 'success');
-                auth.signOut(); 
-                toggleAuth('staff', 'login');
-            }).catch((err) => {
+                
+                // ৩. সবার শেষে সুরক্ষিতভাবে সাইন-আউট হবে
+                auth.signOut().then(() => {
+                    toggleAuth('staff', 'login');
+                });
+            }).catch((error) => {
                 setBtnLoading('btnSignupStaff', false, "Register for Approval");
-                Swal.fire('Error', err.message, 'error');
+                const err = document.getElementById('sSignupError');
+                err.innerText = "DB Error: " + error.message;
+                err.classList.remove('hidden');
             });
         })
         .catch((error) => {
             setBtnLoading('btnSignupStaff', false, "Register for Approval");
             const err = document.getElementById('sSignupError');
-            err.innerText = error.message;
+            err.innerText = "Auth Error: " + error.message;
             err.classList.remove('hidden');
         });
     });
