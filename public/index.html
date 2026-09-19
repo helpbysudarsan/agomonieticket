@@ -359,7 +359,7 @@
         body.dark-mode .vip-pass-subtext { color: #fcd34d !important; }
 
         /* =========================================
-           7. FORMS, INPUTS & BUTTONS & BRUTE-FORCE LOCK INFO
+           7. FORMS, INPUTS & BUTTONS
            ========================================= */
         input:not([type="checkbox"]), select { width: 100%; padding: 14px; margin: 8px 0 16px 0; border: 1px solid var(--input-border); border-radius: 8px; box-sizing: border-box; font-size: 1rem; background-color: var(--input-bg); color: var(--text-main); transition: all 0.2s; }
         input:focus, select:focus { outline: none; border-color: var(--visitor-color); box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15); }
@@ -368,26 +368,12 @@
         
         .pin-input { text-align: center; font-size: 1.8rem; letter-spacing: 10px; font-weight: bold; }
         .password-container { position: relative; width: 100%; }
-        .password-container input { padding-right: 50px; margin-bottom: 5px; }
+        .password-container input { padding-right: 50px; margin-bottom: 15px; } /* Adjusted margin for clean look without span */
         .eye-btn {
             position: absolute; right: 15px; top: 40%; transform: translateY(-50%);
             background: none; border: none; cursor: pointer; font-size: 1.2rem;
             color: var(--text-muted); padding: 0; width: auto;
         }
-
-        /* Brute-force Attempts text styling */
-        .attempts-text {
-            display: block;
-            text-align: right;
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            margin-top: -2px;
-            height: 15px;
-        }
-        .attempts-danger { color: var(--danger) !important; animation: pulse-red-text 1s infinite alternate; }
-        @keyframes pulse-red-text { from { opacity: 1; } to { opacity: 0.6; } }
 
         button { 
             color: white; border: none; padding: 14px 20px; border-radius: 12px; 
@@ -455,36 +441,18 @@
         body.dark-mode .scanned-by-text { color: #ffea00; }
 
         /* =========================================
-           9. COMPACT SWEETALERT2 POPUP DESIGN (RESIZED PRO)
+           9. COMPACT SWEETALERT2 POPUP DESIGN
            ========================================= */
         .swal2-popup {
             width: clamp(220px, 65vw, 280px) !important; 
             padding: 0.8em 0.5em 0.5em !important; 
             border-radius: 12px !important;
         }
-        .swal2-title {
-            font-size: 1.05rem !important;
-            margin-bottom: 0 !important;
-            padding: 0 !important;
-        }
-        .swal2-html-container {
-            font-size: 0.8rem !important;
-            margin: 0.5em 0 0.8em !important; 
-            line-height: 1.3 !important;
-        }
-        .swal2-icon {
-            transform: scale(0.45) !important; 
-            margin: 0 auto !important; 
-        }
-        .swal2-actions {
-            margin-top: 0 !important;
-        }
-        .swal2-confirm, .swal2-cancel {
-            font-size: 0.8rem !important;
-            padding: 6px 16px !important;
-            border-radius: 6px !important;
-            min-height: 30px !important;
-        }
+        .swal2-title { font-size: 1.05rem !important; margin-bottom: 0 !important; padding: 0 !important; }
+        .swal2-html-container { font-size: 0.8rem !important; margin: 0.5em 0 0.8em !important; line-height: 1.3 !important; }
+        .swal2-icon { transform: scale(0.45) !important; margin: 0 auto !important; }
+        .swal2-actions { margin-top: 0 !important; }
+        .swal2-confirm, .swal2-cancel { font-size: 0.8rem !important; padding: 6px 16px !important; border-radius: 6px !important; min-height: 30px !important; }
 
         body.dark-mode .swal2-popup { background: #1a0505 !important; color: #fef3c7 !important; border: 1px solid #7f1d1d; }
         body.dark-mode .swal2-title, body.dark-mode .swal2-html-container { color: #fef3c7 !important; }
@@ -631,7 +599,7 @@
             </div>
             
             <div id="visitorAuthSection">
-                <!-- Login Form with Brute Force Protection -->
+                <!-- Login Form -->
                 <form id="formVisitorLogin">
                     <h3>Student Login</h3>
                     <input type="email" id="vLoginEmail" placeholder="Email Address" required>
@@ -639,7 +607,6 @@
                         <input type="password" id="vLoginPass" placeholder="Password" required>
                         <button type="button" class="eye-btn" onclick="togglePassword('vLoginPass', this)">👁️</button>
                     </div>
-                    <span id="vLoginAttempts" class="attempts-text"></span>
                     <button type="submit" class="btn-visitor" id="btnLoginVisitor">Log In</button>
                     <div id="vLoginError" class="status-msg msg-error hidden">Invalid credentials.</div>
                     
@@ -747,7 +714,7 @@
             </div>
             
             <div id="staffAuthSection">
-                <!-- Login Form with Brute Force Protection -->
+                <!-- Login Form -->
                 <form id="formStaffLogin">
                     <h3>Admin Login</h3>
                     <input type="email" id="sLoginEmail" placeholder="Admin Email" required>
@@ -755,7 +722,6 @@
                         <input type="password" id="sLoginPass" placeholder="Password" required>
                         <button type="button" class="eye-btn" onclick="togglePassword('sLoginPass', this)">👁️</button>
                     </div>
-                    <span id="sLoginAttempts" class="attempts-text"></span>
                     <button type="submit" class="btn-staff" id="btnLoginStaff">Log In</button>
                     <div id="sLoginError" class="status-msg msg-error hidden">Invalid credentials or awaiting Master Approval.</div>
                     
@@ -764,7 +730,7 @@
                 </form>
 
                 <!-- Signup Form -->
-                <form id="formStaffSignup" class="hidden">
+                <form id="formStaffSignup">
                     <h3>Admin Registration</h3>
                     <input type="text" id="sSignupName" placeholder="Full Name" required>
                     <input type="email" id="sSignupEmail" placeholder="Admin Email" required>
@@ -873,8 +839,7 @@
             <div id="admin2FASection">
                 <h3 style="text-align: center; color: var(--admin-color);">Step 1: Security PIN</h3>
                 <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Enter the 6-digit Master Security PIN to continue.</p>
-                <input type="password" id="aLoginPin" class="pin-input" placeholder="••••••" maxlength="6" pattern="\d{6}" autocomplete="off" style="margin-bottom: 5px;">
-                <span id="aLoginPinAttempts" class="attempts-text"></span>
+                <input type="password" id="aLoginPin" class="pin-input" placeholder="••••••" maxlength="6" pattern="\d{6}" autocomplete="off" style="margin-bottom: 15px;">
                 <button class="btn-admin" onclick="verifyAdminPin()" id="btnVerifyPin">Verify PIN</button>
                 
                 <!-- SECRET FORGOT PASSWORD BUTTON (HIDDEN) -->
@@ -892,7 +857,6 @@
                     <input type="password" id="aLoginPass" placeholder="Master Password">
                     <button type="button" class="eye-btn" onclick="togglePassword('aLoginPass', this)">👁️</button>
                 </div>
-                <span id="aLoginPassAttempts" class="attempts-text"></span>
                 <button class="btn-admin" onclick="handleAdminLogin()" id="btnMasterLogin">Secure Login</button>
                 
                 <!-- SECRET FORGOT PASSWORD BUTTON (HIDDEN) -->
@@ -1035,8 +999,8 @@
                         <h3 style="margin:0; font-size:1.1rem;">🛡️ Pending Admin Approvals</h3>
                         <button class="back-btn" style="margin:0; padding:4px 10px;" onclick="closeListView('master', 'adminViewStaffApprove')">✕</button>
                     </div>
-                    <input type="text" class="search-bar" id="search-adminStaffApprove" placeholder="Search by name or email..." onkeyup="filterList('search-adminStaffApprove', 'adminStaffApprovalList')">
-                    <div id="adminStaffApprovalList" style="font-size: 0.95rem;"></div>
+                    <input type="text" class="search-bar" id="search-adminStaffApprove" placeholder="Search by name or email..." onkeyup="filterList('search-adminStaffApprove', 'adminStaffApproveList')">
+                    <div id="adminStaffApproveList" style="font-size: 0.95rem;"></div>
                 </div>
 
                 <div id="adminViewStaff" class="hidden section-box">
@@ -1123,6 +1087,8 @@
 
 <!-- === MAIN APPLICATION SCRIPT === -->
 <script>
+    const MASTER_EMAIL = "iamdarsan.ai@gmail.com";
+
     // --- HELPER TO GET DYNAMIC VISUALS BASED ON REGISTRATION ORDER ---
     function getTicketVisuals(tktId) {
         const numPart = tktId ? tktId.replace(/\D/g, '') : '0';
@@ -1174,7 +1140,7 @@
     function sendApprovalEmail(ticketData) {
         const serviceID = 'service_i88qlsl'; 
         const templateID = 'template_uuqg0oz'; 
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-HJexs9rv-mFJ1A0zlO_hjM7BfBl6iHNjt6lj7D-xz-wH_D9VrDsJ4ZhHEyTulihq/exec'; 
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxnDsT3tD0Auv9qxxwLSLaD8gFunio5DQyJ3I_tAwWyAJb_I1Is9ATgZHkX2XK7KqYh/exec'; 
         
         const templateParams = {
             to_name: ticketData.name,
@@ -1192,7 +1158,6 @@
             let currentCount = doc.exists ? (doc.data().sentCount || 0) : 0;
 
             if (currentCount < 0) {
-                // EmailJS (Free Limit 200, so safe up to 180)
                 emailjs.send(serviceID, templateID, templateParams)
                     .then(function(response) {
                         console.log('EmailJS: SUCCESS!', ticketData.email);
@@ -1202,7 +1167,6 @@
                         sendViaAppsScript(GAS_WEB_APP_URL, templateParams, docRef, currentCount);
                     });
             } else {
-                // Above 180: Use Google Apps Script
                 sendViaAppsScript(GAS_WEB_APP_URL, templateParams, docRef, currentCount);
             }
         }).catch(err => console.error("Error reading email count", err));
@@ -1218,7 +1182,7 @@
             method: 'POST',
             mode: 'no-cors', 
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'text/plain;charset=utf-8',
             },
             body: JSON.stringify(params)
         }).then(() => {
@@ -1228,87 +1192,6 @@
             console.error('Google Apps Script: Error', error);
         });
     }
-
-    // --- BRUTE FORCE LOCKOUT SYSTEM ---
-    const MAX_ATTEMPTS = 10;
-    const LOCK_DURATION = 30 * 60 * 1000; // 30 Minutes
-
-    function handleBruteForce(roleType, btnId, errorTextId, attemptTextId) {
-        const lockKey = roleType + '_lock_time';
-        const attemptsKey = roleType + '_attempts';
-        const now = Date.now();
-        
-        let lockTime = localStorage.getItem(lockKey);
-        
-        // If account is locked
-        if (lockTime && now < parseInt(lockTime)) {
-            const timeLeft = Math.ceil((parseInt(lockTime) - now) / 60000); // in mins
-            const lockMsg = `Account locked. Try again in ${timeLeft}m.`;
-            
-            document.getElementById(btnId).disabled = true;
-            document.getElementById(errorTextId).innerText = lockMsg;
-            document.getElementById(errorTextId).classList.remove('hidden');
-            document.getElementById(attemptTextId).innerText = '';
-            
-            // Check again in 1 minute to auto unlock visually
-            setTimeout(() => handleBruteForce(roleType, btnId, errorTextId, attemptTextId), 60000);
-            return true; // Is locked
-        } else if (lockTime) {
-            // Lock expired, reset
-            localStorage.removeItem(lockKey);
-            localStorage.setItem(attemptsKey, 0);
-            document.getElementById(btnId).disabled = false;
-        }
-
-        let attempts = parseInt(localStorage.getItem(attemptsKey)) || 0;
-        let left = MAX_ATTEMPTS - attempts;
-        
-        const attemptEl = document.getElementById(attemptTextId);
-        
-        if (left < MAX_ATTEMPTS) {
-            attemptEl.innerText = `${left} attempt(s) remaining.`;
-            if (left <= 3) attemptEl.classList.add('attempts-danger');
-            else attemptEl.classList.remove('attempts-danger');
-        } else {
-            attemptEl.innerText = '';
-            attemptEl.classList.remove('attempts-danger');
-        }
-
-        return false; // Not locked
-    }
-
-    function logFailedAttempt(roleType, btnId, errorTextId, attemptTextId) {
-        const attemptsKey = roleType + '_attempts';
-        const lockKey = roleType + '_lock_time';
-        
-        let attempts = parseInt(localStorage.getItem(attemptsKey)) || 0;
-        attempts++;
-        localStorage.setItem(attemptsKey, attempts);
-        
-        if (attempts >= MAX_ATTEMPTS) {
-            // Lock out
-            localStorage.setItem(lockKey, Date.now() + LOCK_DURATION);
-            handleBruteForce(roleType, btnId, errorTextId, attemptTextId);
-            Swal.fire('Locked', 'Too many failed attempts. Account locked for 30 minutes.', 'error');
-        } else {
-            // Update UI
-            handleBruteForce(roleType, btnId, errorTextId, attemptTextId);
-        }
-    }
-
-    function clearBruteForce(roleType) {
-        localStorage.removeItem(roleType + '_attempts');
-        localStorage.removeItem(roleType + '_lock_time');
-    }
-
-    // Call on load for all forms
-    document.addEventListener("DOMContentLoaded", () => {
-        handleBruteForce('visitor', 'btnLoginVisitor', 'vLoginError', 'vLoginAttempts');
-        handleBruteForce('staff', 'btnLoginStaff', 'sLoginError', 'sLoginAttempts');
-        handleBruteForce('admin', 'btnVerifyPin', 'aPinError', 'aLoginPinAttempts'); // Step 1
-        handleBruteForce('adminStep2', 'btnMasterLogin', 'aLoginError', 'aLoginPassAttempts'); // Step 2
-    });
-
 
     // --- EASTER EGG DOUBLE TAP LOGIC ---
     let lastHeaderTap = 0;
@@ -1450,7 +1333,7 @@
     }
 
     function reFilterAll() {
-        if(document.getElementById('search-adminStaffApprove')) filterList('search-adminStaffApprove', 'adminStaffApprovalList');
+        if(document.getElementById('search-adminStaffApprove')) filterList('search-adminStaffApprove', 'adminStaffApproveList');
         if(document.getElementById('search-adminStaff')) filterList('search-adminStaff', 'adminStaffList');
         if(document.getElementById('search-adminPending')) filterList('search-adminPending', 'adminPendingList');
         if(document.getElementById('search-adminApproved')) filterList('search-adminApproved', 'adminApprovedList');
@@ -1499,8 +1382,15 @@
     let currentVisitor = null; 
     let currentStaff = null;
     let isAdminLoggedIn = false;
+    
+    let masterPinAttempts = 0; 
+    let masterPinLockUntil = 0;
 
-    db.collection('system').doc('masterCredentials').onSnapshot((doc) => {
+    let ticketListener = null;
+    let userListener = null;
+    let masterCredListener = null;
+
+    masterCredListener = db.collection('system').doc('masterCredentials').onSnapshot((doc) => {
         if(doc.exists) {
             const data = doc.data();
             if(isAdminLoggedIn && data.sessionId && data.sessionId !== localSessionId) {
@@ -1583,7 +1473,7 @@
                 auth.signInWithEmailLink(em, window.location.href)
                 .then((result) => {
                     window.localStorage.removeItem('emailForSignIn');
-                    if (em === "iamdarsan.ai@gmail.com") {
+                    if (em === MASTER_EMAIL) {
                         Swal.fire('Verified!', 'Master Email Verified! You can now securely set or reset the Master Credentials.', 'success');
                         switchView('view-admin');
                         document.getElementById('admin2FASection').classList.add('hidden');
@@ -1601,7 +1491,8 @@
     });
 
     function loadTickets() {
-        db.collection('tickets').onSnapshot((snapshot) => {
+        if (ticketListener) ticketListener(); 
+        ticketListener = db.collection('tickets').onSnapshot((snapshot) => {
             tickets = [];
             snapshot.forEach(doc => tickets.push(doc.data()));
             if(currentVisitor) updateVisitorUI();
@@ -1609,13 +1500,17 @@
     }
 
     function loadAllTicketsAndUsers() {
-        db.collection('tickets').onSnapshot((snapshot) => {
+        if (ticketListener) ticketListener();
+        if (userListener) userListener();
+        
+        ticketListener = db.collection('tickets').onSnapshot((snapshot) => {
             tickets = [];
             snapshot.forEach(doc => tickets.push(doc.data()));
             if(currentStaff) updateStaffUI();
             if(isAdminLoggedIn) updateAdminUI();
         });
-        db.collection('users').onSnapshot((snapshot) => {
+        
+        userListener = db.collection('users').onSnapshot((snapshot) => {
             visitors = []; staffMembers = [];
             snapshot.forEach(doc => {
                 let data = doc.data();
@@ -1820,6 +1715,10 @@
         if(role === 'visitor' || role === 'staff') {
             auth.signOut().then(() => {
                 currentVisitor = null; currentStaff = null; localSessionId = null;
+                
+                if (ticketListener) { ticketListener(); ticketListener = null; }
+                if (role === 'staff' && userListener) { userListener(); userListener = null; }
+
                 document.getElementById(`${role}Dashboard`).classList.add('hidden');
                 document.getElementById(`${role}AuthSection`).classList.remove('hidden');
                 
@@ -1837,6 +1736,10 @@
         } else if (role === 'admin') {
             isAdminLoggedIn = false;
             localSessionId = null;
+            
+            if (ticketListener) { ticketListener(); ticketListener = null; }
+            if (userListener) { userListener(); userListener = null; }
+
             closeScanner('master');
             closeListView('master', 'adminViewStaffApprove');
             closeListView('master', 'adminViewStaff');
@@ -1911,25 +1814,21 @@
     // --- STUDENT LOGIN (Firebase Auth) ---
     document.getElementById('formVisitorLogin').addEventListener('submit', e => {
         e.preventDefault();
-        if (handleBruteForce('visitor', 'btnLoginVisitor', 'vLoginError', 'vLoginAttempts')) return;
-        
         setBtnLoading('btnLoginVisitor', true);
         const eMail = document.getElementById('vLoginEmail').value;
         const pRaw = document.getElementById('vLoginPass').value;
 
         auth.signInWithEmailAndPassword(eMail, pRaw)
         .then((cred) => {
-            clearBruteForce('visitor');
             localSessionId = Date.now().toString();
             db.collection('users').doc(cred.user.uid).update({ sessionId: localSessionId });
-
             e.target.reset(); 
             setBtnLoading('btnLoginVisitor', false, "Log In");
         })
         .catch((error) => {
             setBtnLoading('btnLoginVisitor', false, "Log In");
+            const errBox = document.getElementById('vLoginError');
             
-            // --- Custom User Not Found Popup Logic ---
             if (error.code === 'auth/user-not-found') {
                 Swal.fire({
                     title: 'Account Not Found!',
@@ -1939,14 +1838,14 @@
                     confirmButtonText: 'Sign Up Now',
                     cancelButtonText: 'Try Again'
                 }).then((result) => {
-                    if (result.isConfirmed) {
-                        toggleAuth('visitor', 'signup');
-                    }
+                    if (result.isConfirmed) toggleAuth('visitor', 'signup');
                 });
+            } else if (error.code === 'auth/too-many-requests') {
+                errBox.innerText = 'Account temporarily locked due to many failed attempts. Try again later.';
+                errBox.classList.remove('hidden'); 
             } else {
-                document.getElementById('vLoginError').innerText = 'Invalid credentials.';
-                document.getElementById('vLoginError').classList.remove('hidden'); 
-                logFailedAttempt('visitor', 'btnLoginVisitor', 'vLoginError', 'vLoginAttempts');
+                errBox.innerText = 'Invalid credentials.';
+                errBox.classList.remove('hidden'); 
             }
         });
     });
@@ -2104,19 +2003,16 @@
             let gradStart, gradEnd, borderColor, borderInner, titleColor, subTitleColor, detailColor, foodColor;
             
             if (styleType === 0) {
-                // Style 1: Crimson Gold
                 gradStart = '#1a0505'; gradEnd = '#000000';
                 borderColor = '#ffd700'; borderInner = 'rgba(255, 0, 85, 0.4)';
                 titleColor = '#ffd700'; subTitleColor = '#fcd34d';
                 detailColor = '#fef3c7'; foodColor = '#ff0055';
             } else if (styleType === 1) {
-                // Style 2: Deep Blue Neon
                 gradStart = '#081229'; gradEnd = '#000000';
                 borderColor = '#00f0ff'; borderInner = 'rgba(0, 240, 255, 0.4)';
                 titleColor = '#00f0ff'; subTitleColor = '#7dd3fc';
                 detailColor = '#f0f9ff'; foodColor = '#38bdf8';
             } else {
-                // Style 3: Emerald Gold
                 gradStart = '#022c22'; gradEnd = '#000000';
                 borderColor = '#facc15'; borderInner = 'rgba(74, 222, 128, 0.4)';
                 titleColor = '#facc15'; subTitleColor = '#bbf7d0';
@@ -2288,19 +2184,16 @@
         .then((userCredential) => {
             const uid = userCredential.user.uid;
             
-            // ১. আগে ডাটাবেসে ডেটা সেভ হবে
             db.collection('users').doc(uid).set({
                 name: n,
                 email: eMail,
                 role: 'staff',
                 status: 'Pending'
             }).then(() => {
-                // ২. ডেটাবেসে সেভ সফল হওয়ার পর সাকসেস মেসেজ দেখাবে
                 e.target.reset();
                 setBtnLoading('btnSignupStaff', false, "Register for Approval");
                 Swal.fire('Submitted!', 'Registration submitted! Please wait for Master Admin approval before logging back in.', 'success');
                 
-                // ৩. সবার শেষে সুরক্ষিতভাবে সাইন-আউট হবে
                 auth.signOut().then(() => {
                     toggleAuth('staff', 'login');
                 });
@@ -2322,15 +2215,12 @@
     // --- ADMIN LOGIN WITH "NOT FOUND" POPUP ---
     document.getElementById('formStaffLogin').addEventListener('submit', e => {
         e.preventDefault();
-        if (handleBruteForce('staff', 'btnLoginStaff', 'sLoginError', 'sLoginAttempts')) return;
-
         setBtnLoading('btnLoginStaff', true);
         const eMail = document.getElementById('sLoginEmail').value;
         const pRaw = document.getElementById('sLoginPass').value;
 
         auth.signInWithEmailAndPassword(eMail, pRaw)
         .then((cred) => {
-            clearBruteForce('staff');
             localSessionId = Date.now().toString();
             db.collection('users').doc(cred.user.uid).update({ sessionId: localSessionId });
 
@@ -2339,8 +2229,8 @@
         })
         .catch((error) => {
             setBtnLoading('btnLoginStaff', false, "Log In");
+            const errBox = document.getElementById('sLoginError');
             
-            // --- Custom User Not Found Popup Logic ---
             if (error.code === 'auth/user-not-found') {
                 Swal.fire({
                     title: 'Admin Not Found!',
@@ -2354,10 +2244,12 @@
                         toggleAuth('staff', 'signup');
                     }
                 });
+            } else if (error.code === 'auth/too-many-requests') {
+                errBox.innerText = 'Account temporarily locked due to many failed attempts. Try again later.';
+                errBox.classList.remove('hidden'); 
             } else {
-                document.getElementById('sLoginError').innerText = 'Invalid credentials or awaiting Master Approval.';
-                document.getElementById('sLoginError').classList.remove('hidden'); 
-                logFailedAttempt('staff', 'btnLoginStaff', 'sLoginError', 'sLoginAttempts');
+                errBox.innerText = 'Invalid credentials or awaiting Master Approval.';
+                errBox.classList.remove('hidden'); 
             }
         });
     });
@@ -2449,37 +2341,46 @@
             Swal.fire('Setup Required', 'System is not initialized.', 'warning');
             return;
         }
-        if (handleBruteForce('admin', 'btnVerifyPin', 'aPinError', 'aLoginPinAttempts')) return;
+
+        if (Date.now() < masterPinLockUntil) {
+            const mins = Math.ceil((masterPinLockUntil - Date.now()) / 60000);
+            document.getElementById('aPinError').innerText = `Locked. Try again in ${mins} minute(s).`;
+            document.getElementById('aPinError').classList.remove('hidden');
+            return;
+        }
 
         const pinRaw = document.getElementById('aLoginPin').value;
         const pinHash = hashData(pinRaw);
 
         if(pinHash === masterCredentials.pin || pinRaw === masterCredentials.pin) {
-            clearBruteForce('admin');
+            masterPinAttempts = 0; 
             document.getElementById('admin2FASection').classList.add('hidden');
             document.getElementById('aPinError').classList.add('hidden');
             document.getElementById('adminAuthSection').classList.remove('hidden');
             document.getElementById('aLoginPin').value = ''; 
         } else {
-            document.getElementById('aPinError').innerText = 'Invalid PIN Code';
+            masterPinAttempts++;
+            if (masterPinAttempts >= 5) {
+                masterPinLockUntil = Date.now() + 60000 * 5; 
+                document.getElementById('aPinError').innerText = 'Too many failed attempts. Locked for 5 minutes.';
+            } else {
+                document.getElementById('aPinError').innerText = `Invalid PIN Code. Attempts left: ${5 - masterPinAttempts}`;
+            }
             document.getElementById('aPinError').classList.remove('hidden');
-            logFailedAttempt('admin', 'btnVerifyPin', 'aPinError', 'aLoginPinAttempts');
         }
     }
 
     function handleAdminLogin() {
-        if (!masterCredentials) return; // Prevent login if not setup
-        if (handleBruteForce('adminStep2', 'btnMasterLogin', 'aLoginError', 'aLoginPassAttempts')) return;
+        if (!masterCredentials) return;
 
+        setBtnLoading('btnMasterLogin', true);
         const u = document.getElementById('aLoginUser').value;
         const pRaw = document.getElementById('aLoginPass').value; 
+        const errBox = document.getElementById('aLoginError');
         
-        // 1. Check Custom Username ONLY
         if(u === masterCredentials.user) {
-            
-            auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', pRaw)
+            auth.signInWithEmailAndPassword(MASTER_EMAIL, pRaw)
             .then((cred) => {
-                clearBruteForce('adminStep2');
                 isAdminLoggedIn = true;
                 
                 localSessionId = Date.now().toString();
@@ -2487,23 +2388,26 @@
 
                 loadAllTicketsAndUsers(); 
                 document.getElementById('adminAuthSection').classList.add('hidden');
-                document.getElementById('aLoginError').classList.add('hidden');
+                errBox.classList.add('hidden');
                 document.getElementById('adminDashboard').classList.remove('hidden');
                 updateFooterVisibility();
                 syncOfflineScans();
+                setBtnLoading('btnMasterLogin', false, "Secure Login");
             })
             .catch((error) => {
-                const errBox = document.getElementById('aLoginError');
-                errBox.innerText = "Access Denied: Invalid Password";
+                setBtnLoading('btnMasterLogin', false, "Secure Login");
+                if (error.code === 'auth/too-many-requests') {
+                    errBox.innerText = "Account locked due to too many failed attempts.";
+                } else {
+                    errBox.innerText = "Access Denied: Invalid Password";
+                }
                 errBox.classList.remove('hidden');
-                logFailedAttempt('adminStep2', 'btnMasterLogin', 'aLoginError', 'aLoginPassAttempts');
             });
             
         } else {
-            const errBox = document.getElementById('aLoginError');
+            setBtnLoading('btnMasterLogin', false, "Secure Login");
             errBox.innerText = "Access Denied: Invalid Username";
             errBox.classList.remove('hidden');
-            logFailedAttempt('adminStep2', 'btnMasterLogin', 'aLoginError', 'aLoginPassAttempts');
         }
     }
 
@@ -2518,7 +2422,6 @@
             document.getElementById('aLoginPin').value = '';
             document.getElementById('aPinError').classList.add('hidden');
             
-            // Hiding secret buttons on cancel
             document.getElementById('masterRecoveryBtn1').classList.add('hidden');
             document.getElementById('masterRecoveryBtn2').classList.add('hidden');
             switchView('view-home');
@@ -2536,7 +2439,6 @@
         document.getElementById('adminSignupSection').classList.add('hidden');
         document.getElementById('aRecError').classList.add('hidden');
         
-        // Return to Pin Section securely
         document.getElementById('admin2FASection').classList.remove('hidden');
         document.getElementById('masterRecoveryBtn1').classList.add('hidden');
         document.getElementById('masterRecoveryBtn2').classList.add('hidden');
@@ -2544,16 +2446,15 @@
 
     function sendMasterRecoveryEmail() {
         setBtnLoading('btnSendRecLink', true);
-        const masterEmail = "iamdarsan.ai@gmail.com";
         const actionCodeSettings = {
             url: window.location.href, // Redirect back to this page
             handleCodeInApp: true
         };
         
-        auth.sendSignInLinkToEmail(masterEmail, actionCodeSettings)
+        auth.sendSignInLinkToEmail(MASTER_EMAIL, actionCodeSettings)
             .then(() => {
                 setBtnLoading('btnSendRecLink', false, "Send Recovery Link");
-                window.localStorage.setItem('emailForSignIn', masterEmail);
+                window.localStorage.setItem('emailForSignIn', MASTER_EMAIL);
                 Swal.fire('Sent!', 'A secure recovery/setup link has been sent to the registered email address. Please check your inbox and click the link to configure your credentials.', 'success');
                 cancelMasterReset();
             })
@@ -2582,15 +2483,13 @@
         
         err.classList.add('hidden');
 
-        // We only save hashed pin/user locally in DB. Password checking is fully offloaded to Firebase Auth.
         const newCreds = {
             name: newName,
             user: newUser,
             pin: hashData(newPinRaw),
-            pass: "LOCKED_BY_AUTH" // We no longer save password hash in DB for extra security
+            pass: "LOCKED_BY_AUTH" 
         };
 
-        // Also update the firebase auth password so it syncs!
         const user = auth.currentUser;
         if (user) {
             user.updatePassword(newPassRaw).then(() => {
@@ -2607,10 +2506,9 @@
                     document.getElementById('adminSignupSection').classList.add('hidden');
                     document.getElementById('admin2FASection').classList.remove('hidden');
                     
-                    // Hide secret buttons
                     document.getElementById('masterRecoveryBtn1').classList.add('hidden');
                     document.getElementById('masterRecoveryBtn2').classList.add('hidden');
-                    auth.signOut(); // Force re-login
+                    auth.signOut(); 
                 })
                 .catch((error) => {
                     setBtnLoading('btnSaveMasterCreds', false, "Save Credentials");
@@ -2632,10 +2530,8 @@
         document.getElementById('btnMasterLogout').classList.add('hidden');
         document.getElementById('adminChangeCredsSection').classList.remove('hidden');
         
-        // Clear all inputs
         document.querySelectorAll('.cred-form input').forEach(inp => inp.value = '');
         
-        // Reset to first tab
         switchCredTab('user');
     }
 
@@ -2681,7 +2577,7 @@
     function updateMasterUsername() {
         setBtnLoading('btnUpdateUser', true);
         const oldUser = document.getElementById('cOldUser').value.trim();
-        const pass = document.getElementById('cPassForUser').value; // We check this via re-auth now
+        const pass = document.getElementById('cPassForUser').value; 
         const pin = document.getElementById('cPinForUser').value;
         const newUser = document.getElementById('cNewUser').value.trim();
         
@@ -2690,8 +2586,7 @@
         }
         if(!newUser) { showCredError("❌ Please enter a new username.", 'btnUpdateUser', 'Update Username'); return; }
         
-        // Re-authenticate to prove password is correct
-        auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', pass).then(() => {
+        auth.signInWithEmailAndPassword(auth.currentUser.email, pass).then(() => {
             masterCredentials.user = newUser;
             saveCredsToDB("Username updated securely.", 'btnUpdateUser', 'Update Username');
         }).catch(() => {
@@ -2707,8 +2602,7 @@
         
         if(!newPass || newPass !== confirmPass) { showCredError("❌ New passwords do not match or are empty.", 'btnUpdatePass', 'Update Password'); return; }
         
-        // Re-authenticate to prove old password is correct
-        auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', oldPass).then((cred) => {
+        auth.signInWithEmailAndPassword(auth.currentUser.email, oldPass).then((cred) => {
             cred.user.updatePassword(newPass).then(() => {
                 setBtnLoading('btnUpdatePass', false, 'Update Password');
                 const suc = document.getElementById('cCredsSuccess');
@@ -2732,7 +2626,7 @@
         }
         if(!newPin || newPin.length !== 6 || isNaN(newPin)) { showCredError("❌ New PIN must be exactly 6 digits.", 'btnUpdatePin', 'Update 2-Step PIN'); return; }
         
-        auth.signInWithEmailAndPassword('iamdarsan.ai@gmail.com', pass).then(() => {
+        auth.signInWithEmailAndPassword(auth.currentUser.email, pass).then(() => {
             masterCredentials.pin = hashData(newPin);
             saveCredsToDB("2-Step PIN updated securely.", 'btnUpdatePin', 'Update 2-Step PIN');
         }).catch(() => {
@@ -2776,14 +2670,14 @@
         }
         prevMasterPendingCount = pendingStudents;
         
-        const pendingAdminsDiv = document.getElementById('adminStaffApprovalList');
+        const pendingAdminsDiv = document.getElementById('adminStaffApproveList'); // FIXED ID MISMATCH HERE
         const pendAdmins = staffMembers.filter(s => s.status === 'Pending');
         if(pendAdmins.length > 0) {
             let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--text-main); font-size: 0.9rem;">
-                    <input type="checkbox" onclick="toggleAllBulk(this, 'adminStaffApprovalList')"> Select All
+                    <input type="checkbox" onclick="toggleAllBulk(this, 'adminStaffApproveList')"> Select All
                 </label>
-                <button class="approve-btn" onclick="bulkApproveAdmins('adminStaffApprovalList')" style="margin:0; background-color: var(--visitor-color);">Bulk Approve</button>
+                <button class="approve-btn" onclick="bulkApproveAdmins('adminStaffApproveList')" style="margin:0; background-color: var(--visitor-color);">Bulk Approve</button>
             </div>`;
             
             html += pendAdmins.map((s, index) => {
@@ -2791,7 +2685,7 @@
                 return `
                 <div class="list-item infinite-item" ${isHidden}>
                     <div style="display:flex; align-items:center; gap:12px;">
-                        <input type="checkbox" class="bulk-cb-adminStaffApprovalList" value="${s.uid}">
+                        <input type="checkbox" class="bulk-cb-adminStaffApproveList" value="${s.uid}">
                         <div><strong style="color: var(--text-main);">${s.name}</strong><br><small style="color:var(--text-muted)">${s.email}</small></div>
                     </div>
                     <button class="approve-btn" onclick="approveAdmin('${s.uid}')">Approve Admin</button>
@@ -2858,7 +2752,6 @@
 
         db.collection('tickets').doc(id).update({ status: 'Approved' })
         .then(() => {
-            // Trigger Email Notification upon successful approval
             sendApprovalEmail(ticketToApprove);
 
             Swal.fire({
@@ -2876,6 +2769,25 @@
         });
     }
     
+    // MISSING FUNCTION ADDED HERE FOR INDIVIDUAL ADMIN APPROVAL
+    function approveAdmin(uid) {
+        db.collection('users').doc(uid).update({ status: 'Approved' })
+        .then(() => {
+            Swal.fire({
+                title: 'Success!',
+                text: 'Admin Approved Successfully!',
+                icon: 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        })
+        .catch((e) => {
+            Swal.fire('Error', 'Database Error: ' + e.message, 'error');
+        });
+    }
+
     function deleteApprovedAdmin(uid) {
         Swal.fire({
             title: 'Confirm Deletion',
@@ -2914,7 +2826,6 @@
         });
     }
 
-    // Updated Bulk Approve for Students to include Email Notification
     function bulkApprove(containerId) {
         const checkboxes = document.querySelectorAll('.bulk-cb-' + containerId + ':checked');
         if(checkboxes.length === 0) {
@@ -3019,7 +2930,6 @@
         }
     }
 
-    // Direct Object Write (Fixes Live Update for Revoking)
     function ticketAction(id, action) {
         db.collection('tickets').doc(id).update({ status: action })
         .then(() => {
@@ -3139,11 +3049,10 @@
                 offlineScans.push({ id: t.id, scannedBy: scannedBy + ' (Offline)', scanTime: timestamp });
                 localStorage.setItem('offlineScans', JSON.stringify(offlineScans));
                 
-                // Update local array immediately to reflect in UI
                 t.status = 'Used';
                 t.scannedBy = scannedBy + ' (Offline)';
                 t.scanTime = timestamp;
-                updateAdminUI(); // Trigger UI update
+                updateAdminUI(); 
                 
                 res.innerHTML = `✅ VERIFIED (OFFLINE)<br><small>Entry granted for: ${t.name}. Will sync when online.</small>`; 
                 res.classList.add('msg-success');
@@ -3160,7 +3069,6 @@
 </script>
 
 <!-- === ANTI-INSPECT SECURITY SCRIPT === -->
-<!-- NOTE: You can temporarily remove this block below if you need to use Developer Tools while testing -->
 <script>
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('keydown', function(e) {
