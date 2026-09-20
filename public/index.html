@@ -785,6 +785,10 @@
                         <span>👥 Active Student Passes</span>
                         <span id="badge-staff-appStudent" class="menu-badge">0</span>
                     </div>
+                    <div class="list-menu-btn" style="border-left: 4px solid var(--success);" onclick="openListView('staff', 'staffViewPresent')">
+                        <span>📍 Present in Venue (Scanned)</span>
+                        <span id="badge-staff-present" class="menu-badge">0</span>
+                    </div>
                 </div>
 
                 <!-- ISOLATED LIST VIEWS -->
@@ -804,6 +808,14 @@
                     </div>
                     <input type="text" class="search-bar" id="search-staffApproved" placeholder="Search by name, email or ID..." onkeyup="filterList('search-staffApproved', 'staffApprovedList')">
                     <div id="staffApprovedList" style="font-size: 0.95rem;"></div>
+                </div>
+                <div id="staffViewPresent" class="hidden section-box" style="border-left: 4px solid var(--success);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h3 style="margin:0; font-size:1.1rem;">📍 Present in Venue</h3>
+                        <button class="back-btn" style="margin:0; padding:4px 10px;" onclick="closeListView('staff', 'staffViewPresent')">✕</button>
+                    </div>
+                    <input type="text" class="search-bar" id="search-staffPresent" placeholder="Search by name or food..." onkeyup="filterList('search-staffPresent', 'staffPresentList')">
+                    <div id="staffPresentList" style="font-size: 0.95rem;"></div>
                 </div>
 
                 <!-- ISOLATED SCANNER BOX -->
@@ -1311,6 +1323,7 @@
         if(document.getElementById('search-adminPresent')) filterList('search-adminPresent', 'adminPresentList');
         if(document.getElementById('search-staffPending')) filterList('search-staffPending', 'staffPendingList');
         if(document.getElementById('search-staffApproved')) filterList('search-staffApproved', 'staffApprovedList');
+        if(document.getElementById('search-staffPresent')) filterList('search-staffPresent', 'staffPresentList');
     }
 
     function hashData(text) { return CryptoJS.SHA256(text).toString(); }
@@ -1644,7 +1657,7 @@
                 
                 if(role === 'visitor') document.getElementById('vChangePassSection').classList.add('hidden');
                 if(role === 'staff') {
-                    closeScanner('staff'); closeListView('staff', 'staffViewPending'); closeListView('staff', 'staffViewApproved'); document.getElementById('sChangePassSection').classList.add('hidden');
+                    closeScanner('staff'); closeListView('staff', 'staffViewPending'); closeListView('staff', 'staffViewApproved'); closeListView('staff', 'staffViewPresent'); document.getElementById('sChangePassSection').classList.add('hidden');
                 }
                 toggleAuth(role, 'login'); updateFooterVisibility();
             });
@@ -1959,8 +1972,13 @@
 
     function updateStaffUI() {
         if(!currentStaff) return;
-        let pendingStudents = tickets.filter(t => t.status === 'Pending').length; let approvedStudents = tickets.filter(t => t.status === 'Approved').length;
-        document.getElementById('badge-staff-pendStudent').innerText = pendingStudents; document.getElementById('badge-staff-appStudent').innerText = approvedStudents;
+        let pendingStudents = tickets.filter(t => t.status === 'Pending').length; 
+        let approvedStudents = tickets.filter(t => t.status === 'Approved').length;
+        let presentStudents = tickets.filter(t => t.status === 'Used').length; // NEW for Staff
+
+        document.getElementById('badge-staff-pendStudent').innerText = pendingStudents; 
+        document.getElementById('badge-staff-appStudent').innerText = approvedStudents;
+        document.getElementById('badge-staff-present').innerText = presentStudents; // NEW for Staff
         
         const badgeElem = document.getElementById('badge-staff-pendStudent');
         if (pendingStudents > 2) {
@@ -1968,6 +1986,25 @@
             if (pendingStudents > prevStaffPendingCount) Swal.fire({ title: 'Smart Notification Alert 🔔', text: `${pendingStudents} students are waiting for pass approval!`, icon: 'info', toast: true, position: 'top-end', showConfirmButton: false, timer: 5000, timerProgressBar: true });
         } else badgeElem.classList.remove('badge-alert');
         prevStaffPendingCount = pendingStudents;
+        
+        // NEW: Rendering Present in Venue ONLY showing Name and Food for Staff
+        const presentListDivStaff = document.getElementById('staffPresentList');
+        if (presentListDivStaff) {
+            const presentTicketsStaff = tickets.filter(t => t.status === 'Used');
+            if(presentTicketsStaff.length > 0) {
+                let html = presentTicketsStaff.map((t, index) => {
+                    const isHidden = index >= 20 ? 'style="display: none;"' : '';
+                    return `
+                    <div class="list-item infinite-item" ${isHidden}>
+                        <div><strong style="color: var(--text-main);">${t.name}</strong><br><small style="color:var(--text-muted)">Food: ${t.foodPreference || 'N/A'}</small></div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;"><span class="status-badge" style="background:var(--border-color); color:var(--text-main); font-size:0.7rem">In Venue</span></div>
+                    </div>`;
+                }).join('');
+                if(presentTicketsStaff.length > 20) html += `<div class="load-more-trigger" style="text-align:center; padding: 15px; color: var(--visitor-color); cursor:pointer; font-weight:bold; font-size: 0.9rem;" onclick="loadMoreListItems(this)">⏬ Load More</div>`;
+                presentListDivStaff.innerHTML = html;
+            } else presentListDivStaff.innerHTML = '<span style="color: var(--text-muted);">No students have entered yet.</span>';
+        }
+
         renderTicketLists('staffPendingList', 'staffApprovedList'); reFilterAll();
     }
 
@@ -2221,13 +2258,16 @@
             let html = appT.map((t, index) => {
                 const isHidden = index >= 20 ? 'style="display: none;"' : '';
                 
-                // SUHDHU MASTER ADMIN ER JONNO DELETE BUTTON SHOW KORBE
+                // SUHDHU MASTER ADMIN ER JONNO DELETE BUTTON EBON FULL INFO SHOW KORBE
                 let removeBtnHtml = '';
+                let detailsHtml = `Food: ${t.foodPreference || 'N/A'}`; // Normal Admin শুধু Food দেখবে
+
                 if (isAdminLoggedIn) {
                     removeBtnHtml = `<button class="remove-btn" onclick="ticketAction('${t.id}', 'Revoked')">Remove</button>`;
+                    detailsHtml = `ID: ${t.id} | Food: ${t.foodPreference || 'N/A'}`; // Master admin ID ও দেখবে
                 }
                 
-                return `<div class="list-item infinite-item" ${isHidden}><div><strong style="color: var(--text-main);">${t.name}</strong><br><small style="color:var(--text-muted)">ID: ${t.id} | Food: ${t.foodPreference || 'N/A'}</small></div>${removeBtnHtml}</div>`;
+                return `<div class="list-item infinite-item" ${isHidden}><div><strong style="color: var(--text-main);">${t.name}</strong><br><small style="color:var(--text-muted)">${detailsHtml}</small></div>${removeBtnHtml}</div>`;
             }).join('');
             if(appT.length > 20) html += `<div class="load-more-trigger" style="text-align:center; padding: 15px; color: var(--visitor-color); cursor:pointer; font-weight:bold; font-size: 0.9rem;" onclick="loadMoreListItems(this)">⏬ Load More</div>`;
             aList.innerHTML = html;
