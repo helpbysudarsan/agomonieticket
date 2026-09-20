@@ -1487,14 +1487,17 @@
             document.getElementById('staffMenu').classList.add('hidden');
             document.getElementById(viewId).classList.remove('hidden');
             document.getElementById('btnStaffLogout').classList.add('hidden');
-            document.getElementById('search-' + viewId.replace('View', '')).value = '';
-            filterList('search-' + viewId.replace('View', ''), viewId.replace('View', '') + 'List');
+            
+            const searchInput = document.getElementById('search-' + viewId.replace('View', ''));
+            if(searchInput) { searchInput.value = ''; filterList(searchInput.id, viewId.replace('View', '') + 'List'); }
+            
         } else if (role === 'master') {
             document.getElementById('masterMenu').classList.add('hidden');
             document.getElementById(viewId).classList.remove('hidden');
             document.getElementById('btnMasterLogout').classList.add('hidden');
-            document.getElementById('search-' + viewId.replace('View', '')).value = '';
-            filterList('search-' + viewId.replace('View', ''), viewId.replace('View', '') + 'List');
+            
+            const searchInput = document.getElementById('search-' + viewId.replace('View', ''));
+            if(searchInput) { searchInput.value = ''; filterList(searchInput.id, viewId.replace('View', '') + 'List'); }
         }
         updateFooterVisibility();
     }
@@ -1833,15 +1836,43 @@
 
     // --- ADMIN (STAFF) REGISTRATION ---
     document.getElementById('formStaffSignup').addEventListener('submit', e => {
-        e.preventDefault(); setBtnLoading('btnSignupStaff', true);
-        const n = document.getElementById('sSignupName').value.trim(); const eMail = document.getElementById('sSignupEmail').value.trim(); const pRaw = document.getElementById('sSignupPass').value;
+        e.preventDefault(); 
+        setBtnLoading('btnSignupStaff', true);
+        
+        const n = document.getElementById('sSignupName').value.trim(); 
+        const eMail = document.getElementById('sSignupEmail').value.trim(); 
+        const pRaw = document.getElementById('sSignupPass').value;
+        
         auth.createUserWithEmailAndPassword(eMail, pRaw).then((userCredential) => {
             const uid = userCredential.user.uid;
-            db.collection('users').doc(uid).set({ name: n, email: eMail, role: 'staff', status: 'Pending' }).then(() => {
-                e.target.reset(); setBtnLoading('btnSignupStaff', false, "Register for Approval"); Swal.fire('Submitted!', 'Registration submitted! Please wait for Master Admin approval before logging back in.', 'success');
-                auth.signOut().then(() => { toggleAuth('staff', 'login'); });
-            }).catch((error) => { setBtnLoading('btnSignupStaff', false, "Register for Approval"); const err = document.getElementById('sSignupError'); err.innerText = "DB Error: " + error.message; err.classList.remove('hidden'); });
-        }).catch((error) => { setBtnLoading('btnSignupStaff', false, "Register for Approval"); const err = document.getElementById('sSignupError'); err.innerText = "Auth Error: " + error.message; err.classList.remove('hidden'); });
+            
+            // Write to Firestore first
+            db.collection('users').doc(uid).set({ 
+                name: n, 
+                email: eMail, 
+                role: 'staff', 
+                status: 'Pending' 
+            }).then(() => {
+                e.target.reset(); 
+                setBtnLoading('btnSignupStaff', false, "Register for Approval"); 
+                
+                // Log out the newly registered user so they don't get stuck in an unauthorized state
+                auth.signOut().then(() => { 
+                    Swal.fire('Submitted!', 'Registration submitted! Please wait for Master Admin approval before logging back in.', 'success');
+                    toggleAuth('staff', 'login'); 
+                });
+            }).catch((error) => { 
+                setBtnLoading('btnSignupStaff', false, "Register for Approval"); 
+                const err = document.getElementById('sSignupError'); 
+                err.innerText = "DB Error: " + error.message; 
+                err.classList.remove('hidden'); 
+            });
+        }).catch((error) => { 
+            setBtnLoading('btnSignupStaff', false, "Register for Approval"); 
+            const err = document.getElementById('sSignupError'); 
+            err.innerText = "Auth Error: " + error.message; 
+            err.classList.remove('hidden'); 
+        });
     });
 
     // --- ADMIN (STAFF) LOGIN ---
@@ -2010,7 +2041,8 @@
         
         const pendingAdminsDiv = document.getElementById('adminStaffApproveList'); 
         const pendAdmins = staffMembers.filter(s => s.status === 'Pending');
-        if(pendAdmins.length > 0) {
+
+        if (pendAdmins.length > 0) {
             let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--text-main); font-size: 0.9rem;">
                     <input type="checkbox" onclick="toggleAllBulk(this, 'adminStaffApproveList')"> Select All
@@ -2024,14 +2056,22 @@
                 <div class="list-item infinite-item" ${isHidden}>
                     <div style="display:flex; align-items:center; gap:12px;">
                         <input type="checkbox" class="bulk-cb-adminStaffApproveList" value="${s.uid}">
-                        <div><strong style="color: var(--text-main);">${s.name}</strong><br><small style="color:var(--text-muted)">${s.email}</small></div>
+                        <div>
+                            <strong style="color: var(--text-main);">${s.name}</strong><br>
+                            <small style="color:var(--text-muted)">${s.email}</small>
+                        </div>
                     </div>
                     <button class="approve-btn" onclick="approveAdmin('${s.uid}')">Approve Admin</button>
                 </div>`;
             }).join('');
-            if(pendAdmins.length > 20) html += `<div class="load-more-trigger" style="text-align:center; padding: 15px; color: var(--visitor-color); cursor:pointer; font-weight:bold; font-size: 0.9rem;" onclick="loadMoreListItems(this)">⏬ Load More</div>`;
+            
+            if (pendAdmins.length > 20) {
+                html += `<div class="load-more-trigger" style="text-align:center; padding: 15px; color: var(--visitor-color); cursor:pointer; font-weight:bold; font-size: 0.9rem;" onclick="loadMoreListItems(this)">⏬ Load More</div>`;
+            }
             pendingAdminsDiv.innerHTML = html;
-        } else pendingAdminsDiv.innerHTML = '<span style="color: var(--text-muted);">No pending admin registrations.</span>';
+        } else {
+            pendingAdminsDiv.innerHTML = '<span style="color: var(--text-muted); padding: 10px; display: block;">No pending admin registrations.</span>';
+        }
 
         const staffListDiv = document.getElementById('adminStaffList');
         const appAdmins = staffMembers.filter(s => s.status === 'Approved');
