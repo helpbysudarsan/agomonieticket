@@ -368,7 +368,7 @@
         
         .pin-input { text-align: center; font-size: 1.8rem; letter-spacing: 10px; font-weight: bold; }
         .password-container { position: relative; width: 100%; }
-        .password-container input { padding-right: 50px; margin-bottom: 15px; } /* Adjusted margin for clean look without span */
+        .password-container input { padding-right: 50px; margin-bottom: 15px; }
         .eye-btn {
             position: absolute; right: 15px; top: 40%; transform: translateY(-50%);
             background: none; border: none; cursor: pointer; font-size: 1.2rem;
@@ -730,7 +730,7 @@
                 </form>
 
                 <!-- Signup Form -->
-                <form id="formStaffSignup">
+                <form id="formStaffSignup" class="hidden">
                     <h3>Admin Registration</h3>
                     <input type="text" id="sSignupName" placeholder="Full Name" required>
                     <input type="email" id="sSignupEmail" placeholder="Admin Email" required>
@@ -831,7 +831,7 @@
         <div class="panel" style="border: 2px solid var(--admin-color);">
             <div class="panel-header">
                 <!-- HIDDEN EASTER EGG DOUBLE TAP HERE -->
-                <h2 style="color: var(--admin-color); user-select: none;" onclick="handleMasterHeaderTap(event)">Master Control</h2>
+                <h2 style="color: var(--admin-color); cursor: pointer; -webkit-tap-highlight-color: transparent;" onclick="handleMasterHeaderTap(event)">Master Control</h2>
                 <button class="back-btn" onclick="switchView('view-home')">Close ✕</button>
             </div>
             
@@ -1089,7 +1089,6 @@
 <script>
     const MASTER_EMAIL = "iamdarsan.ai@gmail.com";
 
-    // --- HELPER TO GET DYNAMIC VISUALS BASED ON REGISTRATION ORDER ---
     function getTicketVisuals(tktId) {
         const numPart = tktId ? tktId.replace(/\D/g, '') : '0';
         const num = parseInt(numPart) || 0;
@@ -1100,13 +1099,9 @@
         const img1 = "https://i.pinimg.com/236x/58/6f/51/586f514d8222cb2aec6463e92697a972.jpg";
         const img2 = "https://img.magnific.com/premium-vector/hindu-goddess-durga-face-illustration-with-traditional-golden-ornaments_649214-2356.jpg?semt=ais_hybrid&w=740&q=80";
         
-        return {
-            styleType: styleType,
-            avatar: avatarType === 0 ? img1 : img2
-        };
+        return { styleType: styleType, avatar: avatarType === 0 ? img1 : img2 };
     }
     
-    // --- ADVANCED BASE64 IMAGE FETCHER (BYPASSES CANVAS CORS) ---
     async function getBase64Image(url) {
         const proxyUrl1 = "https://wsrv.nl/?url=" + encodeURIComponent(url) + "&output=png";
         const proxyUrl2 = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
@@ -1136,11 +1131,10 @@
         }
     }
 
-    // --- DUAL EMAIL NOTIFICATION SYSTEM (EMAILJS + GOOGLE APPS SCRIPT FALLBACK) ---
     function sendApprovalEmail(ticketData) {
         const serviceID = 'service_i88qlsl'; 
         const templateID = 'template_uuqg0oz'; 
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxnDsT3tD0Auv9qxxwLSLaD8gFunio5DQyJ3I_tAwWyAJb_I1Is9ATgZHkX2XK7KqYh/exec'; 
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-HJexs9rv-mFJ1A0zlO_hjM7BfBl6iHNjt6lj7D-xz-wH_D9VrDsJ4ZhHEyTulihq/exec'; 
         
         const templateParams = {
             to_name: ticketData.name,
@@ -1156,48 +1150,34 @@
         
         docRef.get().then((doc) => {
             let currentCount = doc.exists ? (doc.data().sentCount || 0) : 0;
-
-            if (currentCount < 0) {
+            if (currentCount < 180) {
                 emailjs.send(serviceID, templateID, templateParams)
                     .then(function(response) {
-                        console.log('EmailJS: SUCCESS!', ticketData.email);
                         docRef.set({sentCount: currentCount + 1}, {merge: true}); 
                     }, function(error) {
-                        console.error('EmailJS: FAILED', error);
                         sendViaAppsScript(GAS_WEB_APP_URL, templateParams, docRef, currentCount);
                     });
             } else {
                 sendViaAppsScript(GAS_WEB_APP_URL, templateParams, docRef, currentCount);
             }
-        }).catch(err => console.error("Error reading email count", err));
+        }).catch(err => console.error(err));
     }
 
     function sendViaAppsScript(gasUrl, params, docRef, currentCount) {
-        if (!gasUrl || gasUrl === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-            console.warn("Google Apps Script URL is missing!");
-            return;
-        }
-
+        if (!gasUrl || gasUrl === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') return;
         fetch(gasUrl, {
             method: 'POST',
             mode: 'no-cors', 
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8',
-            },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(params)
         }).then(() => {
-            console.log('Google Apps Script: Email request sent to', params.to_email);
             docRef.set({sentCount: currentCount + 1}, {merge: true}); 
-        }).catch(error => {
-            console.error('Google Apps Script: Error', error);
-        });
+        }).catch(error => console.error(error));
     }
 
-    // --- EASTER EGG DOUBLE TAP LOGIC ---
     let lastHeaderTap = 0;
     function handleMasterHeaderTap(e) {
         if (isAdminLoggedIn) return; 
-        
         let currentTime = new Date().getTime();
         let tapLength = currentTime - lastHeaderTap;
         if (tapLength < 400 && tapLength > 0) {
@@ -1210,7 +1190,6 @@
         lastHeaderTap = currentTime;
     }
 
-    // --- ADVANCED SECURITY: 15-MINUTE AUTO LOGOUT (INACTIVITY TIMEOUT) ---
     let inactivityTime = function () {
         let time;
         window.onload = resetTimer;
@@ -1223,7 +1202,6 @@
             if (currentVisitor) { logout('visitor'); showAlert(); }
             else if (currentStaff) { logout('staff'); showAlert(); }
             else if (isAdminLoggedIn) { logout('admin'); showAlert(); }
-            
             function showAlert() {
                 Swal.fire('Session Expired', 'You have been automatically logged out due to 15 minutes of inactivity for security reasons.', 'warning');
             }
@@ -1235,7 +1213,6 @@
     };
     inactivityTime();
 
-    // --- PWA SERVICE WORKER SETUP ---
     if ('serviceWorker' in navigator) {
         const swCode = `
             self.addEventListener('install', (e) => { e.waitUntil(self.skipWaiting()); });
@@ -1243,12 +1220,10 @@
             self.addEventListener('fetch', (e) => { });
         `;
         const blob = new Blob([swCode], { type: 'application/javascript' });
-        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log('PWA SW failed:', err));
+        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log(err));
     }
 
-    // --- OFFLINE MODE: SYNC LOGIC ---
     let offlineScans = JSON.parse(localStorage.getItem('offlineScans')) || [];
-
     function syncOfflineScans() {
         if (navigator.onLine && offlineScans.length > 0) {
             Swal.fire({
@@ -1257,13 +1232,11 @@
                 icon: 'info',
                 toast: true, position: 'top-end', showConfirmButton: false, timer: 2000
             });
-            
             let batch = db.batch();
             offlineScans.forEach(scan => {
                 let tRef = db.collection('tickets').doc(scan.id);
                 batch.update(tRef, { status: 'Used', scannedBy: scan.scannedBy, scanTime: scan.scanTime });
             });
-            
             batch.commit().then(() => {
                 offlineScans = [];
                 localStorage.removeItem('offlineScans');
@@ -1273,31 +1246,22 @@
                     icon: 'success',
                     toast: true, position: 'top-end', showConfirmButton: false, timer: 3000
                 });
-            }).catch(e => console.error("Sync failed", e));
+            }).catch(e => console.error(e));
         }
     }
     window.addEventListener('online', syncOfflineScans);
 
-    // --- PAGINATION & INFINITE SCROLL LOGIC ---
     const infiniteScrollObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if(entry.isIntersecting) {
-                loadMoreListItems(entry.target);
-            }
+            if(entry.isIntersecting) loadMoreListItems(entry.target);
         });
     }, { threshold: 0.1 });
 
     function loadMoreListItems(triggerBtn) {
         const container = triggerBtn.parentElement;
         const hiddenItems = container.querySelectorAll('.infinite-item[style*="display: none"]');
-        
-        for(let i = 0; i < 20 && i < hiddenItems.length; i++) {
-            hiddenItems[i].style.display = '';
-        }
-        
-        if(hiddenItems.length <= 20) {
-            triggerBtn.style.display = 'none'; 
-        }
+        for(let i = 0; i < 20 && i < hiddenItems.length; i++) hiddenItems[i].style.display = '';
+        if(hiddenItems.length <= 20) triggerBtn.style.display = 'none'; 
     }
 
     function applyInfiniteScroll() {
@@ -1306,7 +1270,6 @@
         });
     }
 
-    // Spinner utility for buttons
     function setBtnLoading(btnId, isLoading, originalText = "") {
         const btn = document.getElementById(btnId);
         if(!btn) return;
@@ -1322,14 +1285,22 @@
         }
     }
 
-    // Live Search Filter utility
     function filterList(inputId, listId) {
         const input = document.getElementById(inputId).value.toLowerCase();
-        const items = document.getElementById(listId).getElementsByClassName('list-item');
+        const listContainer = document.getElementById(listId);
+        if(!listContainer) return;
+        const items = listContainer.getElementsByClassName('list-item');
+        
         for (let i = 0; i < items.length; i++) {
             const text = items[i].innerText.toLowerCase();
-            items[i].style.display = text.includes(input) ? '' : 'none';
+            if(input.length > 0) {
+                items[i].style.display = text.includes(input) ? '' : 'none';
+            } else {
+                items[i].style.display = (i < 20) ? '' : 'none'; // reset to pagination limit
+            }
         }
+        const loadBtn = listContainer.querySelector('.load-more-trigger');
+        if(loadBtn) loadBtn.style.display = input.length > 0 ? 'none' : 'block';
     }
 
     function reFilterAll() {
@@ -1342,16 +1313,8 @@
         if(document.getElementById('search-staffApproved')) filterList('search-staffApproved', 'staffApprovedList');
     }
 
-    // ==========================================
-    // 0. SECURITY & HASHING ENGINE (For Master Admin)
-    // ==========================================
-    function hashData(text) {
-        return CryptoJS.SHA256(text).toString();
-    }
+    function hashData(text) { return CryptoJS.SHA256(text).toString(); }
 
-    // ==========================================
-    // 1. FIREBASE CLOUD DATABASE CONFIGURATION (FIRESTORE)
-    // ==========================================
     const firebaseConfig = {
       apiKey: "AIzaSyAW1BpFZ8WusY2bq96we9fR-dgvtDLhvkY",
       authDomain: "agomoni-eticket.firebaseapp.com",
@@ -1362,33 +1325,15 @@
       measurementId: "G-16XVTCZJ2V"
     };
     
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // ==========================================
-    // 2. GLOBAL STATE
-    // ==========================================
-    let visitors = []; 
-    let staffMembers = []; 
-    let tickets = [];  
-    let prevMasterPendingCount = 0;
-    let prevStaffPendingCount = 0;
-    let localSessionId = null; 
-
-    let masterCredentials = null;
-    let currentVisitor = null; 
-    let currentStaff = null;
-    let isAdminLoggedIn = false;
-    
-    let masterPinAttempts = 0; 
-    let masterPinLockUntil = 0;
-
-    let ticketListener = null;
-    let userListener = null;
-    let masterCredListener = null;
+    let visitors = []; let staffMembers = []; let tickets = [];  
+    let prevMasterPendingCount = 0; let prevStaffPendingCount = 0; let localSessionId = null; 
+    let masterCredentials = null; let currentVisitor = null; let currentStaff = null;
+    let isAdminLoggedIn = false; let masterPinAttempts = 0; let masterPinLockUntil = 0;
+    let ticketListener = null; let userListener = null; let masterCredListener = null;
 
     masterCredListener = db.collection('system').doc('masterCredentials').onSnapshot((doc) => {
         if(doc.exists) {
@@ -1400,13 +1345,10 @@
                     icon: 'error',
                     allowOutsideClick: false
                 });
-                logout('admin');
-                return;
+                logout('admin'); return;
             }
             masterCredentials = data;
-        } else {
-            masterCredentials = null;
-        }
+        } else masterCredentials = null;
     });
 
     auth.onAuthStateChanged((user) => {
@@ -1421,25 +1363,17 @@
                             icon: 'error',
                             allowOutsideClick: false
                         });
-                        auth.signOut();
-                        return;
+                        auth.signOut(); return;
                     }
-                    if (!localSessionId && userData.sessionId) {
-                        localSessionId = userData.sessionId;
-                    }
+                    if (!localSessionId && userData.sessionId) localSessionId = userData.sessionId;
 
                     if (userData.role === 'visitor') {
-                        currentVisitor = userData;
-                        currentVisitor.email = user.email;
-                        showVisitorDashboard();
-                        loadTickets(); 
+                        currentVisitor = userData; currentVisitor.email = user.email;
+                        showVisitorDashboard(); loadTickets(); 
                     } else if (userData.role === 'staff') {
-                        currentStaff = userData;
-                        currentStaff.email = user.email;
+                        currentStaff = userData; currentStaff.email = user.email;
                         if(currentStaff.status === 'Approved') {
-                            showStaffDashboard();
-                            loadAllTicketsAndUsers(); 
-                            syncOfflineScans();
+                            showStaffDashboard(); loadAllTicketsAndUsers(); syncOfflineScans();
                         } else {
                             if(document.getElementById('view-staff').classList.contains('active')) {
                                 Swal.fire({icon: 'info', title: 'Pending', text: 'Account pending Master Approval. Check back later.'});
@@ -1462,12 +1396,8 @@
                     input: 'email',
                     showCancelButton: false,
                     allowOutsideClick: false
-                }).then((result) => {
-                    if(result.value) processEmailLink(result.value);
-                });
-            } else {
-                processEmailLink(email);
-            }
+                }).then((result) => { if(result.value) processEmailLink(result.value); });
+            } else { processEmailLink(email); }
             
             function processEmailLink(em) {
                 auth.signInWithEmailLink(em, window.location.href)
@@ -1515,10 +1445,7 @@
             snapshot.forEach(doc => {
                 let data = doc.data();
                 if(data.role === 'visitor') visitors.push(data);
-                if(data.role === 'staff') {
-                    let st = data; st.uid = doc.id;
-                    staffMembers.push(st);
-                }
+                if(data.role === 'staff') { let st = data; st.uid = doc.id; staffMembers.push(st); }
             });
             if(currentStaff) updateStaffUI();
             if(isAdminLoggedIn) updateAdminUI();
@@ -1526,10 +1453,6 @@
         });
     }
 
-    // ==========================================
-    // 3. UI, SCANNER & LIST VIEW LOGIC
-    // ==========================================
-    
     function openScanner(role) {
         if(role === 'staff') {
             document.getElementById('staffMenu').classList.add('hidden');
@@ -1544,9 +1467,7 @@
     }
 
     function closeScanner(role) {
-        if(html5QrCode && html5QrCode.isScanning) {
-            html5QrCode.stop().then(() => { html5QrCode.clear(); }).catch(e => {});
-        }
+        if(html5QrCode && html5QrCode.getState() === Html5QrcodeScannerState.SCANNING) { html5QrCode.stop().then(() => { html5QrCode.clear(); }).catch(e => {}); }
         if(role === 'staff') {
             document.getElementById('staffScannerBox').classList.add('hidden');
             document.getElementById('staffMenu').classList.remove('hidden');
@@ -1619,49 +1540,32 @@
         const visitorBtn = document.getElementById('btnFooterVisitorChangePass');
         const staffBtn = document.getElementById('btnFooterStaffChangePass');
 
-        masterBtn.classList.add('hidden');
-        visitorBtn.classList.add('hidden');
-        staffBtn.classList.add('hidden');
-        counterDiv.classList.add('hidden');
-
+        masterBtn.classList.add('hidden'); visitorBtn.classList.add('hidden'); staffBtn.classList.add('hidden'); counterDiv.classList.add('hidden');
         const activeView = document.querySelector('.view-section.active').id;
 
         if (isAdminLoggedIn) {
             const isMenuVisible = !document.getElementById('masterMenu').classList.contains('hidden');
             const isDashboardActive = !document.getElementById('adminDashboard').classList.contains('hidden');
             
-            if (activeView === 'view-admin' && isDashboardActive && isMenuVisible) {
-                masterBtn.classList.remove('hidden');
-            }
-            if (activeView === 'view-admin' || activeView === 'view-staff') {
-                countSpan.innerText = visitors.length;
-                counterDiv.classList.remove('hidden');
-            }
+            if (activeView === 'view-admin' && isDashboardActive && isMenuVisible) masterBtn.classList.remove('hidden');
+            if (activeView === 'view-admin' || activeView === 'view-staff') { countSpan.innerText = visitors.length; counterDiv.classList.remove('hidden'); }
         } else if (currentStaff && currentStaff.status === 'Approved') {
             const isStaffMenuVisible = !document.getElementById('staffMenu').classList.contains('hidden');
             const isStaffDashActive = !document.getElementById('staffDashboard').classList.contains('hidden');
 
-            if (activeView === 'view-staff' && isStaffDashActive && isStaffMenuVisible) {
-                staffBtn.classList.remove('hidden');
-            }
-            if (activeView === 'view-admin' || activeView === 'view-staff') {
-                countSpan.innerText = visitors.length;
-                counterDiv.classList.remove('hidden');
-            }
+            if (activeView === 'view-staff' && isStaffDashActive && isStaffMenuVisible) staffBtn.classList.remove('hidden');
+            if (activeView === 'view-admin' || activeView === 'view-staff') { countSpan.innerText = visitors.length; counterDiv.classList.remove('hidden'); }
         } else if (currentVisitor) {
             visitorBtn.classList.add('hidden');
         }
     }
 
     function toggleAbout() {
-        const content = document.getElementById('aboutContent');
-        const tab = document.querySelector('.about-tab');
+        const content = document.getElementById('aboutContent'); const tab = document.querySelector('.about-tab');
         if(content.classList.contains('hidden')) {
-            content.classList.remove('hidden'); 
-            tab.innerHTML = 'About <span style="background-color: #3b82f6; border-radius: 4px; padding: 2px 4px; color: white; display: inline-block; font-size: 0.85rem; transform: translateY(-2px);">🔼</span>';
+            content.classList.remove('hidden'); tab.innerHTML = 'About <span style="background-color: #3b82f6; border-radius: 4px; padding: 2px 4px; color: white; display: inline-block; font-size: 0.85rem; transform: translateY(-2px);">🔼</span>';
         } else {
-            content.classList.add('hidden'); 
-            tab.innerHTML = 'About <span style="background-color: #3b82f6; border-radius: 4px; padding: 2px 4px; color: white; display: inline-block; font-size: 0.85rem; transform: translateY(-2px);">🔽</span>';
+            content.classList.add('hidden'); tab.innerHTML = 'About <span style="background-color: #3b82f6; border-radius: 4px; padding: 2px 4px; color: white; display: inline-block; font-size: 0.85rem; transform: translateY(-2px);">🔽</span>';
         }
     }
 
@@ -1672,21 +1576,17 @@
     }
 
     function toggleTheme() {
-        const body = document.body;
-        const btn = document.getElementById('themeToggle');
-        body.classList.toggle('dark-mode');
-        btn.innerText = body.classList.contains('dark-mode') ? '☀️' : '🌙';
+        const body = document.body; const btn = document.getElementById('themeToggle');
+        body.classList.toggle('dark-mode'); btn.innerText = body.classList.contains('dark-mode') ? '☀️' : '🌙';
     }
 
     function switchView(viewId) {
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
         document.getElementById(viewId).classList.add('active');
-        if(html5QrCode && html5QrCode.isScanning) { html5QrCode.stop().then(() => { html5QrCode.clear(); }).catch(e => {}); }
+        if(html5QrCode && html5QrCode.getState && html5QrCode.getState() === Html5QrcodeScannerState.SCANNING) { html5QrCode.stop().then(() => { html5QrCode.clear(); }).catch(e => {}); }
         
-        // Always hide secret buttons on view switch
         if(document.getElementById('masterRecoveryBtn1')) document.getElementById('masterRecoveryBtn1').classList.add('hidden');
         if(document.getElementById('masterRecoveryBtn2')) document.getElementById('masterRecoveryBtn2').classList.add('hidden');
-        
         updateFooterVisibility();
     }
 
@@ -1724,41 +1624,24 @@
                 
                 if(role === 'visitor') document.getElementById('vChangePassSection').classList.add('hidden');
                 if(role === 'staff') {
-                    closeScanner('staff');
-                    closeListView('staff', 'staffViewPending');
-                    closeListView('staff', 'staffViewApproved');
-                    document.getElementById('sChangePassSection').classList.add('hidden');
+                    closeScanner('staff'); closeListView('staff', 'staffViewPending'); closeListView('staff', 'staffViewApproved'); document.getElementById('sChangePassSection').classList.add('hidden');
                 }
-                
-                toggleAuth(role, 'login');
-                updateFooterVisibility();
+                toggleAuth(role, 'login'); updateFooterVisibility();
             });
         } else if (role === 'admin') {
-            isAdminLoggedIn = false;
-            localSessionId = null;
-            
+            isAdminLoggedIn = false; localSessionId = null;
             if (ticketListener) { ticketListener(); ticketListener = null; }
             if (userListener) { userListener(); userListener = null; }
 
-            closeScanner('master');
-            closeListView('master', 'adminViewStaffApprove');
-            closeListView('master', 'adminViewStaff');
-            closeListView('master', 'adminViewPending');
-            closeListView('master', 'adminViewApproved');
-            closeListView('master', 'adminViewPresent');
-            document.getElementById('adminDashboard').classList.add('hidden');
-            document.getElementById('adminAuthSection').classList.add('hidden');
+            closeScanner('master'); closeListView('master', 'adminViewStaffApprove'); closeListView('master', 'adminViewStaff');
+            closeListView('master', 'adminViewPending'); closeListView('master', 'adminViewApproved'); closeListView('master', 'adminViewPresent');
+            document.getElementById('adminDashboard').classList.add('hidden'); document.getElementById('adminAuthSection').classList.add('hidden');
             document.getElementById('adminChangeCredsSection').classList.add('hidden');
             
-            document.getElementById('aLoginUser').value = '';
-            document.getElementById('aLoginPass').value = '';
-            document.getElementById('aLoginPin').value = '';
+            document.getElementById('aLoginUser').value = ''; document.getElementById('aLoginPass').value = ''; document.getElementById('aLoginPin').value = '';
             document.getElementById('admin2FASection').classList.remove('hidden');
             
-            // Hide secret buttons securely on logout
-            document.getElementById('masterRecoveryBtn1').classList.add('hidden');
-            document.getElementById('masterRecoveryBtn2').classList.add('hidden');
-            
+            document.getElementById('masterRecoveryBtn1').classList.add('hidden'); document.getElementById('masterRecoveryBtn2').classList.add('hidden');
             updateFooterVisibility();
         }
     }
@@ -1775,117 +1658,72 @@
             setBtnLoading(btnId, true);
             user.updatePassword(newPass).then(() => {
                 setBtnLoading(btnId, false, "Update Password");
-                Swal.fire('Updated!', 'Password successfully updated!', 'success');
-                successCallback(); 
+                Swal.fire('Updated!', 'Password successfully updated!', 'success'); successCallback(); 
             }).catch((error) => {
                 setBtnLoading(btnId, false, "Update Password");
-                if (error.code === 'auth/requires-recent-login') {
-                    err.innerText = "Security Alert: Your session is too old. Please log out and log back in to change your password.";
-                } else {
-                    err.innerText = error.message;
-                }
+                if (error.code === 'auth/requires-recent-login') err.innerText = "Security Alert: Your session is too old. Please log out and log back in to change your password.";
+                else err.innerText = error.message;
                 err.classList.remove('hidden');
             });
         }
     }
 
-    // --- STUDENT REGISTRATION (Firebase Auth) ---
+    // --- STUDENT REGISTRATION ---
     document.getElementById('formVisitorSignup').addEventListener('submit', e => {
-        e.preventDefault();
-        setBtnLoading('btnSignupVisitor', true);
-        const n = document.getElementById('vSignupName').value.trim();
-        const eMail = document.getElementById('vSignupEmail').value.trim();
-        const pRaw = document.getElementById('vSignupPass').value;
-        
-        auth.createUserWithEmailAndPassword(eMail, pRaw)
-        .then((userCredential) => {
+        e.preventDefault(); setBtnLoading('btnSignupVisitor', true);
+        const n = document.getElementById('vSignupName').value.trim(); const eMail = document.getElementById('vSignupEmail').value.trim(); const pRaw = document.getElementById('vSignupPass').value;
+        auth.createUserWithEmailAndPassword(eMail, pRaw).then((userCredential) => {
             const uid = userCredential.user.uid;
             db.collection('users').doc(uid).set({ name: n, email: eMail, role: 'visitor' });
-            e.target.reset();
+            e.target.reset(); setBtnLoading('btnSignupVisitor', false, "Sign Up");
+        }).catch((error) => {
             setBtnLoading('btnSignupVisitor', false, "Sign Up");
-        })
-        .catch((error) => {
-            setBtnLoading('btnSignupVisitor', false, "Sign Up");
-            const err = document.getElementById('vSignupError');
-            err.innerText = error.message; err.classList.remove('hidden');
+            const err = document.getElementById('vSignupError'); err.innerText = error.message; err.classList.remove('hidden');
         });
     });
 
-    // --- STUDENT LOGIN (Firebase Auth) ---
+    // --- STUDENT LOGIN ---
     document.getElementById('formVisitorLogin').addEventListener('submit', e => {
-        e.preventDefault();
-        setBtnLoading('btnLoginVisitor', true);
-        const eMail = document.getElementById('vLoginEmail').value;
-        const pRaw = document.getElementById('vLoginPass').value;
-
-        auth.signInWithEmailAndPassword(eMail, pRaw)
-        .then((cred) => {
+        e.preventDefault(); setBtnLoading('btnLoginVisitor', true);
+        const eMail = document.getElementById('vLoginEmail').value; const pRaw = document.getElementById('vLoginPass').value;
+        auth.signInWithEmailAndPassword(eMail, pRaw).then((cred) => {
             localSessionId = Date.now().toString();
             db.collection('users').doc(cred.user.uid).update({ sessionId: localSessionId });
-            e.target.reset(); 
-            setBtnLoading('btnLoginVisitor', false, "Log In");
-        })
-        .catch((error) => {
+            e.target.reset(); setBtnLoading('btnLoginVisitor', false, "Log In");
+        }).catch((error) => {
             setBtnLoading('btnLoginVisitor', false, "Log In");
             const errBox = document.getElementById('vLoginError');
-            
             if (error.code === 'auth/user-not-found') {
-                Swal.fire({
-                    title: 'Account Not Found!',
-                    text: 'This email is not registered in our database.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sign Up Now',
-                    cancelButtonText: 'Try Again'
-                }).then((result) => {
-                    if (result.isConfirmed) toggleAuth('visitor', 'signup');
-                });
+                Swal.fire({ title: 'Account Not Found!', text: 'This email is not registered in our database.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sign Up Now', cancelButtonText: 'Try Again' }).then((result) => { if (result.isConfirmed) toggleAuth('visitor', 'signup'); });
             } else if (error.code === 'auth/too-many-requests') {
-                errBox.innerText = 'Account temporarily locked due to many failed attempts. Try again later.';
-                errBox.classList.remove('hidden'); 
-            } else {
-                errBox.innerText = 'Invalid credentials.';
-                errBox.classList.remove('hidden'); 
-            }
+                errBox.innerText = 'Account temporarily locked due to many failed attempts. Try again later.'; errBox.classList.remove('hidden'); 
+            } else { errBox.innerText = 'Invalid credentials.'; errBox.classList.remove('hidden'); }
         });
     });
 
     // --- STUDENT FORGOT PASSWORD ---
     document.getElementById('formVisitorForgot').addEventListener('submit', e => {
-        e.preventDefault();
-        setBtnLoading('btnForgotVisitor', true);
+        e.preventDefault(); setBtnLoading('btnForgotVisitor', true);
         const eMail = document.getElementById('vForgotEmail').value.trim();
-
-        auth.sendPasswordResetEmail(eMail)
-        .then(() => {
+        auth.sendPasswordResetEmail(eMail).then(() => {
             setBtnLoading('btnForgotVisitor', false, "Send Reset Link");
             Swal.fire('Sent!', 'A secure reset link has been sent to your email!', 'success');
             e.target.reset(); toggleAuth('visitor', 'login');
-        })
-        .catch((error) => {
+        }).catch((error) => {
             setBtnLoading('btnForgotVisitor', false, "Send Reset Link");
-            const err = document.getElementById('vForgotError');
-            err.innerText = "Error: Ensure the email is registered."; err.classList.remove('hidden');
+            const err = document.getElementById('vForgotError'); err.innerText = "Error: Ensure the email is registered."; err.classList.remove('hidden');
         });
     });
 
-    // --- STUDENT CHANGE PASSWORD IN DASHBOARD ---
     function toggleVisitorChangePass() {
         const sec = document.getElementById('vChangePassSection');
         if (sec.classList.contains('hidden')) {
-            sec.classList.remove('hidden');
-            document.getElementById('vChangePassError').classList.add('hidden');
-            document.getElementById('vNewPassInput').value = '';
-            document.getElementById('vConfirmPassInput').value = '';
-            sec.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
-        } else {
-            sec.classList.add('hidden');
-        }
+            sec.classList.remove('hidden'); document.getElementById('vChangePassError').classList.add('hidden'); document.getElementById('vNewPassInput').value = ''; document.getElementById('vConfirmPassInput').value = ''; sec.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+        } else sec.classList.add('hidden');
     }
 
     function submitVisitorPasswordChange() {
-        const p1 = document.getElementById('vNewPassInput').value;
-        const p2 = document.getElementById('vConfirmPassInput').value;
+        const p1 = document.getElementById('vNewPassInput').value; const p2 = document.getElementById('vConfirmPassInput').value;
         updateFirebaseUserPassword(p1, p2, 'vChangePassError', toggleVisitorChangePass, 'btnUpdatePassVisitor');
     }
 
@@ -1898,779 +1736,279 @@
 
     function updateVisitorUI() {
         const tkt = tickets.find(t => t.email === currentVisitor.email);
-        const btn = document.getElementById('btnRequestPass');
-        const disp = document.getElementById('userTicketDisplay');
-        const badge = document.getElementById('tktStatus');
-        const qrBox = document.getElementById('tktQrContainer');
-        const foodSec = document.getElementById('foodPreferenceSection');
+        const btn = document.getElementById('btnRequestPass'); const disp = document.getElementById('userTicketDisplay'); const badge = document.getElementById('tktStatus'); const qrBox = document.getElementById('tktQrContainer'); const foodSec = document.getElementById('foodPreferenceSection');
 
         if (!tkt) {
-            btn.classList.remove('hidden'); 
-            foodSec.classList.remove('hidden');
-            disp.classList.add('hidden');
-            document.getElementById('foodPrefSelect').value = '';
-            document.getElementById('foodPrefError').classList.add('hidden');
+            btn.classList.remove('hidden'); foodSec.classList.remove('hidden'); disp.classList.add('hidden'); document.getElementById('foodPrefSelect').value = ''; document.getElementById('foodPrefError').classList.add('hidden');
         } else {
-            btn.classList.add('hidden'); 
-            foodSec.classList.add('hidden');
-            disp.classList.remove('hidden');
-            
+            btn.classList.add('hidden'); foodSec.classList.add('hidden'); disp.classList.remove('hidden');
             document.getElementById('tktName').innerText = tkt.name;
-            
-            // Apply Dynamic Avatar and Colors to Web UI
             const visuals = getTicketVisuals(tkt.id);
             document.getElementById('passAvatar').style.backgroundImage = `url('${visuals.avatar}')`;
             
             const vipPassEl = document.querySelector('.vip-pass');
-            if(visuals.styleType === 0) {
-                vipPassEl.style.borderColor = '#ffd700'; // Gold
-                vipPassEl.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.2)';
-            } else if (visuals.styleType === 1) {
-                vipPassEl.style.borderColor = '#00f0ff'; // Neon Blue
-                vipPassEl.style.boxShadow = '0 0 15px rgba(0, 240, 255, 0.2)';
-            } else {
-                vipPassEl.style.borderColor = '#facc15'; // Emerald Gold
-                vipPassEl.style.boxShadow = '0 0 15px rgba(250, 204, 21, 0.2)';
-            }
+            if(visuals.styleType === 0) { vipPassEl.style.borderColor = '#ffd700'; vipPassEl.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.2)'; } 
+            else if (visuals.styleType === 1) { vipPassEl.style.borderColor = '#00f0ff'; vipPassEl.style.boxShadow = '0 0 15px rgba(0, 240, 255, 0.2)'; } 
+            else { vipPassEl.style.borderColor = '#facc15'; vipPassEl.style.boxShadow = '0 0 15px rgba(250, 204, 21, 0.2)'; }
 
-            if (tkt.status === 'Pending') {
-                badge.innerText = 'Pending Approval'; badge.className = 'status-badge bg-pending'; qrBox.classList.add('hidden');
-            } else if (tkt.status === 'Approved') {
-                badge.innerText = 'Pass Authorized'; badge.className = 'status-badge bg-success'; qrBox.classList.remove('hidden');
-                new QRious({ element: document.getElementById('qrCanvas'), value: tkt.id, size: 200, level: 'H' });
-            } else if (tkt.status === 'Used') {
-                badge.innerText = 'Pass Used (Entry Verified)'; badge.className = 'status-badge'; badge.style.background = 'var(--border-color)'; badge.style.color = 'var(--text-main)'; qrBox.classList.remove('hidden'); 
-            } else if (tkt.status === 'Revoked') {
-                badge.innerText = 'Pass Revoked'; badge.className = 'status-badge bg-danger'; qrBox.classList.add('hidden');
-            }
+            if (tkt.status === 'Pending') { badge.innerText = 'Pending Approval'; badge.className = 'status-badge bg-pending'; qrBox.classList.add('hidden'); } 
+            else if (tkt.status === 'Approved') { badge.innerText = 'Pass Authorized'; badge.className = 'status-badge bg-success'; qrBox.classList.remove('hidden'); new QRious({ element: document.getElementById('qrCanvas'), value: tkt.id, size: 200, level: 'H' }); } 
+            else if (tkt.status === 'Used') { badge.innerText = 'Pass Used (Entry Verified)'; badge.className = 'status-badge'; badge.style.background = 'var(--border-color)'; badge.style.color = 'var(--text-main)'; qrBox.classList.remove('hidden'); } 
+            else if (tkt.status === 'Revoked') { badge.innerText = 'Pass Revoked'; badge.className = 'status-badge bg-danger'; qrBox.classList.add('hidden'); }
         }
     }
 
     function requestTicket() {
-        const now = Date.now();
-        const lastReq = localStorage.getItem('lastRequestTime');
-        if (lastReq && (now - lastReq < 60000)) { 
-            Swal.fire('Please Wait', 'To prevent spam, you can only request a pass once per minute. Please try again shortly.', 'warning');
-            return;
-        }
-
-        const foodPref = document.getElementById('foodPrefSelect').value;
-        const err = document.getElementById('foodPrefError');
-        
+        const now = Date.now(); const lastReq = localStorage.getItem('lastRequestTime');
+        if (lastReq && (now - lastReq < 60000)) { Swal.fire('Please Wait', 'To prevent spam, you can only request a pass once per minute. Please try again shortly.', 'warning'); return; }
+        const foodPref = document.getElementById('foodPrefSelect').value; const err = document.getElementById('foodPrefError');
         if (!foodPref) { err.classList.remove('hidden'); return; }
         err.classList.add('hidden');
 
         const newId = 'MMCC26-' + Math.floor(Math.random() * 90000 + 10000);
-        db.collection('tickets').doc(newId).set({
-            id: newId, 
-            email: currentVisitor.email, 
-            name: currentVisitor.name, 
-            foodPreference: foodPref,
-            status: 'Pending'
-        }).then(() => {
+        db.collection('tickets').doc(newId).set({ id: newId, email: currentVisitor.email, name: currentVisitor.name, foodPreference: foodPref, status: 'Pending' }).then(() => {
             localStorage.setItem('lastRequestTime', now);
-            Swal.fire({
-                title: 'Requested!',
-                text: 'Your Pass request has been submitted for approval.',
-                icon: 'success',
-                confirmButtonColor: '#10b981'
-            });
+            Swal.fire({ title: 'Requested!', text: 'Your Pass request has been submitted for approval.', icon: 'success', confirmButtonColor: '#10b981' });
         }).catch((e) => Swal.fire('Error', e.message, 'error'));
     }
 
-    // --- DOWNLOAD PASS PNG (3 DYNAMIC PREMIUM THEMES WITH PROXY FALLBACK) ---
     async function downloadPassAsPNG() {
-        const tkt = tickets.find(t => t.email === currentVisitor.email);
-        if(!tkt || tkt.status !== 'Approved') return;
-
-        const qrCanvas = document.getElementById('qrCanvas');
-        if(!qrCanvas) return;
-
-        const dlBtn = document.getElementById('btnDownloadPassPNG');
-        const origText = dlBtn.innerHTML;
-        dlBtn.innerHTML = 'Generating... ⌛';
-        dlBtn.style.pointerEvents = 'none';
+        const tkt = tickets.find(t => t.email === currentVisitor.email); if(!tkt || tkt.status !== 'Approved') return;
+        const qrCanvas = document.getElementById('qrCanvas'); if(!qrCanvas) return;
+        const dlBtn = document.getElementById('btnDownloadPassPNG'); const origText = dlBtn.innerHTML; dlBtn.innerHTML = 'Generating... ⌛'; dlBtn.style.pointerEvents = 'none';
 
         try {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 400;
-            canvas.height = 700;
-            
-            const visuals = getTicketVisuals(tkt.id);
-            const styleType = visuals.styleType;
-            
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); canvas.width = 400; canvas.height = 700;
+            const visuals = getTicketVisuals(tkt.id); const styleType = visuals.styleType;
             let gradStart, gradEnd, borderColor, borderInner, titleColor, subTitleColor, detailColor, foodColor;
             
-            if (styleType === 0) {
-                gradStart = '#1a0505'; gradEnd = '#000000';
-                borderColor = '#ffd700'; borderInner = 'rgba(255, 0, 85, 0.4)';
-                titleColor = '#ffd700'; subTitleColor = '#fcd34d';
-                detailColor = '#fef3c7'; foodColor = '#ff0055';
-            } else if (styleType === 1) {
-                gradStart = '#081229'; gradEnd = '#000000';
-                borderColor = '#00f0ff'; borderInner = 'rgba(0, 240, 255, 0.4)';
-                titleColor = '#00f0ff'; subTitleColor = '#7dd3fc';
-                detailColor = '#f0f9ff'; foodColor = '#38bdf8';
-            } else {
-                gradStart = '#022c22'; gradEnd = '#000000';
-                borderColor = '#facc15'; borderInner = 'rgba(74, 222, 128, 0.4)';
-                titleColor = '#facc15'; subTitleColor = '#bbf7d0';
-                detailColor = '#f0fdf4'; foodColor = '#4ade80';
-            }
+            if (styleType === 0) { gradStart = '#1a0505'; gradEnd = '#000000'; borderColor = '#ffd700'; borderInner = 'rgba(255, 0, 85, 0.4)'; titleColor = '#ffd700'; subTitleColor = '#fcd34d'; detailColor = '#fef3c7'; foodColor = '#ff0055'; } 
+            else if (styleType === 1) { gradStart = '#081229'; gradEnd = '#000000'; borderColor = '#00f0ff'; borderInner = 'rgba(0, 240, 255, 0.4)'; titleColor = '#00f0ff'; subTitleColor = '#7dd3fc'; detailColor = '#f0f9ff'; foodColor = '#38bdf8'; } 
+            else { gradStart = '#022c22'; gradEnd = '#000000'; borderColor = '#facc15'; borderInner = 'rgba(74, 222, 128, 0.4)'; titleColor = '#facc15'; subTitleColor = '#bbf7d0'; detailColor = '#f0fdf4'; foodColor = '#4ade80'; }
 
-            // Premium Gradient Background
-            let gradient = ctx.createLinearGradient(0, 0, 400, 700);
-            gradient.addColorStop(0, gradStart); 
-            gradient.addColorStop(1, gradEnd); 
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            let gradient = ctx.createLinearGradient(0, 0, 400, 700); gradient.addColorStop(0, gradStart); gradient.addColorStop(1, gradEnd); ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = borderColor; ctx.lineWidth = 3; ctx.strokeRect(15, 15, 370, 670);
+            ctx.strokeStyle = borderInner; ctx.lineWidth = 1; ctx.strokeRect(20, 20, 360, 660);
+            ctx.fillStyle = titleColor; ctx.font = 'bold 28px "Georgia", serif'; ctx.textAlign = 'center'; ctx.fillText('আগমনী ২০২৬', 200, 65);
+            ctx.fillStyle = subTitleColor; ctx.font = '700 14px "Segoe UI", Helvetica, Arial, sans-serif'; ctx.letterSpacing = "2px"; ctx.fillText('MMCC CS E-Pass', 200, 90);
 
-            // Outer Border
-            ctx.strokeStyle = borderColor;
-            ctx.lineWidth = 3;
-            ctx.strokeRect(15, 15, 370, 670);
-            
-            // Inner Subtle Border
-            ctx.strokeStyle = borderInner;
-            ctx.lineWidth = 1;
-            ctx.strokeRect(20, 20, 360, 660);
-
-            // Main Title (Agomoni in stylish Bengali)
-            ctx.fillStyle = titleColor; 
-            ctx.font = 'bold 28px "Georgia", serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('আগমনী ২০২৬', 200, 65);
-            
-            // Subtitle
-            ctx.fillStyle = subTitleColor; 
-            ctx.font = '700 14px "Segoe UI", Helvetica, Arial, sans-serif';
-            ctx.letterSpacing = "2px"; 
-            ctx.fillText('MMCC CS E-Pass', 200, 90);
-
-            // Fetch Base64 Image to Bypass CORS entirely
             const base64Data = await getBase64Image(visuals.avatar);
-
-            // Draw Avatar Background Circle
-            ctx.beginPath();
-            ctx.arc(200, 160, 45, 0, Math.PI * 2);
-            ctx.fillStyle = gradStart;
-            ctx.fill();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = borderColor;
-            ctx.stroke();
-
-            // Draw Maa Durga Image Custom Positioned
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(200, 160, 45, 0, Math.PI * 2);
-            ctx.clip();
+            ctx.beginPath(); ctx.arc(200, 160, 45, 0, Math.PI * 2); ctx.fillStyle = gradStart; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = borderColor; ctx.stroke();
+            ctx.save(); ctx.beginPath(); ctx.arc(200, 160, 45, 0, Math.PI * 2); ctx.clip();
             
             if(base64Data) {
                 const maaImage = new Image();
                 await new Promise((resolve) => {
                     maaImage.onload = () => {
-                        const aspect = maaImage.width / maaImage.height;
-                        const zoomScale = 1.45; // 45% Zoom
-                        const baseSize = 90;
-                        const targetSize = baseSize * zoomScale; 
-                        
+                        const aspect = maaImage.width / maaImage.height; const zoomScale = 1.45; const targetSize = 90 * zoomScale; 
                         let dWidth = targetSize, dHeight = targetSize;
-                        if (aspect > 1) { 
-                            dWidth = targetSize * aspect; 
-                        } else { 
-                            dHeight = targetSize / aspect; 
-                        }
-                        
-                        // Shift X left (-6px) & Shift Y down (+8px) to frame face center
-                        const offsetX = -6; 
-                        const offsetY = 8;  
-                        
-                        const dx = 200 - (dWidth / 2) + offsetX;
-                        const dy = 160 - (dHeight / 2) + offsetY;
-                        
-                        ctx.drawImage(maaImage, dx, dy, dWidth, dHeight);
-                        resolve();
+                        if (aspect > 1) dWidth = targetSize * aspect; else dHeight = targetSize / aspect; 
+                        const dx = 200 - (dWidth / 2) - 6; const dy = 160 - (dHeight / 2) + 8;
+                        ctx.drawImage(maaImage, dx, dy, dWidth, dHeight); resolve();
                     };
-                    maaImage.onerror = () => {
-                        ctx.fillStyle = foodColor;
-                        ctx.font = 'bold 40px "Segoe UI"';
-                        ctx.fillText(tkt.name.charAt(0).toUpperCase(), 200, 175);
-                        resolve();
-                    };
+                    maaImage.onerror = () => { ctx.fillStyle = foodColor; ctx.font = 'bold 40px "Segoe UI"'; ctx.fillText(tkt.name.charAt(0).toUpperCase(), 200, 175); resolve(); };
                     maaImage.src = base64Data;
                 });
-            } else {
-                ctx.fillStyle = foodColor;
-                ctx.font = 'bold 40px "Segoe UI"';
-                ctx.fillText(tkt.name.charAt(0).toUpperCase(), 200, 175);
-            }
+            } else { ctx.fillStyle = foodColor; ctx.font = 'bold 40px "Segoe UI"'; ctx.fillText(tkt.name.charAt(0).toUpperCase(), 200, 175); }
             ctx.restore();
 
-            // Student Name
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 24px "Segoe UI", Helvetica, Arial, sans-serif';
-            ctx.fillText(tkt.name, 200, 240);
-
-            // Decorative Line
-            ctx.beginPath();
-            ctx.moveTo(80, 255);
-            ctx.lineTo(320, 255);
-            ctx.strokeStyle = borderInner;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            // Details Section
-            ctx.fillStyle = detailColor;
-            ctx.font = '500 16px "Segoe UI", Helvetica, Arial, sans-serif';
-            ctx.fillText('Venue: MMCC Room no 8', 200, 285);
-            ctx.fillText('Date: 13 October 2026', 200, 310);
-            ctx.fillText('Time: 12:30 PM', 200, 335);
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 24px "Segoe UI", Helvetica, Arial, sans-serif'; ctx.fillText(tkt.name, 200, 240);
+            ctx.beginPath(); ctx.moveTo(80, 255); ctx.lineTo(320, 255); ctx.strokeStyle = borderInner; ctx.lineWidth = 1; ctx.stroke();
+            ctx.fillStyle = detailColor; ctx.font = '500 16px "Segoe UI", Helvetica, Arial, sans-serif'; ctx.fillText('Venue: MMCC Room no 8', 200, 285); ctx.fillText('Date: 13 October 2026', 200, 310); ctx.fillText('Time: 12:30 PM', 200, 335);
+            ctx.fillStyle = foodColor; ctx.font = 'bold 16px "Segoe UI", Helvetica, Arial, sans-serif'; ctx.fillText('Food: ' + (tkt.foodPreference || 'N/A'), 200, 365);
             
-            ctx.fillStyle = foodColor; 
-            ctx.font = 'bold 16px "Segoe UI", Helvetica, Arial, sans-serif';
-            ctx.fillText('Food: ' + (tkt.foodPreference || 'N/A'), 200, 365);
-
-            // QR Code Box (White background to ensure phone scanners can read it)
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowColor = 'rgba(0,0,0,0.5)';
-            ctx.shadowBlur = 10;
-            if(ctx.roundRect) {
-                ctx.roundRect(100, 395, 200, 200, 16);
-            } else {
-                ctx.rect(100, 395, 200, 200); 
-            }
-            ctx.fill();
-            ctx.shadowBlur = 0; // Reset shadow
-
-            // Draw actual QR
+            ctx.fillStyle = '#ffffff'; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10;
+            if(ctx.roundRect) ctx.roundRect(100, 395, 200, 200, 16); else ctx.rect(100, 395, 200, 200); 
+            ctx.fill(); ctx.shadowBlur = 0; 
             ctx.drawImage(qrCanvas, 110, 405, 180, 180);
 
-            // Footer Text
-            ctx.fillStyle = '#9ca3af';
-            ctx.font = 'italic 12px "Segoe UI", Helvetica, Arial, sans-serif';
+            ctx.fillStyle = '#9ca3af'; ctx.font = 'italic 12px "Segoe UI", Helvetica, Arial, sans-serif';
             const now = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
             ctx.fillText('Downloaded on: ' + now, 200, 635);
-            
-            ctx.fillStyle = borderColor;
-            ctx.font = 'bold 13px "Segoe UI", Helvetica, Arial, sans-serif';
-            ctx.fillText('MMCC Computer Science Dept', 200, 655);
+            ctx.fillStyle = borderColor; ctx.font = 'bold 13px "Segoe UI", Helvetica, Arial, sans-serif'; ctx.fillText('MMCC Computer Science Dept', 200, 655);
 
-            // Trigger Download
-            const link = document.createElement('a');
-            link.download = tkt.name.replace(/\s+/g, '_') + '_Agomoni_Pass.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            
-        } catch(error) {
-            console.error("Download Error:", error);
-            Swal.fire("Error", "Could not generate pass. Please try again.", "error");
-        } finally {
-            // Restore button state
-            dlBtn.innerHTML = origText;
-            dlBtn.style.pointerEvents = 'auto';
-        }
+            const link = document.createElement('a'); link.download = tkt.name.replace(/\s+/g, '_') + '_Agomoni_Pass.png'; link.href = canvas.toDataURL('image/png'); link.click();
+        } catch(error) { console.error("Download Error:", error); Swal.fire("Error", "Could not generate pass. Please try again.", "error"); } finally { dlBtn.innerHTML = origText; dlBtn.style.pointerEvents = 'auto'; }
     }
 
-    // --- ADMIN AUTHENTICATION (Firebase Auth) ---
+    // --- ADMIN (STAFF) REGISTRATION ---
     document.getElementById('formStaffSignup').addEventListener('submit', e => {
-        e.preventDefault();
-        setBtnLoading('btnSignupStaff', true);
-        const n = document.getElementById('sSignupName').value.trim();
-        const eMail = document.getElementById('sSignupEmail').value.trim();
-        const pRaw = document.getElementById('sSignupPass').value;
-        
-        auth.createUserWithEmailAndPassword(eMail, pRaw)
-        .then((userCredential) => {
+        e.preventDefault(); setBtnLoading('btnSignupStaff', true);
+        const n = document.getElementById('sSignupName').value.trim(); const eMail = document.getElementById('sSignupEmail').value.trim(); const pRaw = document.getElementById('sSignupPass').value;
+        auth.createUserWithEmailAndPassword(eMail, pRaw).then((userCredential) => {
             const uid = userCredential.user.uid;
-            
-            db.collection('users').doc(uid).set({
-                name: n,
-                email: eMail,
-                role: 'staff',
-                status: 'Pending'
-            }).then(() => {
-                e.target.reset();
-                setBtnLoading('btnSignupStaff', false, "Register for Approval");
-                Swal.fire('Submitted!', 'Registration submitted! Please wait for Master Admin approval before logging back in.', 'success');
-                
-                auth.signOut().then(() => {
-                    toggleAuth('staff', 'login');
-                });
-            }).catch((error) => {
-                setBtnLoading('btnSignupStaff', false, "Register for Approval");
-                const err = document.getElementById('sSignupError');
-                err.innerText = "DB Error: " + error.message;
-                err.classList.remove('hidden');
-            });
-        })
-        .catch((error) => {
-            setBtnLoading('btnSignupStaff', false, "Register for Approval");
-            const err = document.getElementById('sSignupError');
-            err.innerText = "Auth Error: " + error.message;
-            err.classList.remove('hidden');
-        });
+            db.collection('users').doc(uid).set({ name: n, email: eMail, role: 'staff', status: 'Pending' }).then(() => {
+                e.target.reset(); setBtnLoading('btnSignupStaff', false, "Register for Approval"); Swal.fire('Submitted!', 'Registration submitted! Please wait for Master Admin approval before logging back in.', 'success');
+                auth.signOut().then(() => { toggleAuth('staff', 'login'); });
+            }).catch((error) => { setBtnLoading('btnSignupStaff', false, "Register for Approval"); const err = document.getElementById('sSignupError'); err.innerText = "DB Error: " + error.message; err.classList.remove('hidden'); });
+        }).catch((error) => { setBtnLoading('btnSignupStaff', false, "Register for Approval"); const err = document.getElementById('sSignupError'); err.innerText = "Auth Error: " + error.message; err.classList.remove('hidden'); });
     });
 
-    // --- ADMIN LOGIN WITH "NOT FOUND" POPUP ---
+    // --- ADMIN (STAFF) LOGIN ---
     document.getElementById('formStaffLogin').addEventListener('submit', e => {
-        e.preventDefault();
-        setBtnLoading('btnLoginStaff', true);
-        const eMail = document.getElementById('sLoginEmail').value;
-        const pRaw = document.getElementById('sLoginPass').value;
-
-        auth.signInWithEmailAndPassword(eMail, pRaw)
-        .then((cred) => {
-            localSessionId = Date.now().toString();
-            db.collection('users').doc(cred.user.uid).update({ sessionId: localSessionId });
-
-            e.target.reset();
-            setBtnLoading('btnLoginStaff', false, "Log In");
-        })
-        .catch((error) => {
-            setBtnLoading('btnLoginStaff', false, "Log In");
-            const errBox = document.getElementById('sLoginError');
-            
-            if (error.code === 'auth/user-not-found') {
-                Swal.fire({
-                    title: 'Admin Not Found!',
-                    text: 'This email is not registered as an Admin.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Register Here',
-                    cancelButtonText: 'Try Again'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        toggleAuth('staff', 'signup');
-                    }
-                });
-            } else if (error.code === 'auth/too-many-requests') {
-                errBox.innerText = 'Account temporarily locked due to many failed attempts. Try again later.';
-                errBox.classList.remove('hidden'); 
-            } else {
-                errBox.innerText = 'Invalid credentials or awaiting Master Approval.';
-                errBox.classList.remove('hidden'); 
-            }
+        e.preventDefault(); setBtnLoading('btnLoginStaff', true);
+        const eMail = document.getElementById('sLoginEmail').value; const pRaw = document.getElementById('sLoginPass').value;
+        auth.signInWithEmailAndPassword(eMail, pRaw).then((cred) => {
+            localSessionId = Date.now().toString(); db.collection('users').doc(cred.user.uid).update({ sessionId: localSessionId }); e.target.reset(); setBtnLoading('btnLoginStaff', false, "Log In");
+        }).catch((error) => {
+            setBtnLoading('btnLoginStaff', false, "Log In"); const errBox = document.getElementById('sLoginError');
+            if (error.code === 'auth/user-not-found') { Swal.fire({ title: 'Admin Not Found!', text: 'This email is not registered as an Admin.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Register Here', cancelButtonText: 'Try Again' }).then((result) => { if (result.isConfirmed) toggleAuth('staff', 'signup'); });
+            } else if (error.code === 'auth/too-many-requests') { errBox.innerText = 'Account temporarily locked due to many failed attempts. Try again later.'; errBox.classList.remove('hidden'); 
+            } else { errBox.innerText = 'Invalid credentials or awaiting Master Approval.'; errBox.classList.remove('hidden'); }
         });
     });
 
-    // --- ADMIN FORGOT PASSWORD ---
+    // --- ADMIN (STAFF) FORGOT PASSWORD ---
     document.getElementById('formStaffForgot').addEventListener('submit', e => {
-        e.preventDefault();
-        setBtnLoading('btnForgotStaff', true);
-        const eMail = document.getElementById('sForgotEmail').value.trim();
-
-        auth.sendPasswordResetEmail(eMail)
-        .then(() => {
-            setBtnLoading('btnForgotStaff', false, "Send Reset Link");
-            Swal.fire('Sent!', 'A secure reset link has been sent to your admin email!', 'success');
-            e.target.reset();
-            toggleAuth('staff', 'login');
-        })
-        .catch((error) => {
-            setBtnLoading('btnForgotStaff', false, "Send Reset Link");
-            const err = document.getElementById('sForgotError');
-            err.innerText = "Error: Ensure the email is registered.";
-            err.classList.remove('hidden');
-        });
+        e.preventDefault(); setBtnLoading('btnForgotStaff', true); const eMail = document.getElementById('sForgotEmail').value.trim();
+        auth.sendPasswordResetEmail(eMail).then(() => {
+            setBtnLoading('btnForgotStaff', false, "Send Reset Link"); Swal.fire('Sent!', 'A secure reset link has been sent to your admin email!', 'success'); e.target.reset(); toggleAuth('staff', 'login');
+        }).catch((error) => { setBtnLoading('btnForgotStaff', false, "Send Reset Link"); const err = document.getElementById('sForgotError'); err.innerText = "Error: Ensure the email is registered."; err.classList.remove('hidden'); });
     });
 
-    // --- ADMIN (STAFF) CHANGE PASSWORD IN DASHBOARD ---
     function toggleStaffChangePass() {
         const sec = document.getElementById('sChangePassSection');
-        if (sec.classList.contains('hidden')) {
-            sec.classList.remove('hidden');
-            document.getElementById('sChangePassError').classList.add('hidden');
-            document.getElementById('sNewPassInput').value = '';
-            document.getElementById('sConfirmPassInput').value = '';
-            sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            sec.classList.add('hidden');
-        }
+        if (sec.classList.contains('hidden')) { sec.classList.remove('hidden'); document.getElementById('sChangePassError').classList.add('hidden'); document.getElementById('sNewPassInput').value = ''; document.getElementById('sConfirmPassInput').value = ''; sec.scrollIntoView({ behavior: 'smooth', block: 'center' }); } else sec.classList.add('hidden');
     }
 
     function submitStaffPasswordChange() {
-        const p1 = document.getElementById('sNewPassInput').value;
-        const p2 = document.getElementById('sConfirmPassInput').value;
-        updateFirebaseUserPassword(p1, p2, 'sChangePassError', toggleStaffChangePass, 'btnUpdatePassStaff');
+        const p1 = document.getElementById('sNewPassInput').value; const p2 = document.getElementById('sConfirmPassInput').value; updateFirebaseUserPassword(p1, p2, 'sChangePassError', toggleStaffChangePass, 'btnUpdatePassStaff');
     }
 
     function showStaffDashboard() {
-        document.getElementById('staffAuthSection').classList.add('hidden');
-        document.getElementById('staffDashboard').classList.remove('hidden');
-        document.getElementById('sWelcomeMsg').innerText = `Admin: ${currentStaff.name}`;
-        updateFooterVisibility();
+        document.getElementById('staffAuthSection').classList.add('hidden'); document.getElementById('staffDashboard').classList.remove('hidden'); document.getElementById('sWelcomeMsg').innerText = `Admin: ${currentStaff.name}`; updateFooterVisibility();
     }
 
     function updateStaffUI() {
         if(!currentStaff) return;
-        
-        let pendingStudents = tickets.filter(t => t.status === 'Pending').length;
-        let approvedStudents = tickets.filter(t => t.status === 'Approved').length;
-
-        document.getElementById('badge-staff-pendStudent').innerText = pendingStudents;
-        document.getElementById('badge-staff-appStudent').innerText = approvedStudents;
+        let pendingStudents = tickets.filter(t => t.status === 'Pending').length; let approvedStudents = tickets.filter(t => t.status === 'Approved').length;
+        document.getElementById('badge-staff-pendStudent').innerText = pendingStudents; document.getElementById('badge-staff-appStudent').innerText = approvedStudents;
         
         const badgeElem = document.getElementById('badge-staff-pendStudent');
         if (pendingStudents > 2) {
             badgeElem.classList.add('badge-alert');
-            if (pendingStudents > prevStaffPendingCount) {
-                Swal.fire({
-                    title: 'Smart Notification Alert 🔔',
-                    text: `${pendingStudents} students are waiting for pass approval!`,
-                    icon: 'info',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 5000,
-                    timerProgressBar: true
-                });
-            }
-        } else {
-            badgeElem.classList.remove('badge-alert');
-        }
+            if (pendingStudents > prevStaffPendingCount) Swal.fire({ title: 'Smart Notification Alert 🔔', text: `${pendingStudents} students are waiting for pass approval!`, icon: 'info', toast: true, position: 'top-end', showConfirmButton: false, timer: 5000, timerProgressBar: true });
+        } else badgeElem.classList.remove('badge-alert');
         prevStaffPendingCount = pendingStudents;
-
-        renderTicketLists('staffPendingList', 'staffApprovedList');
-        reFilterAll();
+        renderTicketLists('staffPendingList', 'staffApprovedList'); reFilterAll();
     }
 
     // --- MASTER ADMIN LOGIC ---
     function verifyAdminPin() {
-        if (!masterCredentials) {
-            Swal.fire('Setup Required', 'System is not initialized.', 'warning');
-            return;
-        }
+        if (!masterCredentials) { Swal.fire('Setup Required', 'System is not initialized.', 'warning'); return; }
+        if (Date.now() < masterPinLockUntil) { const mins = Math.ceil((masterPinLockUntil - Date.now()) / 60000); document.getElementById('aPinError').innerText = `Locked. Try again in ${mins} minute(s).`; document.getElementById('aPinError').classList.remove('hidden'); return; }
 
-        if (Date.now() < masterPinLockUntil) {
-            const mins = Math.ceil((masterPinLockUntil - Date.now()) / 60000);
-            document.getElementById('aPinError').innerText = `Locked. Try again in ${mins} minute(s).`;
-            document.getElementById('aPinError').classList.remove('hidden');
-            return;
-        }
-
-        const pinRaw = document.getElementById('aLoginPin').value;
-        const pinHash = hashData(pinRaw);
-
+        const pinRaw = document.getElementById('aLoginPin').value; const pinHash = hashData(pinRaw);
         if(pinHash === masterCredentials.pin || pinRaw === masterCredentials.pin) {
-            masterPinAttempts = 0; 
-            document.getElementById('admin2FASection').classList.add('hidden');
-            document.getElementById('aPinError').classList.add('hidden');
-            document.getElementById('adminAuthSection').classList.remove('hidden');
-            document.getElementById('aLoginPin').value = ''; 
+            masterPinAttempts = 0; document.getElementById('admin2FASection').classList.add('hidden'); document.getElementById('aPinError').classList.add('hidden'); document.getElementById('adminAuthSection').classList.remove('hidden'); document.getElementById('aLoginPin').value = ''; 
         } else {
             masterPinAttempts++;
-            if (masterPinAttempts >= 5) {
-                masterPinLockUntil = Date.now() + 60000 * 5; 
-                document.getElementById('aPinError').innerText = 'Too many failed attempts. Locked for 5 minutes.';
-            } else {
-                document.getElementById('aPinError').innerText = `Invalid PIN Code. Attempts left: ${5 - masterPinAttempts}`;
-            }
+            if (masterPinAttempts >= 5) { masterPinLockUntil = Date.now() + 60000 * 5; document.getElementById('aPinError').innerText = 'Too many failed attempts. Locked for 5 minutes.'; } else document.getElementById('aPinError').innerText = `Invalid PIN Code. Attempts left: ${5 - masterPinAttempts}`;
             document.getElementById('aPinError').classList.remove('hidden');
         }
     }
 
     function handleAdminLogin() {
         if (!masterCredentials) return;
-
-        setBtnLoading('btnMasterLogin', true);
-        const u = document.getElementById('aLoginUser').value;
-        const pRaw = document.getElementById('aLoginPass').value; 
-        const errBox = document.getElementById('aLoginError');
+        setBtnLoading('btnMasterLogin', true); const u = document.getElementById('aLoginUser').value; const pRaw = document.getElementById('aLoginPass').value; const errBox = document.getElementById('aLoginError');
         
         if(u === masterCredentials.user) {
-            auth.signInWithEmailAndPassword(MASTER_EMAIL, pRaw)
-            .then((cred) => {
-                isAdminLoggedIn = true;
-                
-                localSessionId = Date.now().toString();
-                db.collection('system').doc('masterCredentials').set({ sessionId: localSessionId }, { merge: true });
-
-                loadAllTicketsAndUsers(); 
-                document.getElementById('adminAuthSection').classList.add('hidden');
-                errBox.classList.add('hidden');
-                document.getElementById('adminDashboard').classList.remove('hidden');
-                updateFooterVisibility();
-                syncOfflineScans();
+            auth.signInWithEmailAndPassword(MASTER_EMAIL, pRaw).then((cred) => {
+                isAdminLoggedIn = true; localSessionId = Date.now().toString(); db.collection('system').doc('masterCredentials').set({ sessionId: localSessionId }, { merge: true });
+                loadAllTicketsAndUsers(); document.getElementById('adminAuthSection').classList.add('hidden'); errBox.classList.add('hidden'); document.getElementById('adminDashboard').classList.remove('hidden'); updateFooterVisibility(); syncOfflineScans(); setBtnLoading('btnMasterLogin', false, "Secure Login");
+            }).catch((error) => {
                 setBtnLoading('btnMasterLogin', false, "Secure Login");
-            })
-            .catch((error) => {
-                setBtnLoading('btnMasterLogin', false, "Secure Login");
-                if (error.code === 'auth/too-many-requests') {
-                    errBox.innerText = "Account locked due to too many failed attempts.";
-                } else {
-                    errBox.innerText = "Access Denied: Invalid Password";
-                }
+                if (error.code === 'auth/too-many-requests') errBox.innerText = "Account locked due to too many failed attempts."; else errBox.innerText = "Access Denied: Invalid Password";
                 errBox.classList.remove('hidden');
             });
-            
         } else {
-            setBtnLoading('btnMasterLogin', false, "Secure Login");
-            errBox.innerText = "Access Denied: Invalid Username";
-            errBox.classList.remove('hidden');
+            setBtnLoading('btnMasterLogin', false, "Secure Login"); errBox.innerText = "Access Denied: Invalid Username"; errBox.classList.remove('hidden');
         }
     }
 
     function cancelAdminLogin(action) {
         if(action === 'back') {
-            document.getElementById('adminAuthSection').classList.add('hidden');
-            document.getElementById('admin2FASection').classList.remove('hidden');
-            document.getElementById('aLoginUser').value = '';
-            document.getElementById('aLoginPass').value = '';
-            document.getElementById('aLoginError').classList.add('hidden');
+            document.getElementById('adminAuthSection').classList.add('hidden'); document.getElementById('admin2FASection').classList.remove('hidden'); document.getElementById('aLoginUser').value = ''; document.getElementById('aLoginPass').value = ''; document.getElementById('aLoginError').classList.add('hidden');
         } else if (action === 'home') {
-            document.getElementById('aLoginPin').value = '';
-            document.getElementById('aPinError').classList.add('hidden');
-            
-            document.getElementById('masterRecoveryBtn1').classList.add('hidden');
-            document.getElementById('masterRecoveryBtn2').classList.add('hidden');
-            switchView('view-home');
+            document.getElementById('aLoginPin').value = ''; document.getElementById('aPinError').classList.add('hidden'); document.getElementById('masterRecoveryBtn1').classList.add('hidden'); document.getElementById('masterRecoveryBtn2').classList.add('hidden'); switchView('view-home');
         }
     }
 
-    function showMasterReset() {
-        document.getElementById('adminAuthSection').classList.add('hidden');
-        document.getElementById('admin2FASection').classList.add('hidden');
-        document.getElementById('adminResetVerifySection').classList.remove('hidden');
-    }
-
-    function cancelMasterReset() {
-        document.getElementById('adminResetVerifySection').classList.add('hidden');
-        document.getElementById('adminSignupSection').classList.add('hidden');
-        document.getElementById('aRecError').classList.add('hidden');
-        
-        document.getElementById('admin2FASection').classList.remove('hidden');
-        document.getElementById('masterRecoveryBtn1').classList.add('hidden');
-        document.getElementById('masterRecoveryBtn2').classList.add('hidden');
-    }
+    function showMasterReset() { document.getElementById('adminAuthSection').classList.add('hidden'); document.getElementById('admin2FASection').classList.add('hidden'); document.getElementById('adminResetVerifySection').classList.remove('hidden'); }
+    function cancelMasterReset() { document.getElementById('adminResetVerifySection').classList.add('hidden'); document.getElementById('adminSignupSection').classList.add('hidden'); document.getElementById('aRecError').classList.add('hidden'); document.getElementById('admin2FASection').classList.remove('hidden'); document.getElementById('masterRecoveryBtn1').classList.add('hidden'); document.getElementById('masterRecoveryBtn2').classList.add('hidden'); }
 
     function sendMasterRecoveryEmail() {
         setBtnLoading('btnSendRecLink', true);
-        const actionCodeSettings = {
-            url: window.location.href, // Redirect back to this page
-            handleCodeInApp: true
-        };
-        
-        auth.sendSignInLinkToEmail(MASTER_EMAIL, actionCodeSettings)
-            .then(() => {
-                setBtnLoading('btnSendRecLink', false, "Send Recovery Link");
-                window.localStorage.setItem('emailForSignIn', MASTER_EMAIL);
-                Swal.fire('Sent!', 'A secure recovery/setup link has been sent to the registered email address. Please check your inbox and click the link to configure your credentials.', 'success');
-                cancelMasterReset();
-            })
-            .catch((error) => {
-                setBtnLoading('btnSendRecLink', false, "Send Recovery Link");
-                const err = document.getElementById('aRecError');
-                err.innerText = error.message;
-                err.classList.remove('hidden');
-            });
+        auth.sendSignInLinkToEmail(MASTER_EMAIL, { url: window.location.href, handleCodeInApp: true }).then(() => {
+            setBtnLoading('btnSendRecLink', false, "Send Recovery Link"); window.localStorage.setItem('emailForSignIn', MASTER_EMAIL); Swal.fire('Sent!', 'A secure recovery/setup link has been sent to the registered email address. Please check your inbox and click the link to configure your credentials.', 'success'); cancelMasterReset();
+        }).catch((error) => { setBtnLoading('btnSendRecLink', false, "Send Recovery Link"); const err = document.getElementById('aRecError'); err.innerText = error.message; err.classList.remove('hidden'); });
     }
 
     function saveNewMasterCredentials() {
         setBtnLoading('btnSaveMasterCreds', true);
-        const newName = document.getElementById('aNewName').value.trim();
-        const newUser = document.getElementById('aNewUser').value.trim();
-        const newPassRaw = document.getElementById('aNewPass').value.trim();
-        const newPinRaw = document.getElementById('aNewPin').value.trim();
-        const err = document.getElementById('aNewError');
-
-        if (!newName || !newUser || !newPassRaw || newPinRaw.length !== 6 || isNaN(newPinRaw)) {
-            err.innerText = "Please fill all fields correctly. PIN must be a 6-digit number.";
-            err.classList.remove('hidden');
-            setBtnLoading('btnSaveMasterCreds', false, "Save Credentials");
-            return;
-        }
-        
+        const newName = document.getElementById('aNewName').value.trim(); const newUser = document.getElementById('aNewUser').value.trim(); const newPassRaw = document.getElementById('aNewPass').value.trim(); const newPinRaw = document.getElementById('aNewPin').value.trim(); const err = document.getElementById('aNewError');
+        if (!newName || !newUser || !newPassRaw || newPinRaw.length !== 6 || isNaN(newPinRaw)) { err.innerText = "Please fill all fields correctly. PIN must be a 6-digit number."; err.classList.remove('hidden'); setBtnLoading('btnSaveMasterCreds', false, "Save Credentials"); return; }
         err.classList.add('hidden');
-
-        const newCreds = {
-            name: newName,
-            user: newUser,
-            pin: hashData(newPinRaw),
-            pass: "LOCKED_BY_AUTH" 
-        };
-
         const user = auth.currentUser;
         if (user) {
             user.updatePassword(newPassRaw).then(() => {
-                db.collection('system').doc('masterCredentials').set(newCreds)
-                .then(() => {
-                    setBtnLoading('btnSaveMasterCreds', false, "Save Credentials");
-                    Swal.fire('Saved!', 'Master Admin credentials configured and securely encrypted successfully!', 'success');
-                    
-                    document.getElementById('aNewName').value = '';
-                    document.getElementById('aNewUser').value = '';
-                    document.getElementById('aNewPass').value = '';
-                    document.getElementById('aNewPin').value = '';
-                    
-                    document.getElementById('adminSignupSection').classList.add('hidden');
-                    document.getElementById('admin2FASection').classList.remove('hidden');
-                    
-                    document.getElementById('masterRecoveryBtn1').classList.add('hidden');
-                    document.getElementById('masterRecoveryBtn2').classList.add('hidden');
-                    auth.signOut(); 
-                })
-                .catch((error) => {
-                    setBtnLoading('btnSaveMasterCreds', false, "Save Credentials");
-                    err.innerText = "Database Error: " + error.message;
-                    err.classList.remove('hidden');
-                });
-            }).catch(e => {
-                setBtnLoading('btnSaveMasterCreds', false, "Save Credentials");
-                err.innerText = "Auth Error: " + e.message;
-                err.classList.remove('hidden');
-            });
+                db.collection('system').doc('masterCredentials').set({ name: newName, user: newUser, pin: hashData(newPinRaw), pass: "LOCKED_BY_AUTH" }).then(() => {
+                    setBtnLoading('btnSaveMasterCreds', false, "Save Credentials"); Swal.fire('Saved!', 'Master Admin credentials configured and securely encrypted successfully!', 'success');
+                    document.getElementById('aNewName').value = ''; document.getElementById('aNewUser').value = ''; document.getElementById('aNewPass').value = ''; document.getElementById('aNewPin').value = '';
+                    document.getElementById('adminSignupSection').classList.add('hidden'); document.getElementById('admin2FASection').classList.remove('hidden'); document.getElementById('masterRecoveryBtn1').classList.add('hidden'); document.getElementById('masterRecoveryBtn2').classList.add('hidden'); auth.signOut(); 
+                }).catch((error) => { setBtnLoading('btnSaveMasterCreds', false, "Save Credentials"); err.innerText = "Database Error: " + error.message; err.classList.remove('hidden'); });
+            }).catch(e => { setBtnLoading('btnSaveMasterCreds', false, "Save Credentials"); err.innerText = "Auth Error: " + e.message; err.classList.remove('hidden'); });
         }
     }
 
-    // --- CHANGE MASTER CREDENTIALS INSIDE DASHBOARD (TABBED INTERFACE) ---
-    function showChangeCredsForm() {
-        document.getElementById('masterMenu').classList.add('hidden');
-        document.getElementById('btnFooterChangeCreds').classList.add('hidden');
-        document.getElementById('btnMasterLogout').classList.add('hidden');
-        document.getElementById('adminChangeCredsSection').classList.remove('hidden');
-        
-        document.querySelectorAll('.cred-form input').forEach(inp => inp.value = '');
-        
-        switchCredTab('user');
-    }
-
-    function hideChangeCredsForm() {
-        document.getElementById('adminChangeCredsSection').classList.add('hidden');
-        document.getElementById('masterMenu').classList.remove('hidden');
-        document.getElementById('btnMasterLogout').classList.remove('hidden');
-        updateFooterVisibility();
-    }
+    function showChangeCredsForm() { document.getElementById('masterMenu').classList.add('hidden'); document.getElementById('btnFooterChangeCreds').classList.add('hidden'); document.getElementById('btnMasterLogout').classList.add('hidden'); document.getElementById('adminChangeCredsSection').classList.remove('hidden'); document.querySelectorAll('.cred-form input').forEach(inp => inp.value = ''); switchCredTab('user'); }
+    function hideChangeCredsForm() { document.getElementById('adminChangeCredsSection').classList.add('hidden'); document.getElementById('masterMenu').classList.remove('hidden'); document.getElementById('btnMasterLogout').classList.remove('hidden'); updateFooterVisibility(); }
 
     function switchCredTab(tab) {
-        document.querySelectorAll('.cred-form').forEach(el => el.classList.add('hidden'));
-        document.getElementById('tab-user').classList.remove('tab-active');
-        document.getElementById('tab-pass').classList.remove('tab-active');
-        document.getElementById('tab-pin').classList.remove('tab-active');
-        
-        document.getElementById('form-change-' + tab).classList.remove('hidden');
-        document.getElementById('tab-' + tab).classList.add('tab-active');
-        document.getElementById('cCredsError').classList.add('hidden');
-        document.getElementById('cCredsSuccess').classList.add('hidden');
+        document.querySelectorAll('.cred-form').forEach(el => el.classList.add('hidden')); document.getElementById('tab-user').classList.remove('tab-active'); document.getElementById('tab-pass').classList.remove('tab-active'); document.getElementById('tab-pin').classList.remove('tab-active');
+        document.getElementById('form-change-' + tab).classList.remove('hidden'); document.getElementById('tab-' + tab).classList.add('tab-active'); document.getElementById('cCredsError').classList.add('hidden'); document.getElementById('cCredsSuccess').classList.add('hidden');
     }
 
-    function showCredError(msg, btnId, defaultText) {
-        if(btnId) setBtnLoading(btnId, false, defaultText);
-        const err = document.getElementById('cCredsError');
-        err.innerText = msg; err.classList.remove('hidden');
-        document.getElementById('cCredsSuccess').classList.add('hidden');
-    }
-
+    function showCredError(msg, btnId, defaultText) { if(btnId) setBtnLoading(btnId, false, defaultText); const err = document.getElementById('cCredsError'); err.innerText = msg; err.classList.remove('hidden'); document.getElementById('cCredsSuccess').classList.add('hidden'); }
     function saveCredsToDB(successMsg, btnId, defaultText) {
         document.getElementById('cCredsError').classList.add('hidden');
-        db.collection('system').doc('masterCredentials').set(masterCredentials)
-        .then(() => {
-            if(btnId) setBtnLoading(btnId, false, defaultText);
-            const suc = document.getElementById('cCredsSuccess');
-            suc.innerText = "✅ " + successMsg; 
-            suc.classList.remove('hidden');
-            document.querySelectorAll('.cred-form input').forEach(inp => inp.value = ''); // Clear inputs
-        })
-        .catch((error) => showCredError("Database Error: " + error.message, btnId, defaultText));
+        db.collection('system').doc('masterCredentials').set(masterCredentials).then(() => { if(btnId) setBtnLoading(btnId, false, defaultText); const suc = document.getElementById('cCredsSuccess'); suc.innerText = "✅ " + successMsg; suc.classList.remove('hidden'); document.querySelectorAll('.cred-form input').forEach(inp => inp.value = ''); }).catch((error) => showCredError("Database Error: " + error.message, btnId, defaultText));
     }
 
     function updateMasterUsername() {
-        setBtnLoading('btnUpdateUser', true);
-        const oldUser = document.getElementById('cOldUser').value.trim();
-        const pass = document.getElementById('cPassForUser').value; 
-        const pin = document.getElementById('cPinForUser').value;
-        const newUser = document.getElementById('cNewUser').value.trim();
-        
-        if(oldUser !== masterCredentials.user || hashData(pin) !== masterCredentials.pin) {
-            showCredError("❌ Current credentials incorrect. Change blocked.", 'btnUpdateUser', 'Update Username'); return;
-        }
+        setBtnLoading('btnUpdateUser', true); const oldUser = document.getElementById('cOldUser').value.trim(); const pass = document.getElementById('cPassForUser').value; const pin = document.getElementById('cPinForUser').value; const newUser = document.getElementById('cNewUser').value.trim();
+        if(oldUser !== masterCredentials.user || hashData(pin) !== masterCredentials.pin) { showCredError("❌ Current credentials incorrect. Change blocked.", 'btnUpdateUser', 'Update Username'); return; }
         if(!newUser) { showCredError("❌ Please enter a new username.", 'btnUpdateUser', 'Update Username'); return; }
-        
-        auth.signInWithEmailAndPassword(auth.currentUser.email, pass).then(() => {
-            masterCredentials.user = newUser;
-            saveCredsToDB("Username updated securely.", 'btnUpdateUser', 'Update Username');
-        }).catch(() => {
-            showCredError("❌ Current password incorrect. Change blocked.", 'btnUpdateUser', 'Update Username');
-        });
+        auth.signInWithEmailAndPassword(auth.currentUser.email, pass).then(() => { masterCredentials.user = newUser; saveCredsToDB("Username updated securely.", 'btnUpdateUser', 'Update Username'); }).catch(() => { showCredError("❌ Current password incorrect. Change blocked.", 'btnUpdateUser', 'Update Username'); });
     }
 
     function updateMasterPassword() {
-        setBtnLoading('btnUpdatePass', true);
-        const oldPass = document.getElementById('cOldPass').value;
-        const newPass = document.getElementById('cNewPass').value;
-        const confirmPass = document.getElementById('cNewPassConfirm').value;
-        
+        setBtnLoading('btnUpdatePass', true); const oldPass = document.getElementById('cOldPass').value; const newPass = document.getElementById('cNewPass').value; const confirmPass = document.getElementById('cNewPassConfirm').value;
         if(!newPass || newPass !== confirmPass) { showCredError("❌ New passwords do not match or are empty.", 'btnUpdatePass', 'Update Password'); return; }
-        
-        auth.signInWithEmailAndPassword(auth.currentUser.email, oldPass).then((cred) => {
-            cred.user.updatePassword(newPass).then(() => {
-                setBtnLoading('btnUpdatePass', false, 'Update Password');
-                const suc = document.getElementById('cCredsSuccess');
-                suc.innerText = "✅ Password updated securely in Firebase Auth."; 
-                suc.classList.remove('hidden');
-                document.querySelectorAll('.cred-form input').forEach(inp => inp.value = ''); 
-            }).catch(e => showCredError("❌ " + e.message, 'btnUpdatePass', 'Update Password'));
-        }).catch(() => {
-            showCredError("❌ Current password incorrect. Change blocked.", 'btnUpdatePass', 'Update Password');
-        });
+        auth.signInWithEmailAndPassword(auth.currentUser.email, oldPass).then((cred) => { cred.user.updatePassword(newPass).then(() => { setBtnLoading('btnUpdatePass', false, 'Update Password'); const suc = document.getElementById('cCredsSuccess'); suc.innerText = "✅ Password updated securely in Firebase Auth."; suc.classList.remove('hidden'); document.querySelectorAll('.cred-form input').forEach(inp => inp.value = ''); }).catch(e => showCredError("❌ " + e.message, 'btnUpdatePass', 'Update Password')); }).catch(() => { showCredError("❌ Current password incorrect. Change blocked.", 'btnUpdatePass', 'Update Password'); });
     }
 
     function updateMasterPin() {
-        setBtnLoading('btnUpdatePin', true);
-        const pass = document.getElementById('cPassForPin').value;
-        const oldPin = document.getElementById('cOldPin').value;
-        const newPin = document.getElementById('cNewPin').value;
-        
-        if(hashData(oldPin) !== masterCredentials.pin) {
-            showCredError("❌ Current PIN incorrect. Change blocked.", 'btnUpdatePin', 'Update 2-Step PIN'); return;
-        }
+        setBtnLoading('btnUpdatePin', true); const pass = document.getElementById('cPassForPin').value; const oldPin = document.getElementById('cOldPin').value; const newPin = document.getElementById('cNewPin').value;
+        if(hashData(oldPin) !== masterCredentials.pin) { showCredError("❌ Current PIN incorrect. Change blocked.", 'btnUpdatePin', 'Update 2-Step PIN'); return; }
         if(!newPin || newPin.length !== 6 || isNaN(newPin)) { showCredError("❌ New PIN must be exactly 6 digits.", 'btnUpdatePin', 'Update 2-Step PIN'); return; }
-        
-        auth.signInWithEmailAndPassword(auth.currentUser.email, pass).then(() => {
-            masterCredentials.pin = hashData(newPin);
-            saveCredsToDB("2-Step PIN updated securely.", 'btnUpdatePin', 'Update 2-Step PIN');
-        }).catch(() => {
-            showCredError("❌ Current password incorrect. Change blocked.", 'btnUpdatePin', 'Update 2-Step PIN');
-        });
+        auth.signInWithEmailAndPassword(auth.currentUser.email, pass).then(() => { masterCredentials.pin = hashData(newPin); saveCredsToDB("2-Step PIN updated securely.", 'btnUpdatePin', 'Update 2-Step PIN'); }).catch(() => { showCredError("❌ Current password incorrect. Change blocked.", 'btnUpdatePin', 'Update 2-Step PIN'); });
     }
 
-    // --- UI UPDATES & EXPORTS ---
     function updateAdminUI() {
         if(!isAdminLoggedIn) return;
-        
-        let pendingStaff = staffMembers.filter(s => s.status === 'Pending').length;
-        let approvedStaff = staffMembers.filter(s => s.status === 'Approved').length;
-        let pendingStudents = tickets.filter(t => t.status === 'Pending').length;
-        let approvedStudents = tickets.filter(t => t.status === 'Approved').length;
-        let presentStudents = tickets.filter(t => t.status === 'Used').length;
+        let pendingStaff = staffMembers.filter(s => s.status === 'Pending').length; let approvedStaff = staffMembers.filter(s => s.status === 'Approved').length; let pendingStudents = tickets.filter(t => t.status === 'Pending').length; let approvedStudents = tickets.filter(t => t.status === 'Approved').length; let presentStudents = tickets.filter(t => t.status === 'Used').length;
 
-        document.getElementById('badge-master-pendAdmin').innerText = pendingStaff;
-        document.getElementById('badge-master-appAdmin').innerText = approvedStaff;
-        document.getElementById('badge-master-pendStudent').innerText = pendingStudents;
-        document.getElementById('badge-master-appStudent').innerText = approvedStudents;
-        document.getElementById('badge-master-present').innerText = presentStudents;
+        document.getElementById('badge-master-pendAdmin').innerText = pendingStaff; document.getElementById('badge-master-appAdmin').innerText = approvedStaff; document.getElementById('badge-master-pendStudent').innerText = pendingStudents; document.getElementById('badge-master-appStudent').innerText = approvedStudents; document.getElementById('badge-master-present').innerText = presentStudents;
 
         const badgeElem = document.getElementById('badge-master-pendStudent');
         if (pendingStudents > 2) {
             badgeElem.classList.add('badge-alert');
-            if (pendingStudents > prevMasterPendingCount) {
-                Swal.fire({
-                    title: 'Smart Notification Alert 🔔',
-                    text: `${pendingStudents} students are waiting for pass approval!`,
-                    icon: 'info',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 5000,
-                    timerProgressBar: true
-                });
-            }
-        } else {
-            badgeElem.classList.remove('badge-alert');
-        }
+            if (pendingStudents > prevMasterPendingCount) Swal.fire({ title: 'Smart Notification Alert 🔔', text: `${pendingStudents} students are waiting for pass approval!`, icon: 'info', toast: true, position: 'top-end', showConfirmButton: false, timer: 5000, timerProgressBar: true });
+        } else badgeElem.classList.remove('badge-alert');
         prevMasterPendingCount = pendingStudents;
         
-        const pendingAdminsDiv = document.getElementById('adminStaffApproveList'); // FIXED ID MISMATCH HERE
+        const pendingAdminsDiv = document.getElementById('adminStaffApproveList'); 
         const pendAdmins = staffMembers.filter(s => s.status === 'Pending');
         if(pendAdmins.length > 0) {
             let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;">
@@ -2693,9 +2031,7 @@
             }).join('');
             if(pendAdmins.length > 20) html += `<div class="load-more-trigger" style="text-align:center; padding: 15px; color: var(--visitor-color); cursor:pointer; font-weight:bold; font-size: 0.9rem;" onclick="loadMoreListItems(this)">⏬ Load More</div>`;
             pendingAdminsDiv.innerHTML = html;
-        } else {
-            pendingAdminsDiv.innerHTML = '<span style="color: var(--text-muted);">No pending admin registrations.</span>';
-        }
+        } else pendingAdminsDiv.innerHTML = '<span style="color: var(--text-muted);">No pending admin registrations.</span>';
 
         const staffListDiv = document.getElementById('adminStaffList');
         const appAdmins = staffMembers.filter(s => s.status === 'Approved');
@@ -2713,9 +2049,7 @@
             }).join('');
             if(appAdmins.length > 20) html += `<div class="load-more-trigger" style="text-align:center; padding: 15px; color: var(--visitor-color); cursor:pointer; font-weight:bold; font-size: 0.9rem;" onclick="loadMoreListItems(this)">⏬ Load More</div>`;
             staffListDiv.innerHTML = html;
-        } else {
-            staffListDiv.innerHTML = '<span style="color: var(--text-muted);">No approved admins yet.</span>';
-        }
+        } else staffListDiv.innerHTML = '<span style="color: var(--text-muted);">No approved admins yet.</span>';
 
         const presentListDiv = document.getElementById('adminPresentList');
         const presentTickets = tickets.filter(t => t.status === 'Used');
@@ -2724,345 +2058,126 @@
                 const isHidden = index >= 20 ? 'style="display: none;"' : '';
                 return `
                 <div class="list-item infinite-item" ${isHidden}>
-                    <div>
-                        <strong style="color: var(--text-main);">${t.name}</strong> 
-                        <span class="scanned-by-text">(Scanned by: ${t.scannedBy} at ${t.scanTime || 'N/A'})</span><br>
-                        <small style="color:var(--text-muted)">${t.email} | Food: ${t.foodPreference || 'N/A'}</small>
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
-                        <span class="status-badge" style="background:var(--border-color); color:var(--text-main); font-size:0.7rem">In Venue</span>
-                        <button class="remove-btn" style="padding: 4px 8px; font-size: 0.75rem;" onclick="deleteInVenueRecord('${t.id}')">Delete</button>
-                    </div>
+                    <div><strong style="color: var(--text-main);">${t.name}</strong> <span class="scanned-by-text">(Scanned by: ${t.scannedBy} at ${t.scanTime || 'N/A'})</span><br><small style="color:var(--text-muted)">${t.email} | Food: ${t.foodPreference || 'N/A'}</small></div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;"><span class="status-badge" style="background:var(--border-color); color:var(--text-main); font-size:0.7rem">In Venue</span><button class="remove-btn" style="padding: 4px 8px; font-size: 0.75rem;" onclick="deleteInVenueRecord('${t.id}')">Delete</button></div>
                 </div>`;
             }).join('');
             if(presentTickets.length > 20) html += `<div class="load-more-trigger" style="text-align:center; padding: 15px; color: var(--visitor-color); cursor:pointer; font-weight:bold; font-size: 0.9rem;" onclick="loadMoreListItems(this)">⏬ Load More</div>`;
             presentListDiv.innerHTML = html;
-        } else {
-            presentListDiv.innerHTML = '<span style="color: var(--text-muted);">No students have entered yet.</span>';
-        }
+        } else presentListDiv.innerHTML = '<span style="color: var(--text-muted);">No students have entered yet.</span>';
 
-        renderTicketLists('adminPendingList', 'adminApprovedList');
-        reFilterAll();
-        applyInfiniteScroll();
+        renderTicketLists('adminPendingList', 'adminApprovedList'); reFilterAll(); applyInfiniteScroll();
     }
 
     function approveStudentTicket(id) {
-        const ticketToApprove = tickets.find(t => t.id === id);
-        if(!ticketToApprove) return;
-
-        db.collection('tickets').doc(id).update({ status: 'Approved' })
-        .then(() => {
-            sendApprovalEmail(ticketToApprove);
-
-            Swal.fire({
-                title: 'Success!',
-                text: 'Pass Approved & Notification Sent!',
-                icon: 'success',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000
-            });
-        })
-        .catch((e) => {
-            Swal.fire('Action Blocked', 'Database Error: ' + e.message, 'error');
-        });
+        const ticketToApprove = tickets.find(t => t.id === id); if(!ticketToApprove) return;
+        db.collection('tickets').doc(id).update({ status: 'Approved' }).then(() => { sendApprovalEmail(ticketToApprove); Swal.fire({ title: 'Success!', text: 'Pass Approved & Notification Sent!', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 }); }).catch((e) => { Swal.fire('Action Blocked', 'Database Error: ' + e.message, 'error'); });
     }
     
-    // MISSING FUNCTION ADDED HERE FOR INDIVIDUAL ADMIN APPROVAL
     function approveAdmin(uid) {
-        db.collection('users').doc(uid).update({ status: 'Approved' })
-        .then(() => {
-            Swal.fire({
-                title: 'Success!',
-                text: 'Admin Approved Successfully!',
-                icon: 'success',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000
-            });
-        })
-        .catch((e) => {
-            Swal.fire('Error', 'Database Error: ' + e.message, 'error');
-        });
+        db.collection('users').doc(uid).update({ status: 'Approved' }).then(() => { Swal.fire({ title: 'Success!', text: 'Admin Approved Successfully!', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 }); }).catch((e) => { Swal.fire('Error', 'Database Error: ' + e.message, 'error'); });
     }
 
-    function deleteApprovedAdmin(uid) {
-        Swal.fire({
-            title: 'Confirm Deletion',
-            text: 'Type "yes" to permanently delete this admin:',
-            input: 'text',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-        }).then((result) => {
-            if (result.value === "yes") {
-                db.collection('users').doc(uid).delete().then(() => Swal.fire('Deleted!', 'Admin deleted successfully.', 'success'));
-            }
-        });
-    }
+    function deleteApprovedAdmin(uid) { Swal.fire({ title: 'Confirm Deletion', text: 'Type "yes" to permanently delete this admin:', input: 'text', showCancelButton: true, confirmButtonColor: '#ef4444', }).then((result) => { if (result.value === "yes") { db.collection('users').doc(uid).delete().then(() => Swal.fire('Deleted!', 'Admin deleted successfully.', 'success')); } }); }
 
-    function deleteInVenueRecord(id) {
-        Swal.fire({
-            title: 'Confirm Deletion',
-            text: 'Type "yes" to permanently delete this record:',
-            input: 'text',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-        }).then((result) => {
-            if (result.value === "yes") {
-                db.collection('tickets').doc(id).delete().then(() => Swal.fire('Deleted!', 'Record deleted successfully.', 'success'));
-            }
-        });
-    }
+    function deleteInVenueRecord(id) { Swal.fire({ title: 'Confirm Permanent Deletion', text: 'Type "yes" to permanently delete this record from the database:', input: 'text', showCancelButton: true, confirmButtonColor: '#ef4444', }).then((result) => { if (result.value === "yes") { db.collection('tickets').doc(id).delete().then(() => { Swal.fire('Deleted!', 'Record deleted permanently by Master Admin.', 'success'); }).catch((e) => { Swal.fire('Error', 'Database Error: ' + e.message, 'error'); }); } }); }
 
-    // --- BULK ACTION LOGIC ---
-    function toggleAllBulk(source, containerId) {
-        const checkboxes = document.querySelectorAll('.bulk-cb-' + containerId);
-        checkboxes.forEach(cb => {
-            if (cb.closest('.list-item').style.display !== 'none') {
-                cb.checked = source.checked;
-            }
-        });
-    }
+    function toggleAllBulk(source, containerId) { const checkboxes = document.querySelectorAll('.bulk-cb-' + containerId); checkboxes.forEach(cb => { if (cb.closest('.list-item').style.display !== 'none') { cb.checked = source.checked; } }); }
 
     function bulkApprove(containerId) {
         const checkboxes = document.querySelectorAll('.bulk-cb-' + containerId + ':checked');
-        if(checkboxes.length === 0) {
-            Swal.fire('No Selection', 'Please select at least one student to approve.', 'warning');
-            return;
-        }
-        
-        Swal.fire({
-            title: 'Approving & Sending Emails...',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
-        
+        if(checkboxes.length === 0) { Swal.fire('No Selection', 'Please select at least one student to approve.', 'warning'); return; }
+        Swal.fire({ title: 'Approving & Sending Emails...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
         let batch = db.batch();
         checkboxes.forEach(cb => {
-            let tRef = db.collection('tickets').doc(cb.value);
-            batch.update(tRef, { status: 'Approved' });
-            
-            // Queue Email for each selected user
-            const ticketToApprove = tickets.find(t => t.id === cb.value);
-            if(ticketToApprove) {
-                sendApprovalEmail(ticketToApprove);
-            }
+            let tRef = db.collection('tickets').doc(cb.value); batch.update(tRef, { status: 'Approved' });
+            const ticketToApprove = tickets.find(t => t.id === cb.value); if(ticketToApprove) sendApprovalEmail(ticketToApprove);
         });
-        
-        batch.commit().then(() => {
-            Swal.fire('Success!', checkboxes.length + ' passes approved and emails sent!', 'success');
-        }).catch(e => {
-            Swal.fire('Error', e.message, 'error');
-        });
+        batch.commit().then(() => { Swal.fire('Success!', checkboxes.length + ' passes approved and emails sent!', 'success'); }).catch(e => { Swal.fire('Error', e.message, 'error'); });
     }
     
     function bulkApproveAdmins(containerId) {
         const checkboxes = document.querySelectorAll('.bulk-cb-' + containerId + ':checked');
-        if(checkboxes.length === 0) {
-            Swal.fire('No Selection', 'Please select at least one admin to approve.', 'warning');
-            return;
-        }
-        
-        Swal.fire({
-            title: 'Approving...',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
-        
+        if(checkboxes.length === 0) { Swal.fire('No Selection', 'Please select at least one admin to approve.', 'warning'); return; }
+        Swal.fire({ title: 'Approving...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
         let batch = db.batch();
-        checkboxes.forEach(cb => {
-            let uRef = db.collection('users').doc(cb.value);
-            batch.update(uRef, { status: 'Approved' });
-        });
-        
-        batch.commit().then(() => {
-            Swal.fire('Success!', checkboxes.length + ' admins approved successfully!', 'success');
-        }).catch(e => {
-            Swal.fire('Error', e.message, 'error');
-        });
+        checkboxes.forEach(cb => { let uRef = db.collection('users').doc(cb.value); batch.update(uRef, { status: 'Approved' }); });
+        batch.commit().then(() => { Swal.fire('Success!', checkboxes.length + ' admins approved successfully!', 'success'); }).catch(e => { Swal.fire('Error', e.message, 'error'); });
     }
 
     function renderTicketLists(pendingContainerId, approvedContainerId) {
-        const pList = document.getElementById(pendingContainerId);
-        const pendT = tickets.filter(t => t.status === 'Pending');
+        const pList = document.getElementById(pendingContainerId); const pendT = tickets.filter(t => t.status === 'Pending');
         if(pendT.length > 0) {
-            let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;">
-                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--text-main); font-size: 0.9rem;">
-                    <input type="checkbox" onclick="toggleAllBulk(this, '${pendingContainerId}')"> Select All
-                </label>
-                <button class="approve-btn" onclick="bulkApprove('${pendingContainerId}')" style="margin:0; background-color: var(--visitor-color);">Bulk Approve</button>
-            </div>`;
-            
+            let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;"><label style="cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:bold; color:var(--text-main); font-size: 0.9rem;"><input type="checkbox" onclick="toggleAllBulk(this, '${pendingContainerId}')"> Select All</label><button class="approve-btn" onclick="bulkApprove('${pendingContainerId}')" style="margin:0; background-color: var(--visitor-color);">Bulk Approve</button></div>`;
             html += pendT.map((t, index) => {
                 const isHidden = index >= 20 ? 'style="display: none;"' : '';
-                return `
-                <div class="list-item infinite-item" ${isHidden}>
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <input type="checkbox" class="bulk-cb-${pendingContainerId}" value="${t.id}">
-                        <div><strong style="color: var(--text-main);">${t.name}</strong><br><small style="color:var(--text-muted)">${t.email} | Food: ${t.foodPreference || 'N/A'}</small></div>
-                    </div>
-                    <button class="approve-btn" onclick="approveStudentTicket('${t.id}')">Approve</button>
-                </div>`;
+                return `<div class="list-item infinite-item" ${isHidden}><div style="display:flex; align-items:center; gap:12px;"><input type="checkbox" class="bulk-cb-${pendingContainerId}" value="${t.id}"><div><strong style="color: var(--text-main);">${t.name}</strong><br><small style="color:var(--text-muted)">${t.email} | Food: ${t.foodPreference || 'N/A'}</small></div></div><button class="approve-btn" onclick="approveStudentTicket('${t.id}')">Approve</button></div>`;
             }).join('');
             if(pendT.length > 20) html += `<div class="load-more-trigger" style="text-align:center; padding: 15px; color: var(--visitor-color); cursor:pointer; font-weight:bold; font-size: 0.9rem;" onclick="loadMoreListItems(this)">⏬ Load More</div>`;
             pList.innerHTML = html;
-        } else {
-            pList.innerHTML = '<span style="color: var(--text-muted);">Queue is empty.</span>';
-        }
+        } else pList.innerHTML = '<span style="color: var(--text-muted);">Queue is empty.</span>';
 
-        const aList = document.getElementById(approvedContainerId);
-        const appT = tickets.filter(t => t.status === 'Approved');
+        const aList = document.getElementById(approvedContainerId); const appT = tickets.filter(t => t.status === 'Approved');
         if(appT.length > 0) {
             let html = appT.map((t, index) => {
                 const isHidden = index >= 20 ? 'style="display: none;"' : '';
-                return `
-                <div class="list-item infinite-item" ${isHidden}>
-                    <div><strong style="color: var(--text-main);">${t.name}</strong><br><small style="color:var(--text-muted)">ID: ${t.id} | Food: ${t.foodPreference || 'N/A'}</small></div>
-                    <button class="remove-btn" onclick="ticketAction('${t.id}', 'Revoked')">Remove</button>
-                </div>`;
+                return `<div class="list-item infinite-item" ${isHidden}><div><strong style="color: var(--text-main);">${t.name}</strong><br><small style="color:var(--text-muted)">ID: ${t.id} | Food: ${t.foodPreference || 'N/A'}</small></div><button class="remove-btn" onclick="ticketAction('${t.id}', 'Revoked')">Remove</button></div>`;
             }).join('');
             if(appT.length > 20) html += `<div class="load-more-trigger" style="text-align:center; padding: 15px; color: var(--visitor-color); cursor:pointer; font-weight:bold; font-size: 0.9rem;" onclick="loadMoreListItems(this)">⏬ Load More</div>`;
             aList.innerHTML = html;
-        } else {
-            aList.innerHTML = '<span style="color: var(--text-muted);">No active passes.</span>';
-        }
+        } else aList.innerHTML = '<span style="color: var(--text-muted);">No active passes.</span>';
     }
 
-    function ticketAction(id, action) {
-        db.collection('tickets').doc(id).update({ status: action })
-        .then(() => {
-            Swal.fire({
-                title: 'Success!',
-                text: 'Pass has been ' + action + '!',
-                icon: 'success',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000
-            });
-        })
-        .catch((e) => {
-            Swal.fire('Action Blocked', 'Database Error: ' + e.message + '\n\nPlease update Firebase Database Rules.', 'error');
-        });
-    }
+    function ticketAction(id, action) { db.collection('tickets').doc(id).update({ status: action }).then(() => { Swal.fire({ title: 'Success!', text: 'Pass has been ' + action + '!', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 }); }).catch((e) => { Swal.fire('Action Blocked', 'Database Error: ' + e.message + '\n\nPlease update Firebase Database Rules.', 'error'); }); }
 
     function downloadPDF() {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
         doc.setFontSize(18); doc.text("AGOMONI 2026 - Master Event Report", 14, 20); doc.setFontSize(12);
-        
-        doc.text("1. Present in Venue (Scanned & Verified)", 14, 30);
-        const presentData = tickets.filter(t => t.status === 'Used').map(t => [t.name, t.foodPreference || 'N/A', t.id, t.scannedBy || 'Master', t.scanTime || 'N/A']);
-        doc.autoTable({ startY: 35, head: [['Name', 'Food Pref', 'Pass ID', 'Verified By', 'Time']], body: presentData });
-        
-        let finalY = doc.lastAutoTable.finalY || 35;
-        doc.text("2. Active / Approved Passes (Not Scanned Yet)", 14, finalY + 15);
-        const activeData = tickets.filter(t => t.status === 'Approved').map(t => [t.name, t.foodPreference || 'N/A', t.email, t.id]);
-        doc.autoTable({ startY: finalY + 20, head: [['Student Name', 'Food Pref', 'Email', 'Pass ID']], body: activeData });
-        
-        finalY = doc.lastAutoTable.finalY || finalY + 20;
-        doc.text("3. Authorized Admins", 14, finalY + 15);
-        const adminData = staffMembers.filter(s => s.status === 'Approved').map(s => [s.name, s.email]);
-        doc.autoTable({ startY: finalY + 20, head: [['Admin Name', 'Email']], body: adminData });
-        
+        doc.text("1. Present in Venue (Scanned & Verified)", 14, 30); const presentData = tickets.filter(t => t.status === 'Used').map(t => [t.name, t.foodPreference || 'N/A', t.id, t.scannedBy || 'Master', t.scanTime || 'N/A']); doc.autoTable({ startY: 35, head: [['Name', 'Food Pref', 'Pass ID', 'Verified By', 'Time']], body: presentData });
+        let finalY = doc.lastAutoTable.finalY || 35; doc.text("2. Active / Approved Passes (Not Scanned Yet)", 14, finalY + 15); const activeData = tickets.filter(t => t.status === 'Approved').map(t => [t.name, t.foodPreference || 'N/A', t.email, t.id]); doc.autoTable({ startY: finalY + 20, head: [['Student Name', 'Food Pref', 'Email', 'Pass ID']], body: activeData });
+        finalY = doc.lastAutoTable.finalY || finalY + 20; doc.text("3. Authorized Admins", 14, finalY + 15); const adminData = staffMembers.filter(s => s.status === 'Approved').map(s => [s.name, s.email]); doc.autoTable({ startY: finalY + 20, head: [['Admin Name', 'Email']], body: adminData });
         doc.save("AGOMONI_2026_Event_Report.pdf");
     }
 
     function downloadCSV() {
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "AGOMONI 2026 - Master Event Report\n\n";
-        
-        csvContent += "1. Present in Venue (Scanned & Verified)\n";
-        csvContent += "Student Name,Email,Food Preference,Pass ID,Verified By,Scan Time\n";
-        tickets.filter(t => t.status === 'Used').forEach(t => {
-            csvContent += `"${t.name}","${t.email}","${t.foodPreference || 'N/A'}","${t.id}","${t.scannedBy || 'Master'}","${t.scanTime || 'N/A'}"\n`;
-        });
-        
-        csvContent += "\n2. Active / Approved Passes (Not Scanned Yet)\n";
-        csvContent += "Student Name,Email,Food Preference,Pass ID\n";
-        tickets.filter(t => t.status === 'Approved').forEach(t => {
-            csvContent += `"${t.name}","${t.email}","${t.foodPreference || 'N/A'}","${t.id}"\n`;
-        });
-        
-        csvContent += "\n3. Authorized Admins\n";
-        csvContent += "Admin Name,Email\n";
-        staffMembers.filter(s => s.status === 'Approved').forEach(s => {
-            csvContent += `"${s.name}","${s.email}"\n`;
-        });
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "AGOMONI_2026_Event_Report.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        let csvContent = "data:text/csv;charset=utf-8,"; csvContent += "AGOMONI 2026 - Master Event Report\n\n";
+        csvContent += "1. Present in Venue (Scanned & Verified)\n"; csvContent += "Student Name,Email,Food Preference,Pass ID,Verified By,Scan Time\n"; tickets.filter(t => t.status === 'Used').forEach(t => { csvContent += `"${t.name}","${t.email}","${t.foodPreference || 'N/A'}","${t.id}","${t.scannedBy || 'Master'}","${t.scanTime || 'N/A'}"\n`; });
+        csvContent += "\n2. Active / Approved Passes (Not Scanned Yet)\n"; csvContent += "Student Name,Email,Food Preference,Pass ID\n"; tickets.filter(t => t.status === 'Approved').forEach(t => { csvContent += `"${t.name}","${t.email}","${t.foodPreference || 'N/A'}","${t.id}"\n`; });
+        csvContent += "\n3. Authorized Admins\n"; csvContent += "Admin Name,Email\n"; staffMembers.filter(s => s.status === 'Approved').forEach(s => { csvContent += `"${s.name}","${s.email}"\n`; });
+        const encodedUri = encodeURI(csvContent); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", "AGOMONI_2026_Event_Report.csv"); document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 
     let html5QrCode;
     function startCamera(readerElementId, resultElementId) {
         if(html5QrCode) { html5QrCode.stop().then(() => { html5QrCode.clear(); }).catch(err => console.log(err)); }
-        document.getElementById(resultElementId).classList.add('hidden');
-        html5QrCode = new Html5Qrcode(readerElementId);
-        
+        document.getElementById(resultElementId).classList.add('hidden'); html5QrCode = new Html5Qrcode(readerElementId);
         html5QrCode.start({ facingMode: "environment" }, { fps: 5, qrbox: { width: 250, height: 250 } }, 
-        (decodedText) => {
-            html5QrCode.stop();
-            document.getElementById(readerElementId).innerHTML = '<div style="color:#10b981; padding:40px 0; font-size:1.5rem; font-weight:bold; text-align:center;">✅ QR Detected! Processing...</div>';
-            processScan(decodedText, resultElementId);
+        (decodedText) => { 
+            html5QrCode.stop().then(() => {
+                document.getElementById(readerElementId).innerHTML = '<div style="color:#10b981; padding:40px 0; font-size:1.5rem; font-weight:bold; text-align:center;">✅ QR Detected! Processing...</div>'; 
+                processScan(decodedText, resultElementId); 
+            }).catch(e => {
+                processScan(decodedText, resultElementId);
+            });
         }, 
-        (errorMessage) => {}).catch(err => {
-            document.getElementById(resultElementId).innerText = "Camera access denied. Ensure you are on a secure (HTTPS) connection or use manual entry.";
-            document.getElementById(resultElementId).classList.remove('hidden'); document.getElementById(resultElementId).classList.add('msg-error');
-        });
+        (errorMessage) => {}).catch(err => { document.getElementById(resultElementId).innerText = "Camera access denied. Ensure you are on a secure (HTTPS) connection or use manual entry."; document.getElementById(resultElementId).classList.remove('hidden'); document.getElementById(resultElementId).classList.add('msg-error'); });
     }
 
     function processScan(decodedText, resultId) {
-        const id = decodedText.trim();
-        const res = document.getElementById(resultId);
-        res.classList.remove('hidden', 'msg-success', 'msg-error');
+        const id = decodedText.trim(); const res = document.getElementById(resultId); res.classList.remove('hidden', 'msg-success', 'msg-error');
         if(!id) { res.innerText = "❌ Please enter a valid Pass ID"; res.classList.add('msg-error'); return; }
-
         let t = tickets.find(t => t.id === id);
-
-        if(!t || t.status === 'Pending' || t.status === 'Revoked') {
-            res.innerText = "❌ Pass Not Found or Unauthorized"; res.classList.add('msg-error');
-        } else if (t.status === 'Used') {
-            res.innerText = `⚠️ Alert: Pass Already Used! (${t.name})`; res.classList.add('msg-error');
+        if(!t || t.status === 'Pending' || t.status === 'Revoked') { res.innerText = "❌ Pass Not Found or Unauthorized"; res.classList.add('msg-error');
+        } else if (t.status === 'Used') { res.innerText = `⚠️ Alert: Pass Already Used! (${t.name})`; res.classList.add('msg-error');
         } else if (t.status === 'Approved') {
-            const scannedBy = isAdminLoggedIn ? 'Master Admin' : (currentStaff ? currentStaff.name : 'System');
-            const timestamp = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
-            
+            const scannedBy = isAdminLoggedIn ? 'Master Admin' : (currentStaff ? currentStaff.name : 'System'); const timestamp = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
             if (navigator.onLine) {
-                db.collection('tickets').doc(t.id).update({ status: 'Used', scannedBy: scannedBy, scanTime: timestamp })
-                .then(() => {
-                    res.innerHTML = `✅ VERIFIED<br><small>Entry granted for: ${t.name}</small>`; 
-                    res.classList.add('msg-success');
-                })
-                .catch(e => {
-                    res.innerText = "❌ DB Error: " + e.message; 
-                    res.classList.add('msg-error');
-                });
+                db.collection('tickets').doc(t.id).update({ status: 'Used', scannedBy: scannedBy, scanTime: timestamp }).then(() => { res.innerHTML = `✅ VERIFIED<br><small>Entry granted for: ${t.name}</small>`; res.classList.add('msg-success'); }).catch(e => { res.innerText = "❌ DB Error: " + e.message; res.classList.add('msg-error'); });
             } else {
-                // OFFLINE MODE PROCESSING
-                offlineScans.push({ id: t.id, scannedBy: scannedBy + ' (Offline)', scanTime: timestamp });
-                localStorage.setItem('offlineScans', JSON.stringify(offlineScans));
-                
-                t.status = 'Used';
-                t.scannedBy = scannedBy + ' (Offline)';
-                t.scanTime = timestamp;
-                updateAdminUI(); 
-                
-                res.innerHTML = `✅ VERIFIED (OFFLINE)<br><small>Entry granted for: ${t.name}. Will sync when online.</small>`; 
-                res.classList.add('msg-success');
-                
-                Swal.fire({
-                    title: 'Offline Scan Saved',
-                    text: `${t.name} recorded locally.`,
-                    icon: 'success',
-                    toast: true, position: 'top-end', showConfirmButton: false, timer: 2000
-                });
+                offlineScans.push({ id: t.id, scannedBy: scannedBy + ' (Offline)', scanTime: timestamp }); localStorage.setItem('offlineScans', JSON.stringify(offlineScans));
+                t.status = 'Used'; t.scannedBy = scannedBy + ' (Offline)'; t.scanTime = timestamp; updateAdminUI(); 
+                res.innerHTML = `✅ VERIFIED (OFFLINE)<br><small>Entry granted for: ${t.name}. Will sync when online.</small>`; res.classList.add('msg-success');
+                Swal.fire({ title: 'Offline Scan Saved', text: `${t.name} recorded locally.`, icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
             }
         }
     }
@@ -3071,13 +2186,7 @@
 <!-- === ANTI-INSPECT SECURITY SCRIPT === -->
 <script>
     document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
-        if (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) { e.preventDefault(); return false; }
-        if (e.metaKey && e.altKey && ['I','i','J','j','C','c'].includes(e.key)) { e.preventDefault(); return false; }
-        if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
-        if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) { e.preventDefault(); return false; }
-    });
+    document.addEventListener('keydown', function(e) { if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; } if (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) { e.preventDefault(); return false; } if (e.metaKey && e.altKey && ['I','i','J','j','C','c'].includes(e.key)) { e.preventDefault(); return false; } if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; } if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) { e.preventDefault(); return false; } });
 </script>
 </body>
 </html>
