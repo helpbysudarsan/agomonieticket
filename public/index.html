@@ -1329,6 +1329,12 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
+    // Firebase Offline Persistence (Local Cache) On korar jonno (Ete data instant show korbe)
+    db.enablePersistence({ synchronizeTabs: true })
+      .catch(function(err) {
+          console.log("Cache Enable Error: ", err.message);
+      });
+
     let visitors = []; let staffMembers = []; let tickets = [];  
     let prevMasterPendingCount = 0; let prevStaffPendingCount = 0; let localSessionId = null; 
     let masterCredentials = null; let currentVisitor = null; let currentStaff = null;
@@ -2214,7 +2220,14 @@
         if(appT.length > 0) {
             let html = appT.map((t, index) => {
                 const isHidden = index >= 20 ? 'style="display: none;"' : '';
-                return `<div class="list-item infinite-item" ${isHidden}><div><strong style="color: var(--text-main);">${t.name}</strong><br><small style="color:var(--text-muted)">ID: ${t.id} | Food: ${t.foodPreference || 'N/A'}</small></div><button class="remove-btn" onclick="ticketAction('${t.id}', 'Revoked')">Remove</button></div>`;
+                
+                // SUHDHU MASTER ADMIN ER JONNO DELETE BUTTON SHOW KORBE
+                let removeBtnHtml = '';
+                if (isAdminLoggedIn) {
+                    removeBtnHtml = `<button class="remove-btn" onclick="ticketAction('${t.id}', 'Revoked')">Remove</button>`;
+                }
+                
+                return `<div class="list-item infinite-item" ${isHidden}><div><strong style="color: var(--text-main);">${t.name}</strong><br><small style="color:var(--text-muted)">ID: ${t.id} | Food: ${t.foodPreference || 'N/A'}</small></div>${removeBtnHtml}</div>`;
             }).join('');
             if(appT.length > 20) html += `<div class="load-more-trigger" style="text-align:center; padding: 15px; color: var(--visitor-color); cursor:pointer; font-weight:bold; font-size: 0.9rem;" onclick="loadMoreListItems(this)">⏬ Load More</div>`;
             aList.innerHTML = html;
