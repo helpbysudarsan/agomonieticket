@@ -1146,7 +1146,7 @@
     function sendApprovalEmail(ticketData) {
         const serviceID = 'service_i88qlsl'; 
         const templateID = 'template_uuqg0oz'; 
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwdfNB_-oa0Qcd3K-MMDF0hn4CM2S16m7TNLTbW59d7jeIioCDfYYsBmPNi4u_YYvnN/exec'; 
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyVYACUQde1_AX43r0JedQsvMdFNIYSxSClEu5j6dPumFs2cS2DH9mXEOMtnxM3vrIt/exec'; 
         
         const templateParams = {
             to_name: ticketData.name,
@@ -2210,35 +2210,76 @@
         db.collection('tickets').doc(id).update({ status: 'Approved' }).then(() => { sendApprovalEmail(ticketToApprove); Swal.fire({ title: 'Success!', text: 'Pass Approved & Notification Sent!', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 }); }).catch((e) => { Swal.fire('Action Blocked', 'Database Error: ' + e.message, 'error'); });
     }
     
+    // নতুন ইমেইল ফাংশন (এটি sendApprovalEmail এর নিচে বা যেকোনো জায়গায় রাখতে পারেন)
+    function sendAdminApprovalEmail(adminData) {
+        const serviceID = 'service_i88qlsl'; 
+        const templateID = 'template_uuqg0oz'; 
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwdfNB_-oa0Qcd3K-MMDF0hn4CM2S16m7TNLTbW59d7jeIioCDfYYsBmPNi4u_YYvnN/exec'; 
+        
+        const templateParams = {
+            to_name: adminData.name,
+            to_email: adminData.email,
+            pass_id: 'ADMIN-ACCESS',
+            event_name: 'Agomoni 2026 - Admin Portal Access',
+            event_date: '13 October 2026',
+            event_time: 'Valid from Now',
+            food_pref: 'N/A'
+        };
+
+        const docRef = db.collection('system').doc('emailStats');
+        
+        docRef.get().then((doc) => {
+            let currentCount = doc.exists ? (doc.data().sentCount || 0) : 0;
+            if (currentCount < 180) {
+                emailjs.send(serviceID, templateID, templateParams)
+                    .then(function(response) {
+                        docRef.set({sentCount: currentCount + 1}, {merge: true}); 
+                    }, function(error) {
+                        sendViaAppsScript(GAS_WEB_APP_URL, templateParams, docRef, currentCount);
+                    });
+            } else {
+                sendViaAppsScript(GAS_WEB_APP_URL, templateParams, docRef, currentCount);
+            }
+        }).catch(err => console.error(err));
+    }
+
+    // আপডেট করা approveAdmin ফাংশন
     function approveAdmin(uid) {
-        db.collection('users').doc(uid).update({ status: 'Approved' }).then(() => { Swal.fire({ title: 'Success!', text: 'Admin Approved Successfully!', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 }); }).catch((e) => { Swal.fire('Error', 'Database Error: ' + e.message, 'error'); });
-    }
+        const adminToApprove = staffMembers.find(s => s.uid === uid);
+        if (!adminToApprove) return;
 
-    function deleteApprovedAdmin(uid) { Swal.fire({ title: 'Confirm Deletion', text: 'Type "yes" to permanently delete this admin:', input: 'text', showCancelButton: true, confirmButtonColor: '#ef4444', }).then((result) => { if (result.value === "yes") { db.collection('users').doc(uid).delete().then(() => Swal.fire('Deleted!', 'Admin deleted successfully.', 'success')); } }); }
-
-    function deleteInVenueRecord(id) { Swal.fire({ title: 'Confirm Permanent Deletion', text: 'Type "yes" to permanently delete this record from the database:', input: 'text', showCancelButton: true, confirmButtonColor: '#ef4444', }).then((result) => { if (result.value === "yes") { db.collection('tickets').doc(id).delete().then(() => { Swal.fire('Deleted!', 'Record deleted permanently by Master Admin.', 'success'); }).catch((e) => { Swal.fire('Error', 'Database Error: ' + e.message, 'error'); }); } }); }
-
-    function toggleAllBulk(source, containerId) { const checkboxes = document.querySelectorAll('.bulk-cb-' + containerId); checkboxes.forEach(cb => { if (cb.closest('.list-item').style.display !== 'none') { cb.checked = source.checked; } }); }
-
-    function bulkApprove(containerId) {
-        const checkboxes = document.querySelectorAll('.bulk-cb-' + containerId + ':checked');
-        if(checkboxes.length === 0) { Swal.fire('No Selection', 'Please select at least one student to approve.', 'warning'); return; }
-        Swal.fire({ title: 'Approving & Sending Emails...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
-        let batch = db.batch();
-        checkboxes.forEach(cb => {
-            let tRef = db.collection('tickets').doc(cb.value); batch.update(tRef, { status: 'Approved' });
-            const ticketToApprove = tickets.find(t => t.id === cb.value); if(ticketToApprove) sendApprovalEmail(ticketToApprove);
+        db.collection('users').doc(uid).update({ status: 'Approved' }).then(() => { 
+            sendAdminApprovalEmail(adminToApprove); // ইমেইল পাঠানোর কল 
+            Swal.fire({ title: 'Success!', text: 'Admin Approved & Notification Sent!', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 }); 
+        }).catch((e) => { 
+            Swal.fire('Error', 'Database Error: ' + e.message, 'error'); 
         });
-        batch.commit().then(() => { Swal.fire('Success!', checkboxes.length + ' passes approved and emails sent!', 'success'); }).catch(e => { Swal.fire('Error', e.message, 'error'); });
     }
-    
+
+    // আপডেট করা bulkApproveAdmins ফাংশন
     function bulkApproveAdmins(containerId) {
         const checkboxes = document.querySelectorAll('.bulk-cb-' + containerId + ':checked');
         if(checkboxes.length === 0) { Swal.fire('No Selection', 'Please select at least one admin to approve.', 'warning'); return; }
-        Swal.fire({ title: 'Approving...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+        
+        Swal.fire({ title: 'Approving & Sending Emails...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
         let batch = db.batch();
-        checkboxes.forEach(cb => { let uRef = db.collection('users').doc(cb.value); batch.update(uRef, { status: 'Approved' }); });
-        batch.commit().then(() => { Swal.fire('Success!', checkboxes.length + ' admins approved successfully!', 'success'); }).catch(e => { Swal.fire('Error', e.message, 'error'); });
+        
+        checkboxes.forEach(cb => { 
+            let uRef = db.collection('users').doc(cb.value); 
+            batch.update(uRef, { status: 'Approved' }); 
+            
+            // ইমেইল পাঠানোর জন্য ডাটা খোঁজা
+            const adminToApprove = staffMembers.find(s => s.uid === cb.value);
+            if (adminToApprove) {
+                sendAdminApprovalEmail(adminToApprove);
+            }
+        });
+        
+        batch.commit().then(() => { 
+            Swal.fire('Success!', checkboxes.length + ' admins approved and emails sent!', 'success'); 
+        }).catch(e => { 
+            Swal.fire('Error', e.message, 'error'); 
+        });
     }
 
     function renderTicketLists(pendingContainerId, approvedContainerId) {
