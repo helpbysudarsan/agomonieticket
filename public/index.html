@@ -1134,7 +1134,7 @@
     function sendApprovalEmail(ticketData) {
         const serviceID = 'service_i88qlsl'; 
         const templateID = 'template_uuqg0oz'; 
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-HJexs9rv-mFJ1A0zlO_hjM7BfBl6iHNjt6lj7D-xz-wH_D9VrDsJ4ZhHEyTulihq/exec'; 
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwdfNB_-oa0Qcd3K-MMDF0hn4CM2S16m7TNLTbW59d7jeIioCDfYYsBmPNi4u_YYvnN/exec'; 
         
         const templateParams = {
             to_name: ticketData.name,
@@ -1334,6 +1334,7 @@
     let masterCredentials = null; let currentVisitor = null; let currentStaff = null;
     let isAdminLoggedIn = false; let masterPinAttempts = 0; let masterPinLockUntil = 0;
     let ticketListener = null; let userListener = null; let masterCredListener = null;
+    let isSigningUp = false; // <--- THE BUG FIX FOR THE RACE CONDITION
 
     masterCredListener = db.collection('system').doc('masterCredentials').onSnapshot((doc) => {
         if(doc.exists) {
@@ -1370,15 +1371,17 @@
                     if (userData.role === 'visitor') {
                         currentVisitor = userData; currentVisitor.email = user.email;
                         showVisitorDashboard(); loadTickets(); 
-                    } else if (userData.role === 'staff') {
+                    } else if (userData.role === 'staff' || userData.role === 'admin' || userData.role === 'Staff') {
                         currentStaff = userData; currentStaff.email = user.email;
                         if(currentStaff.status === 'Approved') {
                             showStaffDashboard(); loadAllTicketsAndUsers(); syncOfflineScans();
                         } else {
-                            if(document.getElementById('view-staff').classList.contains('active')) {
-                                Swal.fire({icon: 'info', title: 'Pending', text: 'Account pending Master Approval. Check back later.'});
+                            if (!isSigningUp) { // <--- THE FIX IS APPLIED HERE
+                                if(document.getElementById('view-staff').classList.contains('active')) {
+                                    Swal.fire({icon: 'info', title: 'Pending', text: 'Account pending Master Approval. Check back later.'});
+                                }
+                                auth.signOut();
                             }
-                            auth.signOut();
                         }
                     }
                 }
@@ -1444,8 +1447,16 @@
             visitors = []; staffMembers = [];
             snapshot.forEach(doc => {
                 let data = doc.data();
-                if(data.role === 'visitor') visitors.push(data);
-                if(data.role === 'staff') { let st = data; st.uid = doc.id; staffMembers.push(st); }
+                if(!data) return;
+                
+                let r = data.role ? data.role.toString().toLowerCase() : '';
+                if(r === 'visitor') {
+                    visitors.push(data);
+                } else if(r === 'staff' || r === 'admin') { 
+                    let st = data; 
+                    st.uid = doc.id; 
+                    staffMembers.push(st); 
+                }
             });
             if(currentStaff) updateStaffUI();
             if(isAdminLoggedIn) updateAdminUI();
@@ -1677,8 +1688,10 @@
         const n = document.getElementById('vSignupName').value.trim(); const eMail = document.getElementById('vSignupEmail').value.trim(); const pRaw = document.getElementById('vSignupPass').value;
         auth.createUserWithEmailAndPassword(eMail, pRaw).then((userCredential) => {
             const uid = userCredential.user.uid;
-            db.collection('users').doc(uid).set({ name: n, email: eMail, role: 'visitor' });
-            e.target.reset(); setBtnLoading('btnSignupVisitor', false, "Sign Up");
+            db.collection('users').doc(uid).set({ name: n, email: eMail, role: 'visitor' }).then(() => {
+                e.target.reset(); setBtnLoading('btnSignupVisitor', false, "Sign Up");
+                Swal.fire({title: 'Success!', text: 'Account created successfully!', icon: 'success', timer: 2000, showConfirmButton: false});
+            });
         }).catch((error) => {
             setBtnLoading('btnSignupVisitor', false, "Sign Up");
             const err = document.getElementById('vSignupError'); err.innerText = error.message; err.classList.remove('hidden');
@@ -1696,11 +1709,22 @@
         }).catch((error) => {
             setBtnLoading('btnLoginVisitor', false, "Log In");
             const errBox = document.getElementById('vLoginError');
-            if (error.code === 'auth/user-not-found') {
-                Swal.fire({ title: 'Account Not Found!', text: 'This email is not registered in our database.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sign Up Now', cancelButtonText: 'Try Again' }).then((result) => { if (result.isConfirmed) toggleAuth('visitor', 'signup'); });
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-login-credentials') {
+                Swal.fire({ 
+                    title: 'Account Not Found / Invalid Login', 
+                    text: 'This email is not registered or the password is wrong. If you are a new student, please Sign Up.', 
+                    icon: 'warning', 
+                    showCancelButton: true, 
+                    confirmButtonText: 'Sign Up Now', 
+                    cancelButtonText: 'Try Again' 
+                }).then((result) => { 
+                    if (result.isConfirmed) toggleAuth('visitor', 'signup'); 
+                });
             } else if (error.code === 'auth/too-many-requests') {
                 errBox.innerText = 'Account temporarily locked due to many failed attempts. Try again later.'; errBox.classList.remove('hidden'); 
-            } else { errBox.innerText = 'Invalid credentials.'; errBox.classList.remove('hidden'); }
+            } else { 
+                errBox.innerText = 'Invalid credentials. (' + error.message + ')'; errBox.classList.remove('hidden'); 
+            }
         });
     });
 
@@ -1838,6 +1862,7 @@
     document.getElementById('formStaffSignup').addEventListener('submit', e => {
         e.preventDefault(); 
         setBtnLoading('btnSignupStaff', true);
+        isSigningUp = true; // <--- THE BUG FIX FLAG IS ACTIVATED HERE
         
         const n = document.getElementById('sSignupName').value.trim(); 
         const eMail = document.getElementById('sSignupEmail').value.trim(); 
@@ -1846,7 +1871,6 @@
         auth.createUserWithEmailAndPassword(eMail, pRaw).then((userCredential) => {
             const uid = userCredential.user.uid;
             
-            // Write to Firestore first
             db.collection('users').doc(uid).set({ 
                 name: n, 
                 email: eMail, 
@@ -1856,18 +1880,21 @@
                 e.target.reset(); 
                 setBtnLoading('btnSignupStaff', false, "Register for Approval"); 
                 
-                // Log out the newly registered user so they don't get stuck in an unauthorized state
+                isSigningUp = false; // <--- DEACTIVATED BEFORE SIGNOUT
                 auth.signOut().then(() => { 
                     Swal.fire('Submitted!', 'Registration submitted! Please wait for Master Admin approval before logging back in.', 'success');
                     toggleAuth('staff', 'login'); 
                 });
             }).catch((error) => { 
+                isSigningUp = false; // <--- DEACTIVATED ON ERROR
                 setBtnLoading('btnSignupStaff', false, "Register for Approval"); 
                 const err = document.getElementById('sSignupError'); 
                 err.innerText = "DB Error: " + error.message; 
                 err.classList.remove('hidden'); 
+                auth.signOut(); // Emergency cleanup
             });
         }).catch((error) => { 
+            isSigningUp = false; // <--- DEACTIVATED ON ERROR
             setBtnLoading('btnSignupStaff', false, "Register for Approval"); 
             const err = document.getElementById('sSignupError'); 
             err.innerText = "Auth Error: " + error.message; 
@@ -1883,9 +1910,23 @@
             localSessionId = Date.now().toString(); db.collection('users').doc(cred.user.uid).update({ sessionId: localSessionId }); e.target.reset(); setBtnLoading('btnLoginStaff', false, "Log In");
         }).catch((error) => {
             setBtnLoading('btnLoginStaff', false, "Log In"); const errBox = document.getElementById('sLoginError');
-            if (error.code === 'auth/user-not-found') { Swal.fire({ title: 'Admin Not Found!', text: 'This email is not registered as an Admin.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Register Here', cancelButtonText: 'Try Again' }).then((result) => { if (result.isConfirmed) toggleAuth('staff', 'signup'); });
-            } else if (error.code === 'auth/too-many-requests') { errBox.innerText = 'Account temporarily locked due to many failed attempts. Try again later.'; errBox.classList.remove('hidden'); 
-            } else { errBox.innerText = 'Invalid credentials or awaiting Master Approval.'; errBox.classList.remove('hidden'); }
+            
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-login-credentials') { 
+                Swal.fire({ 
+                    title: 'Admin Not Found / Invalid Login', 
+                    text: 'This email is not registered as an Admin or the password is wrong. If new, please Register.', 
+                    icon: 'warning', 
+                    showCancelButton: true, 
+                    confirmButtonText: 'Register Here', 
+                    cancelButtonText: 'Try Again' 
+                }).then((result) => { 
+                    if (result.isConfirmed) toggleAuth('staff', 'signup'); 
+                });
+            } else if (error.code === 'auth/too-many-requests') { 
+                errBox.innerText = 'Account temporarily locked due to many failed attempts. Try again later.'; errBox.classList.remove('hidden'); 
+            } else { 
+                errBox.innerText = 'Invalid credentials or awaiting Master Approval.'; errBox.classList.remove('hidden'); 
+            }
         });
     });
 
@@ -2028,9 +2069,19 @@
 
     function updateAdminUI() {
         if(!isAdminLoggedIn) return;
-        let pendingStaff = staffMembers.filter(s => s.status === 'Pending').length; let approvedStaff = staffMembers.filter(s => s.status === 'Approved').length; let pendingStudents = tickets.filter(t => t.status === 'Pending').length; let approvedStudents = tickets.filter(t => t.status === 'Approved').length; let presentStudents = tickets.filter(t => t.status === 'Used').length;
+        
+        // CATCH-ALL: Consider any admin NOT explicitly 'Approved' as 'Pending'
+        let pendingStaff = staffMembers.filter(s => s.status !== 'Approved').length; 
+        let approvedStaff = staffMembers.filter(s => s.status === 'Approved').length; 
+        let pendingStudents = tickets.filter(t => t.status === 'Pending').length; 
+        let approvedStudents = tickets.filter(t => t.status === 'Approved').length; 
+        let presentStudents = tickets.filter(t => t.status === 'Used').length;
 
-        document.getElementById('badge-master-pendAdmin').innerText = pendingStaff; document.getElementById('badge-master-appAdmin').innerText = approvedStaff; document.getElementById('badge-master-pendStudent').innerText = pendingStudents; document.getElementById('badge-master-appStudent').innerText = approvedStudents; document.getElementById('badge-master-present').innerText = presentStudents;
+        document.getElementById('badge-master-pendAdmin').innerText = pendingStaff; 
+        document.getElementById('badge-master-appAdmin').innerText = approvedStaff; 
+        document.getElementById('badge-master-pendStudent').innerText = pendingStudents; 
+        document.getElementById('badge-master-appStudent').innerText = approvedStudents; 
+        document.getElementById('badge-master-present').innerText = presentStudents;
 
         const badgeElem = document.getElementById('badge-master-pendStudent');
         if (pendingStudents > 2) {
@@ -2040,7 +2091,9 @@
         prevMasterPendingCount = pendingStudents;
         
         const pendingAdminsDiv = document.getElementById('adminStaffApproveList'); 
-        const pendAdmins = staffMembers.filter(s => s.status === 'Pending');
+        
+        // CATCH-ALL rendering
+        const pendAdmins = staffMembers.filter(s => s.status !== 'Approved');
 
         if (pendAdmins.length > 0) {
             let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding: 10px; background: rgba(0,0,0,0.05); border-radius: 8px;">
