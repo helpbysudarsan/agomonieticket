@@ -1819,62 +1819,233 @@
     }
 
     async function downloadPassAsPNG() {
-        const tkt = tickets.find(t => t.email === currentVisitor.email); if(!tkt || tkt.status !== 'Approved') return;
-        const qrCanvas = document.getElementById('qrCanvas'); if(!qrCanvas) return;
-        const dlBtn = document.getElementById('btnDownloadPassPNG'); const origText = dlBtn.innerHTML; dlBtn.innerHTML = 'Generating... ⌛'; dlBtn.style.pointerEvents = 'none';
+        const tkt = tickets.find(t => t.email === currentVisitor.email); 
+        // Allow downloading if the pass is Approved OR Used
+        if(!tkt || (tkt.status !== 'Approved' && tkt.status !== 'Used')) {
+            Swal.fire("Unavailable", "Your pass is not approved yet or has been revoked.", "warning");
+            return;
+        }
+        
+        const qrCanvas = document.getElementById('qrCanvas'); 
+        if(!qrCanvas) return;
+        
+        const dlBtn = document.getElementById('btnDownloadPassPNG'); 
+        const origText = dlBtn.innerHTML; 
+        dlBtn.innerHTML = 'Generating Premium Pass... ⌛'; 
+        dlBtn.style.pointerEvents = 'none';
 
         try {
-            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); canvas.width = 400; canvas.height = 700;
-            const visuals = getTicketVisuals(tkt.id); const styleType = visuals.styleType;
-            let gradStart, gradEnd, borderColor, borderInner, titleColor, subTitleColor, detailColor, foodColor;
+            // 3x Scaling to prevent pixelation on zoom
+            const scale = 3; 
+            const canvas = document.createElement('canvas'); 
+            const ctx = canvas.getContext('2d'); 
+            const width = 400 * scale;
+            const height = 700 * scale;
             
-            if (styleType === 0) { gradStart = '#1a0505'; gradEnd = '#000000'; borderColor = '#ffd700'; borderInner = 'rgba(255, 0, 85, 0.4)'; titleColor = '#ffd700'; subTitleColor = '#fcd34d'; detailColor = '#fef3c7'; foodColor = '#ff0055'; } 
-            else if (styleType === 1) { gradStart = '#081229'; gradEnd = '#000000'; borderColor = '#00f0ff'; borderInner = 'rgba(0, 240, 255, 0.4)'; titleColor = '#00f0ff'; subTitleColor = '#7dd3fc'; detailColor = '#f0f9ff'; foodColor = '#38bdf8'; } 
-            else { gradStart = '#022c22'; gradEnd = '#000000'; borderColor = '#facc15'; borderInner = 'rgba(74, 222, 128, 0.4)'; titleColor = '#facc15'; subTitleColor = '#bbf7d0'; detailColor = '#f0fdf4'; foodColor = '#4ade80'; }
+            canvas.width = width; 
+            canvas.height = height;
 
-            let gradient = ctx.createLinearGradient(0, 0, 400, 700); gradient.addColorStop(0, gradStart); gradient.addColorStop(1, gradEnd); ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = borderColor; ctx.lineWidth = 3; ctx.strokeRect(15, 15, 370, 670);
-            ctx.strokeStyle = borderInner; ctx.lineWidth = 1; ctx.strokeRect(20, 20, 360, 660);
-            ctx.fillStyle = titleColor; ctx.font = 'bold 28px "Georgia", serif'; ctx.textAlign = 'center'; ctx.fillText('আগমনী ২০২৬', 200, 65);
-            ctx.fillStyle = subTitleColor; ctx.font = '700 14px "Segoe UI", Helvetica, Arial, sans-serif'; ctx.letterSpacing = "2px"; ctx.fillText('MMCC CS E-Pass', 200, 90);
+            // 1. Outer Dark Black Area (Background)
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, width, height);
 
+            // 2. Inner Premium Card Configuration
+            const cx = 15 * scale;
+            const cy = 15 * scale;
+            const cw = 370 * scale;
+            const ch = 670 * scale;
+            const radius = 20 * scale;
+
+            // Deep Red Premium Gradient
+            let grad = ctx.createLinearGradient(cx, cy, cx, cy + ch);
+            grad.addColorStop(0, '#5a0515');   // Deep Crimson
+            grad.addColorStop(0.5, '#1a0205'); // Very dark red
+            grad.addColorStop(1, '#050000');   // Almost black
+            
+            // Draw Rounded Rectangle for Inner Card
+            ctx.beginPath();
+            ctx.moveTo(cx + radius, cy);
+            ctx.lineTo(cx + cw - radius, cy);
+            ctx.quadraticCurveTo(cx + cw, cy, cx + cw, cy + radius);
+            ctx.lineTo(cx + cw, cy + ch - radius);
+            ctx.quadraticCurveTo(cx + cw, cy + ch, cx + cw - radius, cy + ch);
+            ctx.lineTo(cx + radius, cy + ch);
+            ctx.quadraticCurveTo(cx, cy + ch, cx, cy + ch - radius);
+            ctx.lineTo(cx, cy + radius);
+            ctx.quadraticCurveTo(cx, cy, cx + radius, cy);
+            ctx.closePath();
+
+            // Fill Inner Card and Stroke with Gold
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.lineWidth = 2 * scale;
+            ctx.strokeStyle = '#d4af37'; // Premium Gold
+            ctx.stroke();
+
+            // 3. Premium Red Curve Structure (Watermark design)
+            ctx.save();
+            ctx.clip(); // Ensure curves stay inside the border
+            
+            // Top Curve
+            ctx.beginPath();
+            ctx.moveTo(cx, cy + 120 * scale);
+            ctx.bezierCurveTo(cx + 150 * scale, cy + 220 * scale, cx + 250 * scale, cy, cx + cw, cy + 150 * scale);
+            ctx.lineTo(cx + cw, cy);
+            ctx.lineTo(cx, cy);
+            ctx.fillStyle = 'rgba(255, 10, 50, 0.08)';
+            ctx.fill();
+
+            // Bottom Curve
+            ctx.beginPath();
+            ctx.moveTo(cx, cy + ch - 180 * scale);
+            ctx.bezierCurveTo(cx + 120 * scale, cy + ch, cx + 280 * scale, cy + ch - 250 * scale, cx + cw, cy + ch - 120 * scale);
+            ctx.lineTo(cx + cw, cy + ch);
+            ctx.lineTo(cx, cy + ch);
+            ctx.fillStyle = 'rgba(255, 10, 50, 0.05)';
+            ctx.fill();
+            ctx.restore(); // Remove clipping
+
+            // 4. Typography & Styling
+            const goldColor = '#fcd34d';
+            const whiteColor = '#ffffff';
+            const lightGray = '#d1d5db';
+
+            // Title
+            ctx.fillStyle = goldColor; 
+            ctx.font = `bold ${32 * scale}px "Georgia", serif`; 
+            ctx.textAlign = 'center'; 
+            ctx.fillText('আগমনী ২০২৬', width / 2, 75 * scale);
+            
+            // Subtitle
+            ctx.fillStyle = lightGray; 
+            ctx.font = `600 ${13 * scale}px "Segoe UI", Helvetica, Arial, sans-serif`; 
+            ctx.letterSpacing = `${2 * scale}px`;
+            ctx.fillText('M M C C   C S   E - P A S S', width / 2, 100 * scale);
+
+            // 5. Fetch & Draw Avatar with Zoom
+            const visuals = getTicketVisuals(tkt.id);
             const base64Data = await getBase64Image(visuals.avatar);
-            ctx.beginPath(); ctx.arc(200, 160, 45, 0, Math.PI * 2); ctx.fillStyle = gradStart; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = borderColor; ctx.stroke();
-            ctx.save(); ctx.beginPath(); ctx.arc(200, 160, 45, 0, Math.PI * 2); ctx.clip();
+            
+            const avatarY = 180 * scale;
+            const avatarR = 48 * scale;
+            
+            // Avatar Gold Ring Background
+            ctx.beginPath(); 
+            ctx.arc(width / 2, avatarY, avatarR, 0, Math.PI * 2); 
+            ctx.fillStyle = '#1a0505'; 
+            ctx.fill(); 
+            ctx.lineWidth = 3 * scale; 
+            ctx.strokeStyle = goldColor; 
+            ctx.stroke();
+
+            ctx.save(); 
+            ctx.beginPath(); 
+            ctx.arc(width / 2, avatarY, avatarR, 0, Math.PI * 2); 
+            ctx.clip();
             
             if(base64Data) {
                 const maaImage = new Image();
                 await new Promise((resolve) => {
                     maaImage.onload = () => {
-                        const aspect = maaImage.width / maaImage.height; const zoomScale = 1.45; const targetSize = 90 * zoomScale; 
+                        const aspect = maaImage.width / maaImage.height; 
+                        const zoomScale = 1.45; 
+                        const targetSize = (avatarR * 2) * zoomScale; 
                         let dWidth = targetSize, dHeight = targetSize;
                         if (aspect > 1) dWidth = targetSize * aspect; else dHeight = targetSize / aspect; 
-                        const dx = 200 - (dWidth / 2) - 6; const dy = 160 - (dHeight / 2) + 8;
-                        ctx.drawImage(maaImage, dx, dy, dWidth, dHeight); resolve();
+                        const dx = (width / 2) - (dWidth / 2); 
+                        const dy = avatarY - (dHeight / 2) + (10 * scale);
+                        ctx.drawImage(maaImage, dx, dy, dWidth, dHeight); 
+                        resolve();
                     };
-                    maaImage.onerror = () => { ctx.fillStyle = foodColor; ctx.font = 'bold 40px "Segoe UI"'; ctx.fillText(tkt.name.charAt(0).toUpperCase(), 200, 175); resolve(); };
+                    maaImage.onerror = () => { 
+                        ctx.fillStyle = goldColor; ctx.font = `bold ${40 * scale}px "Segoe UI"`; 
+                        ctx.fillText(tkt.name.charAt(0).toUpperCase(), width / 2, avatarY + 15 * scale); 
+                        resolve(); 
+                    };
                     maaImage.src = base64Data;
                 });
-            } else { ctx.fillStyle = foodColor; ctx.font = 'bold 40px "Segoe UI"'; ctx.fillText(tkt.name.charAt(0).toUpperCase(), 200, 175); }
+            } else { 
+                ctx.fillStyle = goldColor; ctx.font = `bold ${40 * scale}px "Segoe UI"`; 
+                ctx.fillText(tkt.name.charAt(0).toUpperCase(), width / 2, avatarY + 15 * scale); 
+            }
             ctx.restore();
 
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 24px "Segoe UI", Helvetica, Arial, sans-serif'; ctx.fillText(tkt.name, 200, 240);
-            ctx.beginPath(); ctx.moveTo(80, 255); ctx.lineTo(320, 255); ctx.strokeStyle = borderInner; ctx.lineWidth = 1; ctx.stroke();
-            ctx.fillStyle = detailColor; ctx.font = '500 16px "Segoe UI", Helvetica, Arial, sans-serif'; ctx.fillText('Venue: MMCC Room no 8', 200, 285); ctx.fillText('Date: 13 October 2026', 200, 310); ctx.fillText('Time: 12:30 PM', 200, 335);
-            ctx.fillStyle = foodColor; ctx.font = 'bold 16px "Segoe UI", Helvetica, Arial, sans-serif'; ctx.fillText('Food: ' + (tkt.foodPreference || 'N/A'), 200, 365);
+            // 6. User Information
+            ctx.fillStyle = whiteColor; 
+            ctx.font = `bold ${26 * scale}px "Segoe UI", Helvetica, Arial, sans-serif`; 
+            ctx.fillText(tkt.name.toUpperCase(), width / 2, 265 * scale);
             
-            ctx.fillStyle = '#ffffff'; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10;
-            if(ctx.roundRect) ctx.roundRect(100, 395, 200, 200, 16); else ctx.rect(100, 395, 200, 200); 
-            ctx.fill(); ctx.shadowBlur = 0; 
-            ctx.drawImage(qrCanvas, 110, 405, 180, 180);
+            // Delicate Separator Line
+            ctx.beginPath(); 
+            ctx.moveTo(width / 2 - 120 * scale, 285 * scale); 
+            ctx.lineTo(width / 2 + 120 * scale, 285 * scale); 
+            ctx.strokeStyle = 'rgba(252, 211, 77, 0.3)'; 
+            ctx.lineWidth = 1.5 * scale; 
+            ctx.stroke();
 
-            ctx.fillStyle = '#9ca3af'; ctx.font = 'italic 12px "Segoe UI", Helvetica, Arial, sans-serif';
+            // Event Details
+            ctx.fillStyle = lightGray; 
+            ctx.font = `500 ${16 * scale}px "Segoe UI", Helvetica, Arial, sans-serif`; 
+            ctx.fillText('Venue: MMCC Room no 8', width / 2, 320 * scale); 
+            ctx.fillText('Date: 13 October 2026', width / 2, 345 * scale); 
+            ctx.fillText('Time: 12:30 PM', width / 2, 370 * scale);
+            
+            ctx.fillStyle = goldColor; 
+            ctx.font = `bold ${18 * scale}px "Segoe UI", Helvetica, Arial, sans-serif`; 
+            ctx.fillText('Food: ' + (tkt.foodPreference || 'N/A'), width / 2, 405 * scale);
+            
+            // 7. Premium QR Code Box
+            const qrSize = 180 * scale;
+            const qrY = 430 * scale;
+
+            ctx.fillStyle = '#ffffff'; 
+            ctx.shadowColor = 'rgba(0,0,0,0.6)'; 
+            ctx.shadowBlur = 15 * scale;
+            
+            // Draw rounded white box for QR
+            if(ctx.roundRect) {
+                ctx.roundRect(width/2 - qrSize/2 - 10*scale, qrY - 10*scale, qrSize + 20*scale, qrSize + 20*scale, 16 * scale); 
+            } else {
+                ctx.rect(width/2 - qrSize/2 - 10*scale, qrY - 10*scale, qrSize + 20*scale, qrSize + 20*scale); 
+            }
+            ctx.fill(); 
+            ctx.shadowBlur = 0; // reset shadow
+            
+            ctx.drawImage(qrCanvas, width/2 - qrSize/2, qrY, qrSize, qrSize);
+
+            // 8. Custom Status Text (Small, Stylish "Verified" or "Approved")
+            let statusText = tkt.status === 'Used' ? '✅ VERIFIED' : 'APPROVED PASS';
+            let statusColor = tkt.status === 'Used' ? '#10b981' : goldColor;
+
+            ctx.fillStyle = statusColor;
+            // Using a smaller, stylish font size
+            ctx.font = `bold ${14 * scale}px "Segoe UI", Helvetica, sans-serif`;
+            ctx.letterSpacing = `${1.5 * scale}px`;
+            ctx.fillText(statusText, width / 2, qrY + qrSize + 30 * scale);
+
+            // 9. Footer Text
+            ctx.fillStyle = '#9ca3af'; 
+            ctx.font = `italic ${12 * scale}px "Segoe UI", Helvetica, Arial, sans-serif`;
             const now = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
-            ctx.fillText('Downloaded on: ' + now, 200, 635);
-            ctx.fillStyle = borderColor; ctx.font = 'bold 13px "Segoe UI", Helvetica, Arial, sans-serif'; ctx.fillText('MMCC Computer Science Dept', 200, 655);
+            ctx.fillText('Downloaded on: ' + now, width / 2, 645 * scale);
+            
+            ctx.fillStyle = '#d4af37'; 
+            ctx.font = `bold ${13 * scale}px "Segoe UI", Helvetica, Arial, sans-serif`; 
+            ctx.fillText('MMCC Computer Science Dept', width / 2, 665 * scale);
 
-            const link = document.createElement('a'); link.download = tkt.name.replace(/\s+/g, '_') + '_Agomoni_Pass.png'; link.href = canvas.toDataURL('image/png'); link.click();
-        } catch(error) { console.error("Download Error:", error); Swal.fire("Error", "Could not generate pass. Please try again.", "error"); } finally { dlBtn.innerHTML = origText; dlBtn.style.pointerEvents = 'auto'; }
+            // 10. Generate and trigger download
+            const link = document.createElement('a'); 
+            link.download = tkt.name.replace(/\s+/g, '_') + '_VIP_Agomoni_Pass.png'; 
+            link.href = canvas.toDataURL('image/png', 1.0); 
+            link.click();
+            
+        } catch(error) { 
+            console.error("Download Error:", error); 
+            Swal.fire("Error", "Could not generate pass. Please try again.", "error"); 
+        } finally { 
+            dlBtn.innerHTML = origText; 
+            dlBtn.style.pointerEvents = 'auto'; 
+        }
     }
 
     // --- ADMIN (STAFF) REGISTRATION ---
