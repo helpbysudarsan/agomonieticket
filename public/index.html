@@ -797,7 +797,7 @@
                         <h3 style="margin:0; font-size:1.1rem;">🛡️ Pending Student Approvals</h3>
                         <button class="back-btn" style="margin:0; padding:4px 10px;" onclick="closeListView('staff', 'staffViewPending')">✕</button>
                     </div>
-                    <input type="text" class="search-bar" id="search-staffPending" placeholder="Search by name, email or ID..." onkeyup="filterList('search-staffPending', 'staffPendingList')">
+                    <input type="text" class="search-bar" id="search-staffPending" placeholder="Search by name" onkeyup="filterList('search-staffPending', 'staffPendingList')">
                     <div id="staffPendingList" style="font-size: 0.95rem;"></div>
                 </div>
 
@@ -806,7 +806,7 @@
                         <h3 style="margin:0; font-size:1.1rem;">👥 Active Student Passes</h3>
                         <button class="back-btn" style="margin:0; padding:4px 10px;" onclick="closeListView('staff', 'staffViewApproved')">✕</button>
                     </div>
-                    <input type="text" class="search-bar" id="search-staffApproved" placeholder="Search by name, email or ID..." onkeyup="filterList('search-staffApproved', 'staffApprovedList')">
+                    <input type="text" class="search-bar" id="search-staffApproved" placeholder="Search by name or food..." onkeyup="filterList('search-staffApproved', 'staffApprovedList')">
                     <div id="staffApprovedList" style="font-size: 0.95rem;"></div>
                 </div>
                 <div id="staffViewPresent" class="hidden section-box" style="border-left: 4px solid var(--success);">
@@ -1914,7 +1914,7 @@
             ctx.fillStyle = goldColor; 
             ctx.font = `bold ${32 * scale}px "Georgia", serif`; 
             ctx.textAlign = 'center'; 
-            ctx.fillText('🌼আগমনী ২০২৬🪷', width / 2, 75 * scale);
+            ctx.fillText('আগমনী ২০২৬🪷', width / 2, 75 * scale);
             
             // Subtitle
             ctx.fillStyle = lightGray; 
